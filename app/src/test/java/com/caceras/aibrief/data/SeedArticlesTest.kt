@@ -31,5 +31,24 @@ class SeedArticlesTest {
             category = NewsCategory.ALL,
         )
         assertEquals(1, shortArticle.readingTimeMinutes)
+
+        val longSummary = (1..200).joinToString(" ") { "word$it" }
+        val longArticle = NewsArticle(
+            id = "test-2",
+            title = "A Comprehensive Overview of Neural Architectures",
+            source = "Test",
+            url = "https://example.com/2",
+            publishedAt = Instant.now(),
+            summary = longSummary,
+            category = NewsCategory.RESEARCH,
+        )
+        assertTrue(longArticle.readingTimeMinutes >= 4)
+    }
+
+    @Test
+    fun allCategoriesHaveEnumLabels() {
+        NewsCategory.entries.forEach { category ->
+            assertTrue(category.label.isNotBlank())
+        }
     }
 }

@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Bookmark
@@ -590,25 +591,29 @@ private fun ArticleDetailScreen(
         }
 
         item("header") {
-            Text(
-                text = article.title,
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Spacer(Modifier.height(14.dp))
-            val meta = "${formatArticleDate(article.publishedAt)}  •  ${article.source}  •  ${article.readingTimeMinutes} min read"
-            Text(
-                text = meta,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            article.author?.let { author ->
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "By $author",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            SelectionContainer {
+                Column {
+                    Text(
+                        text = article.title,
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    val meta = "${formatArticleDate(article.publishedAt)}  •  ${article.source}  •  ${article.readingTimeMinutes} min read"
+                    Text(
+                        text = meta,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    article.author?.let { author ->
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "By $author",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(28.dp))
         }
@@ -626,11 +631,13 @@ private fun ArticleDetailScreen(
         }
 
         item("prose") {
-            Text(
-                text = article.summary,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
+            SelectionContainer {
+                Text(
+                    text = article.summary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
             Spacer(Modifier.height(36.dp))
         }
 
