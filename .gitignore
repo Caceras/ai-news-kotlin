@@ -8,6 +8,7 @@ keystore.properties
 *.keystore
 *.apk
 *.aab
+index.html
 *.iml
 .DS_Store
 captures/
