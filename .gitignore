@@ -6,6 +6,8 @@ local.properties
 keystore.properties
 *.jks
 *.keystore
+*.apk
+*.aab
 *.iml
 .DS_Store
 captures/
