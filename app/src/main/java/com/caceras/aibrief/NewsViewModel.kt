@@ -3,6 +3,7 @@ package com.caceras.aibrief
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.caceras.aibrief.data.FeedFreshness
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
 import com.caceras.aibrief.data.NewsRepository
@@ -17,17 +18,22 @@ data class NewsUiState(
     val savedArticles: List<NewsArticle>,
     val selectedCategory: NewsCategory = NewsCategory.ALL,
     val isRefreshing: Boolean = false,
-    val isLive: Boolean = false,
+    val freshness: FeedFreshness = FeedFreshness.OFFLINE,
     val lastUpdated: Instant? = null,
 )
 
 class NewsViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = NewsRepository(application)
     private val _uiState = MutableStateFlow(
-        NewsUiState(
-            articles = SeedArticles.create(),
-            savedArticles = repository.savedArticles(),
-        ),
+        run {
+            val initial = repository.initialLoad()
+            NewsUiState(
+                articles = initial.articles,
+                savedArticles = repository.savedArticles(),
+                freshness = initial.freshness,
+                lastUpdated = initial.updatedAt,
+            )
+        },
     )
     val uiState = _uiState.asStateFlow()
 
@@ -43,8 +49,8 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.value = _uiState.value.copy(
                 articles = load.articles,
                 isRefreshing = false,
-                isLive = load.isLive,
-                lastUpdated = if (load.isLive) Instant.now() else null,
+                freshness = load.freshness,
+                lastUpdated = load.updatedAt,
             )
         }
     }

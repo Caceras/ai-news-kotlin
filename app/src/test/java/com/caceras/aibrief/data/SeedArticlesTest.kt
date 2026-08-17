@@ -15,5 +15,21 @@ class SeedArticlesTest {
         assertTrue(articles.all { it.url.startsWith("https://") })
         assertTrue(articles.all { it.title.isNotBlank() && it.summary.isNotBlank() })
         assertTrue(articles.all { it.isOfflineBrief && it.source == "AI Brief" })
+        assertTrue(articles.all { it.author == "AI Brief" && it.imageUrl == null })
+        assertTrue(articles.all { it.readingTimeMinutes in 1..10 })
+    }
+
+    @Test
+    fun readingTimeCalculationHandlesVariousLengths() {
+        val shortArticle = NewsArticle(
+            id = "test-1",
+            title = "Short Title",
+            source = "Test",
+            url = "https://example.com/1",
+            publishedAt = Instant.now(),
+            summary = "Brief summary of only a few words.",
+            category = NewsCategory.ALL,
+        )
+        assertEquals(1, shortArticle.readingTimeMinutes)
     }
 }
