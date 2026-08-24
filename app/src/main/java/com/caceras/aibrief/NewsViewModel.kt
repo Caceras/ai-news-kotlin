@@ -9,6 +9,7 @@ import com.caceras.aibrief.data.NewsCategory
 import com.caceras.aibrief.data.NewsRepository
 import com.caceras.aibrief.data.SeedArticles
 import java.time.Instant
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,13 +46,18 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
         if (_uiState.value.isRefreshing) return
         _uiState.value = _uiState.value.copy(isRefreshing = true)
         viewModelScope.launch {
-            val load = repository.loadLatest()
-            _uiState.value = _uiState.value.copy(
-                articles = load.articles,
-                isRefreshing = false,
-                freshness = load.freshness,
-                lastUpdated = load.updatedAt,
-            )
+            try {
+                val load = repository.loadLatest()
+                _uiState.value = _uiState.value.copy(
+                    articles = load.articles,
+                    freshness = load.freshness,
+                    lastUpdated = load.updatedAt,
+                )
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+            } finally {
+                _uiState.value = _uiState.value.copy(isRefreshing = false)
+            }
         }
     }
 
