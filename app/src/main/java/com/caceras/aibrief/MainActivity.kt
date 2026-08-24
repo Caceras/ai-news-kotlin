@@ -45,6 +45,7 @@ import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -235,6 +236,7 @@ private fun NavTextLink(
         color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
         fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
         modifier = Modifier
+            .minimumInteractiveComponentSize()
             .clickable(role = Role.Tab, onClick = onClick)
             .padding(vertical = 4.dp),
     )
@@ -464,6 +466,7 @@ private fun AboutScreen(
             Spacer(Modifier.height(20.dp))
             Surface(
                 modifier = Modifier
+                    .minimumInteractiveComponentSize()
                     .clickable(
                         role = Role.Button,
                         onClick = {
@@ -507,6 +510,7 @@ private fun CategoryFilterRow(
                 color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
                 modifier = Modifier
+                    .minimumInteractiveComponentSize()
                     .clickable(
                         role = Role.Tab,
                         onClick = {
@@ -533,6 +537,7 @@ private fun EditorialArticleRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .minimumInteractiveComponentSize()
             .clickable(
                 role = Role.Button,
                 onClick = {
@@ -650,6 +655,7 @@ private fun ArticleDetailScreen(
             ) {
                 Surface(
                     modifier = Modifier
+                        .minimumInteractiveComponentSize()
                         .clickable(
                             role = Role.Button,
                             onClick = {
