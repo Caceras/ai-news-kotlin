@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AI Brief</string>
+    <string name="privacy_policy_title">Privacy policy</string>
+    <string name="privacy_policy_text">AI Brief does not collect, sell, or share personal data. It has no account system, analytics tracker, or advertising SDK. Saved articles stay in private storage on this device. The app makes encrypted requests only to listed public publishers for their RSS feeds and, when supplied, their article images. Opening an original story hands off to your browser, where that publisher’s own privacy policy applies.</string>
 </resources>
