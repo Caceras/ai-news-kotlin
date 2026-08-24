@@ -238,6 +238,8 @@ class NewsRepository(context: Context) {
         val cleanLink = link.trim()
         if (cleanTitle.isBlank() || !cleanLink.startsWith("http")) return null
 
+        val parsedDate = parseDate(published) ?: return null
+
         return NewsArticle(
             id = stableId(cleanLink),
             title = cleanTitle,
@@ -245,7 +247,7 @@ class NewsRepository(context: Context) {
             author = plainText(author).takeIf { it.isNotBlank() },
             url = cleanLink,
             imageUrl = imageUrl.trim().takeIf { it.startsWith("http") },
-            publishedAt = parseDate(published),
+            publishedAt = parsedDate,
             summary = plainText(summary).ifBlank { "Open the original story for the full report." }.take(MAX_SUMMARY_LENGTH),
             category = inferCategory("$tags $cleanTitle $summary", feed.category),
         )
@@ -339,13 +341,13 @@ class NewsRepository(context: Context) {
         Html.FROM_HTML_MODE_LEGACY,
     ).toString().replace(WHITESPACE, " ").trim()
 
-    private fun parseDate(value: String): Instant {
+    private fun parseDate(value: String): Instant? {
         val date = value.trim()
         return listOf<() -> Instant>(
             { ZonedDateTime.parse(date, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant() },
             { OffsetDateTime.parse(date).toInstant() },
             { Instant.parse(date) },
-        ).firstNotNullOfOrNull { parser -> runCatching(parser).getOrNull() } ?: Instant.now()
+        ).firstNotNullOfOrNull { parser -> runCatching(parser).getOrNull() }
     }
 
     private fun inferCategory(text: String, fallback: NewsCategory): NewsCategory {
