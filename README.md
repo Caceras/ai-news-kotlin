@@ -90,7 +90,8 @@ app/src/main/java/com/caceras/aibrief/
 Not a developer? [**docs/PHONE_WORKFLOW.md**](docs/PHONE_WORKFLOW.md) covers installing,
 updating, and requesting changes without touching any of the tooling below.
 
-Merging to `main` is the entire publish action:
+Development happens directly on `main`, and a push to it is the entire publish
+action — there is no branch, pull request, or merge step in the loop:
 
 ```mermaid
 flowchart LR

@@ -2,16 +2,18 @@
 #
 # Every push to main produces a signed direct-install APK and a GitHub Release
 # containing both the APK and an `update.json` manifest. The installed app polls
-# that manifest, so merging to main is the whole publish action — nothing else
+# that manifest, so pushing to main is the whole publish action — nothing else
 # has to be run by hand.
 name: Android
 
+# Development happens directly on main, so main is the only branch that builds.
+#
+# Building a branch and its pull request at once previously ran two full Android
+# builds of the same commit in parallel, which raced each other for Maven Central
+# and failed with HTTP 429. It also meant nothing was ever cached: the Gradle
+# dependency cache is read-only on any branch other than the default one.
 on:
   push:
-    branches:
-      - main
-      - "claude/**"
-  pull_request:
     branches:
       - main
   workflow_dispatch:
@@ -123,8 +125,10 @@ jobs:
           name: ai-brief-sideload-${{ steps.identity.outputs.version_code }}
           path: release/
 
-      # Only main publishes. Branch builds still prove the APK compiles, but
-      # they must not move the update everyone's phone is pointed at.
+      # Only main publishes. Pushes to main are the only thing that triggers this
+      # workflow, but a manual workflow_dispatch can still be aimed at any ref, so
+      # the guard stays: a hand-run build must never move the update the phone is
+      # pointed at.
       - name: Publish release
         if: github.ref == 'refs/heads/main'
         env:

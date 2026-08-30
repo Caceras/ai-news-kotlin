@@ -8,40 +8,28 @@ want to touch a branch, a pull request, or a build command — and you don't hav
 ## The short version
 
 1. You say what should change.
-2. The change is written, tested, and merged.
+2. The change is written and verified — the full test and lint suite is run
+   before anything is published, so a broken build never reaches your phone.
 3. A few minutes later your phone shows **new build ready** at the top of the feed.
 4. You tap **install**, and you're on the new version.
 
-That's the whole loop. Step 1 is yours; the rest happens on its own.
+That's the whole loop. Step 1 is yours; the rest happens on its own. There are no
+branches, no pull requests, and nothing for you to approve or merge.
 
 ---
 
 ## One-time setup
 
-### 1. Make the repository public
+Two things to do, both on your phone, both only ever done once.
 
-**This is the only setup step, and it must be done before anything else works.**
+> **Already done:** the repository is public. That is what makes the rest free —
+> unlimited build minutes, a download link that never asks you to log in, and
+> in-app updates that need no password embedded in the app. The repository holds
+> no passwords, no keys, and no personal data.
 
-On your phone, in a browser:
+### 1. Install the app
 
-1. Open `github.com/Caceras/ai-news-kotlin`
-2. **Settings** → scroll to the bottom → **Danger Zone**
-3. **Change repository visibility** → **Make public** → confirm
-
-Why this matters:
-
-| | Private repo | Public repo |
-|---|---|---|
-| Build minutes | Limited monthly allowance, then builds stop or cost money | Free and unlimited |
-| Install link | Requires being logged into GitHub every time | Opens directly |
-| In-app updates | Not possible without embedding a password in the app | Works |
-
-The repository contains no passwords, no keys, and no personal data. The
-Play Store signing key is generated separately and never stored in it.
-
-### 2. Install the app
-
-Once the repository is public and a build has finished, open this link on your phone:
+Open this link on your phone:
 
 ```
 https://github.com/Caceras/ai-news-kotlin/releases/latest/download/ai-brief.apk
@@ -53,7 +41,7 @@ then open the downloaded file.
 Bookmark that link. It always points at the newest build, so it also works as a
 manual fallback if you ever need one.
 
-### 3. Allow AI Brief to install its own updates
+### 2. Allow AI Brief to install its own updates
 
 The first time you tap **install** in the app, Android asks whether AI Brief may
 install apps. Grant it once. Afterwards every update is a single tap, and the
