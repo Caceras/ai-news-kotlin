@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="352" viewBox="0 0 1280 352" role="img" aria-label="AI Brief — a calm, text-first read on artificial intelligence">
+  <rect width="1280" height="352" fill="#FFFFFF"/>
+  <g font-family="Helvetica Neue, Helvetica, Inter, Arial, sans-serif" text-anchor="middle">
+    <text x="640" y="141" fill="#111111" font-size="96" font-weight="700" letter-spacing="-4">AI Brief</text>
+    <text x="640" y="187" fill="#6E6D68" font-size="21" letter-spacing="0.2">A calm, text-first read on artificial intelligence.</text>
+    <line x1="160" y1="243" x2="1120" y2="243" stroke="#DCDCD8" stroke-width="1"/>
+    <text x="640" y="279" fill="#6E6D68" font-size="13" letter-spacing="3.4">KOTLIN &#183; JETPACK COMPOSE &#183; MATERIAL 3 &#183; ANDROID 26&#8211;36</text>
+  </g>
+</svg>

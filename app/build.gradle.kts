@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /**
  * Play Store signing material is supplied locally and is never committed.
@@ -151,6 +152,18 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+/**
+ * Kotlin otherwise targets whichever JDK happens to run Gradle, which disagrees
+ * with the Java target above on any JDK newer than 17 and fails the build. CI
+ * pins JDK 17 and so never saw it; pinning the target keeps the build correct
+ * on a contributor's machine regardless of their installed JDK.
+ */
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 

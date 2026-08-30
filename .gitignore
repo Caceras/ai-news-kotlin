@@ -14,3 +14,7 @@ index.html
 *.iml
 .DS_Store
 captures/
+
+# Python bytecode from the brand asset generators.
+__pycache__/
+*.pyc
