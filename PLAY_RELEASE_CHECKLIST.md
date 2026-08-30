@@ -24,12 +24,29 @@
 - [ ] **Phone Screenshots**: At least 4 high-resolution screenshots capturing the Home Feed, Category Filter, Saved Shelf, and Article Reader view in both Light and Dark modes.
 
 ## 4. Release Build & Upload
+- [ ] **Register a Play developer account**: a one-time $25 fee to Google. Nothing else in this project costs money.
+- [ ] **Create the upload key** (once, and never commit it):
+  ```bash
+  keytool -genkeypair -keystore upload-keystore.jks -storetype PKCS12 \
+    -alias upload -keyalg RSA -keysize 2048 -validity 10950
+  ```
+- [ ] **Configure signing**: copy `keystore.properties.example` to `keystore.properties` and fill in the four values.
 - [ ] **Generate Release Bundle**:
   ```bash
   ./gradlew bundleRelease
   ```
 - [ ] **Verify Artifact**:
   - Path: `app/build/outputs/bundle/release/app-release.aab`
-  - Version: `2.0.0` (Version Code `2`)
-  - Signed with upload key via `keystore.properties`
+  - Version name from `aibrief.versionName` in `gradle.properties`
+  - Signed with the upload key, **not** the sideload key
+- [ ] **Confirm the Play build carries no sideload traces**: the AAB must not declare `REQUEST_INSTALL_PACKAGES`, which Google Play restricts. It is declared only in `app/src/sideload/AndroidManifest.xml` and so cannot reach the `release` variant. Verify after building:
+  ```bash
+  # Expect no output.
+  bundletool dump manifest --bundle app/build/outputs/bundle/release/app-release.aab \
+    | grep REQUEST_INSTALL_PACKAGES
+  ```
 - [ ] **Closed Testing Track**: Upload the AAB to Internal or Closed Testing to verify live device performance before production rollout.
+
+## 5. Migrating Off the Direct-Install Build
+- [ ] **Uninstall the sideload build from every test device first.** The Play artifact is signed with a different key, so Android will refuse to install it over a direct-install copy. Saved articles are device-local and will not survive the switch.
+- [ ] **Confirm `versionCode` continuity**: the Play track must start above the highest `versionCode` ever published to the direct-install channel, so bump `aibrief.versionCodeBase` in `gradle.properties` if the two sequences would otherwise collide.

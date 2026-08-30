@@ -66,12 +66,18 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
 import com.caceras.aibrief.ui.components.AsyncArticleImage
 import com.caceras.aibrief.ui.theme.AiBriefTheme
+import com.caceras.aibrief.update.UpdateBanner
+import com.caceras.aibrief.update.UpdateManifest
+import com.caceras.aibrief.update.UpdateState
+import com.caceras.aibrief.update.UpdateViewModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -86,7 +92,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             AiBriefTheme {
                 val newsViewModel: NewsViewModel = viewModel()
-                AiBriefApp(newsViewModel)
+                val updateViewModel: UpdateViewModel = viewModel()
+                AiBriefApp(newsViewModel, updateViewModel)
             }
         }
     }
@@ -99,11 +106,17 @@ private enum class NavTab {
 }
 
 @Composable
-private fun AiBriefApp(viewModel: NewsViewModel) {
+private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val updateState by updateViewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(NavTab.HOME) }
     var selectedArticle by remember { mutableStateOf<NewsArticle?>(null) }
-    val haptic = LocalHapticFeedback.current
+
+    // Returning from the system settings screen is the moment a pending install
+    // becomes possible, so the update finishes without another tap.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        (updateState as? UpdateState.NeedsPermission)?.let { updateViewModel.retryInstall(it.apk) }
+    }
 
     BackHandler(enabled = selectedArticle != null || currentTab != NavTab.HOME) {
         if (selectedArticle != null) {
@@ -131,7 +144,6 @@ private fun AiBriefApp(viewModel: NewsViewModel) {
                     isSaved = state.savedArticles.any { it.id == article.id },
                     topPadding = topPadding,
                     bottomPadding = bottomPadding,
-                    onBack = { selectedArticle = null },
                     onToggleSaved = { viewModel.toggleSaved(article) },
                     onNavigateTab = {
                         selectedArticle = null
@@ -142,18 +154,22 @@ private fun AiBriefApp(viewModel: NewsViewModel) {
                 when (tab) {
                     NavTab.HOME -> FeedScreen(
                         state = state,
+                        updateState = updateState,
                         currentTab = currentTab,
                         topPadding = topPadding,
                         bottomPadding = bottomPadding,
                         onTabSelected = {
                             if (it == NavTab.HOME) {
                                 viewModel.refresh()
+                                updateViewModel.checkForUpdate()
                             }
                             currentTab = it
                         },
                         onSelectCategory = viewModel::selectCategory,
                         onOpenArticle = { selectedArticle = it },
-                        onToggleSaved = viewModel::toggleSaved,
+                        onInstallUpdate = updateViewModel::downloadAndInstall,
+                        onGrantInstallPermission = updateViewModel::requestInstallPermission,
+                        onDismissUpdate = updateViewModel::dismiss,
                     )
                     NavTab.SAVED -> SavedScreen(
                         articles = state.savedArticles,
@@ -245,13 +261,16 @@ private fun NavTextLink(
 @Composable
 private fun FeedScreen(
     state: NewsUiState,
+    updateState: UpdateState,
     currentTab: NavTab,
     topPadding: androidx.compose.ui.unit.Dp,
     bottomPadding: androidx.compose.ui.unit.Dp,
     onTabSelected: (NavTab) -> Unit,
     onSelectCategory: (NewsCategory) -> Unit,
     onOpenArticle: (NewsArticle) -> Unit,
-    onToggleSaved: (NewsArticle) -> Unit,
+    onInstallUpdate: (UpdateManifest) -> Unit,
+    onGrantInstallPermission: () -> Unit,
+    onDismissUpdate: () -> Unit,
 ) {
     val articles = state.articles.filter {
         state.selectedCategory == NewsCategory.ALL || it.category == state.selectedCategory
@@ -273,6 +292,15 @@ private fun FeedScreen(
                 onTabSelected = onTabSelected,
             )
             Spacer(Modifier.height(44.dp))
+        }
+
+        item("update") {
+            UpdateBanner(
+                state = updateState,
+                onInstall = onInstallUpdate,
+                onGrantPermission = onGrantInstallPermission,
+                onDismiss = onDismissUpdate,
+            )
         }
 
         item("header") {
@@ -484,6 +512,17 @@ private fun AboutScreen(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                 )
             }
+            Spacer(Modifier.height(40.dp))
+        }
+
+        item("version") {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(Modifier.height(20.dp))
+            Text(
+                text = "Version ${BuildConfig.VERSION_NAME} (build ${BuildConfig.BUILD_NUMBER})",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -549,7 +588,7 @@ private fun EditorialArticleRow(
         verticalAlignment = Alignment.Top,
     ) {
         Text(
-            text = formatShortDate(article.publishedAt),
+            text = formatArticleDate(article.publishedAt),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.width(125.dp),
@@ -571,7 +610,6 @@ private fun ArticleDetailScreen(
     isSaved: Boolean,
     topPadding: androidx.compose.ui.unit.Dp,
     bottomPadding: androidx.compose.ui.unit.Dp,
-    onBack: () -> Unit,
     onToggleSaved: () -> Unit,
     onNavigateTab: (NavTab) -> Unit,
 ) {
@@ -720,15 +758,14 @@ private fun ArticleDetailScreen(
     }
 }
 
-private fun formatArticleDate(instant: Instant): String = DateTimeFormatter
-    .ofPattern("MMMM d, yyyy", Locale.US)
-    .withZone(ZoneId.systemDefault())
-    .format(instant)
+/** Every date in the app reads the same way: "March 4, 2026". */
+private val ARTICLE_DATE_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.US)
 
-private fun formatShortDate(instant: Instant): String = DateTimeFormatter
-    .ofPattern("MMMM d, yyyy", Locale.US)
-    .withZone(ZoneId.systemDefault())
-    .format(instant)
+// The zone is resolved per call rather than cached with the pattern, so dates
+// stay correct if the device changes time zone while the app is running.
+private fun formatArticleDate(instant: Instant): String =
+    ARTICLE_DATE_FORMAT.withZone(ZoneId.systemDefault()).format(instant)
 
 private fun Context.openExternalUrl(url: String) {
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))

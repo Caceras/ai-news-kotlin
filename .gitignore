@@ -6,6 +6,8 @@ local.properties
 keystore.properties
 *.jks
 *.keystore
+# The direct-install signing key is intentionally shared: see app/build.gradle.kts.
+!signing/sideload.jks
 *.apk
 *.aab
 index.html

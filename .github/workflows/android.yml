@@ -1,45 +1,158 @@
-name: Android verification
+# Builds AI Brief and publishes it where a phone can install it in one tap.
+#
+# Every push to main produces a signed direct-install APK and a GitHub Release
+# containing both the APK and an `update.json` manifest. The installed app polls
+# that manifest, so merging to main is the whole publish action — nothing else
+# has to be run by hand.
+name: Android
 
 on:
   push:
     branches:
       - main
+      - "claude/**"
   pull_request:
     branches:
       - main
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  # A newer commit supersedes an in-flight build of an older one.
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: "17"
 
 jobs:
   verify:
+    name: Tests and lint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
-          cache: gradle
+          java-version: ${{ env.JAVA_VERSION }}
 
-      - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v4
 
       - name: Run unit tests
-        run: ./gradlew testDebugUnitTest --stacktrace
+        run: ./gradlew testSideloadUnitTest --stacktrace
 
       - name: Run Android lint
-        run: ./gradlew lintDebug --stacktrace
+        run: ./gradlew lintSideload --stacktrace
 
-      - name: Assemble debug APK
-        run: ./gradlew assembleDebug --stacktrace
-
-      - name: Upload debug APK
+      - name: Upload lint report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ai-brief-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: lint-report
+          path: app/build/reports/lint-results-sideload.html
+          if-no-files-found: ignore
+
+  publish:
+    name: Build and publish
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Resolve build identity
+        id: identity
+        run: |
+          set -euo pipefail
+          # gradle.properties is the single source of truth for both values, so
+          # the manifest can never describe a version the APK does not carry.
+          version_name="$(sed -n 's/^aibrief\.versionName=//p' gradle.properties)"
+          version_code_base="$(sed -n 's/^aibrief\.versionCodeBase=//p' gradle.properties)"
+          build_number="${GITHUB_RUN_NUMBER}"
+          version_code="$(( version_code_base + build_number ))"
+
+          {
+            echo "version_name=${version_name}"
+            echo "build_number=${build_number}"
+            echo "version_code=${version_code}"
+            echo "tag=build-${version_code}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build direct-install APK
+        run: ./gradlew assembleSideload --stacktrace -PbuildNumber=${{ steps.identity.outputs.build_number }}
+
+      - name: Stage release assets
+        id: stage
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          apk="$(find app/build/outputs/apk/sideload -name '*.apk' -print -quit)"
+          test -n "$apk" || { echo "::error::No APK was produced"; exit 1; }
+          cp "$apk" release/ai-brief.apk
+
+          # The notes shown in the app's update banner are the commit subject.
+          notes="$(git log -1 --pretty=%s)"
+
+          # jq builds the JSON so any quote or backslash in the subject is escaped.
+          jq -n \
+            --argjson versionCode ${{ steps.identity.outputs.version_code }} \
+            --arg versionName "${{ steps.identity.outputs.version_name }}" \
+            --argjson buildNumber ${{ steps.identity.outputs.build_number }} \
+            --arg apkUrl "${{ github.server_url }}/${{ github.repository }}/releases/download/${{ steps.identity.outputs.tag }}/ai-brief.apk" \
+            --arg notes "$notes" \
+            '{versionCode: $versionCode, versionName: $versionName, buildNumber: $buildNumber, apkUrl: $apkUrl, notes: $notes}' \
+            > release/update.json
+
+          echo "notes<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$notes" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          cat release/update.json
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-brief-sideload-${{ steps.identity.outputs.version_code }}
+          path: release/
+
+      # Only main publishes. Branch builds still prove the APK compiles, but
+      # they must not move the update everyone's phone is pointed at.
+      - name: Publish release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOTES: ${{ steps.stage.outputs.notes }}
+        run: |
+          set -euo pipefail
+          # Written to a file so the body keeps its line breaks and needs no quoting.
+          printf '%s\n\nInstall on Android: download `ai-brief.apk` below and open it.\n' \
+            "$NOTES" > release/notes.md
+          gh release create "${{ steps.identity.outputs.tag }}" \
+            release/ai-brief.apk \
+            release/update.json \
+            --title "AI Brief ${{ steps.identity.outputs.version_name }} (build ${{ steps.identity.outputs.build_number }})" \
+            --notes-file release/notes.md \
+            --latest
+
+      # Keeps the release list readable. `releases/latest` is unaffected.
+      - name: Prune superseded releases
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release list --limit 100 --json tagName,createdAt \
+            --jq 'sort_by(.createdAt) | reverse | .[10:] | .[].tagName' \
+            | while read -r tag; do
+                [ -n "$tag" ] || continue
+                echo "Deleting superseded release $tag"
+                gh release delete "$tag" --cleanup-tag --yes
+              done
