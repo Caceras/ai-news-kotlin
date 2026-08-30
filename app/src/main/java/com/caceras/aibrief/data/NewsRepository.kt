@@ -39,7 +39,15 @@ data class NewsArticle(
     val summary: String,
     val category: NewsCategory,
     val isOfflineBrief: Boolean = false,
+    /**
+     * Set only on original posts written by the owner. RSS stories carry an
+     * empty list and are rendered from [summary] as before.
+     */
+    val blocks: List<PostBlock> = emptyList(),
 ) {
+    /** True for an original post, which has no external article to link out to. */
+    val isOriginalPost: Boolean get() = blocks.isNotEmpty()
+
     val readingTimeMinutes: Int
         get() = ((title.split(Regex("\\s+")).size + summary.split(Regex("\\s+")).size) / 45 + 1).coerceIn(1, 15)
 }
@@ -86,8 +94,10 @@ class NewsRepository(context: Context) {
     }
 
     suspend fun loadLatest(): NewsLoad = withContext(Dispatchers.IO) {
-        val liveArticles = coroutineScope {
-            feeds.map { feed ->
+        // Original posts and the news feeds are independent sources, so they are
+        // fetched together and neither waits on the other.
+        val (liveArticles, ownerPosts) = coroutineScope {
+            val feedJobs = feeds.map { feed ->
                 async {
                     try {
                         fetchFeed(feed)
@@ -96,41 +106,118 @@ class NewsRepository(context: Context) {
                         emptyList()
                     }
                 }
-            }.awaitAll().flatten()
+            }
+            val postJob = async {
+                try {
+                    fetchOwnerPosts()
+                } catch (error: Exception) {
+                    if (error is CancellationException) throw error
+                    emptyList()
+                }
+            }
+            // Identity is keyed on id rather than url throughout: every RSS story
+            // derives its id from its link, so this is the same comparison, but
+            // original posts have no link to be distinct by.
+            val articles = feedJobs.awaitAll().flatten()
+                .distinctBy { it.id }
+                .sortedByDescending { it.publishedAt }
+            articles to postJob.await()
         }
-            .distinctBy { it.url }
-            .sortedByDescending { it.publishedAt }
 
         if (liveArticles.isNotEmpty()) {
             val cached = cachedArticles().orEmpty()
             val refreshedArticles = (liveArticles + cached.filter { cachedArticle ->
-                liveArticles.none { liveArticle -> liveArticle.url == cachedArticle.url }
+                liveArticles.none { liveArticle -> liveArticle.id == cachedArticle.id }
             })
-                .distinctBy { it.url }
+                .distinctBy { it.id }
                 .sortedByDescending { it.publishedAt }
                 .take(MAX_ARTICLES)
             val fallback = SeedArticles.create().filter { seed ->
-                refreshedArticles.none { article -> article.url == seed.url }
+                refreshedArticles.none { article -> article.id == seed.id }
             }
-            cacheLiveArticles(refreshedArticles)
+            cacheLiveArticles(withOwnerPosts(ownerPosts, refreshedArticles))
             NewsLoad(
-                articles = (refreshedArticles + fallback).take(MAX_ARTICLES),
+                articles = withOwnerPosts(
+                    ownerPosts,
+                    (refreshedArticles + fallback).take(MAX_ARTICLES),
+                ),
                 freshness = FeedFreshness.LIVE,
                 updatedAt = Instant.now(),
             )
         } else {
+            // Every feed failed. Original posts are fetched separately and may
+            // still have arrived, so they are merged into whatever is shown.
             cachedArticles()?.let { cached ->
                 NewsLoad(
-                    articles = cached,
+                    articles = withOwnerPosts(ownerPosts, cached),
                     freshness = FeedFreshness.CACHED,
                     updatedAt = cachedAt(),
                 )
             } ?: NewsLoad(
-                articles = SeedArticles.create(),
+                articles = withOwnerPosts(ownerPosts, SeedArticles.create()),
                 freshness = FeedFreshness.OFFLINE,
             )
         }
     }
+
+    /**
+     * Places [posts] into [articles], newest first.
+     *
+     * Posts are added before the article cap is applied rather than after, so a
+     * busy news day can never push the owner's own writing out of the feed.
+     */
+    private fun withOwnerPosts(
+        posts: List<NewsArticle>,
+        articles: List<NewsArticle>,
+    ): List<NewsArticle> =
+        if (posts.isEmpty()) {
+            articles
+        } else {
+            (posts + articles)
+                .distinctBy { it.id }
+                .sortedByDescending { it.publishedAt }
+        }
+
+    /**
+     * Reads the posts the owner has published, as articles the feed can show.
+     *
+     * The document is fetched straight from the repository rather than bundled
+     * into the app, so publishing a post is a commit and needs no new build and
+     * no update on the phone. Posts dated in the future are withheld until due.
+     */
+    private fun fetchOwnerPosts(): List<NewsArticle> {
+        val connection = URL(OWNER_POSTS_URL).openConnection() as HttpURLConnection
+        return try {
+            connection.connectTimeout = NETWORK_TIMEOUT_MILLIS
+            connection.readTimeout = NETWORK_TIMEOUT_MILLIS
+            connection.instanceFollowRedirects = true
+            connection.setRequestProperty("Accept", "application/json")
+            connection.setRequestProperty("User-Agent", "AI-Brief-Android/2.0")
+
+            if (connection.responseCode !in 200..299) return emptyList()
+            val body = connection.inputStream.bufferedReader().use { it.readText() }
+            OwnerPosts.published(body).map { it.toArticle() }
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    /**
+     * An original post has no external article behind it, so [NewsArticle.url]
+     * is deliberately blank and the reader hides its "read the original" action.
+     */
+    private fun OwnerPost.toArticle(): NewsArticle = NewsArticle(
+        id = "post-$id",
+        title = title,
+        source = OWNER_SOURCE,
+        author = author,
+        url = "",
+        imageUrl = imageUrl,
+        publishedAt = publishedAt,
+        summary = summary,
+        category = category,
+        blocks = blocks,
+    )
 
     fun savedArticles(): List<NewsArticle> = restoredArticles(SAVED_ARTICLES_KEY)
 
@@ -321,6 +408,7 @@ class NewsRepository(context: Context) {
         put("summary", summary)
         put("category", category.name)
         put("isOfflineBrief", isOfflineBrief)
+        put("blocks", OwnerPosts.encodeBlocks(blocks))
     }
 
     private fun JSONObject.toArticle(): NewsArticle = NewsArticle(
@@ -334,6 +422,7 @@ class NewsRepository(context: Context) {
         summary = getString("summary"),
         category = NewsCategory.valueOf(getString("category")),
         isOfflineBrief = optBoolean("isOfflineBrief", false),
+        blocks = OwnerPosts.decodeBlocks(optJSONArray("blocks")),
     )
 
     private fun plainText(raw: String): String = Html.fromHtml(
@@ -368,6 +457,17 @@ class NewsRepository(context: Context) {
         const val CACHED_ARTICLES_KEY = "cached_articles"
         const val CACHED_AT_KEY = "cached_at"
         const val NETWORK_TIMEOUT_MILLIS = 7_000
+
+        /**
+         * Where original posts are read from. This points at the repository's
+         * own content file, so a commit publishes a post immediately: the app
+         * re-reads this on every refresh and never needs rebuilding for it.
+         */
+        const val OWNER_POSTS_URL =
+            "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/posts.json"
+
+        /** Shown as the source line on original posts. */
+        const val OWNER_SOURCE = "AI Brief"
         const val ARTICLES_PER_SOURCE = 8
         const val MAX_ARTICLES = 24
         const val MAX_SAVED_ARTICLES = 80

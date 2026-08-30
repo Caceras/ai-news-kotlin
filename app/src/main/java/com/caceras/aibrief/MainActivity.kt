@@ -73,6 +73,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
 import com.caceras.aibrief.ui.components.AsyncArticleImage
+import com.caceras.aibrief.ui.components.PostBlockContent
 import com.caceras.aibrief.ui.theme.AiBriefTheme
 import com.caceras.aibrief.update.UpdateBanner
 import com.caceras.aibrief.update.UpdateManifest
@@ -675,11 +676,22 @@ private fun ArticleDetailScreen(
 
         item("prose") {
             SelectionContainer {
-                Text(
-                    text = article.summary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
+                Column {
+                    if (article.isOriginalPost) {
+                        // An original post carries its own body; the summary is
+                        // only the standfirst already shown in the feed.
+                        article.blocks.forEachIndexed { index, block ->
+                            if (index > 0) Spacer(Modifier.height(20.dp))
+                            PostBlockContent(block)
+                        }
+                    } else {
+                        Text(
+                            text = article.summary,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(36.dp))
         }
@@ -691,7 +703,8 @@ private fun ArticleDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Surface(
+                // An original post has no external source to open.
+                if (article.url.isNotBlank()) Surface(
                     modifier = Modifier
                         .minimumInteractiveComponentSize()
                         .clickable(
@@ -750,7 +763,11 @@ private fun ArticleDetailScreen(
             }
             Spacer(Modifier.height(32.dp))
             Text(
-                text = "AI Brief links directly to original reporting and research. Content is supplied by the listed publishers.",
+                text = if (article.isOriginalPost) {
+                    "Written for AI Brief."
+                } else {
+                    "AI Brief links directly to original reporting and research. Content is supplied by the listed publishers."
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

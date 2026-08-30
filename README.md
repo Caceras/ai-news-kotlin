@@ -50,14 +50,17 @@ same values so the brand and the build cannot drift apart.
 
 ```mermaid
 flowchart LR
-  subgraph Sources
+  subgraph Sources["Relayed reporting"]
     A["MIT News"]
     B["Google AI Research"]
     C["Hugging Face"]
     D["VentureBeat"]
   end
 
+  P[("content/posts.json<br/>original posts")]
+
   A & B & C & D -->|RSS| R["NewsRepository"]
+  P -->|"read at runtime"| R
   R <-->|"merge on partial failure"| K[("JSON disk cache")]
   R -->|StateFlow| V["NewsViewModel"]
   V --> U["Compose UI"]
@@ -67,6 +70,7 @@ flowchart LR
 - **100% Kotlin, Jetpack Compose, Material 3** — unidirectional data flow over `StateFlow`, edge-to-edge, Android API 26–36.
 - **Resilient offline behaviour** — instant warm start from a persistent JSON cache, cache merging that protects healthy articles through partial network failures, and a curated offline edition when there is no connectivity at all.
 - **Two-tier image caching** — an in-memory `LruCache` over a persistent disk cache keyed by SHA-256.
+- **Original posts without a backend** — the app reads [`content/posts.json`](content/posts.json) at runtime, so publishing is a commit: no build, no release, no app update. Future-dated posts are withheld until due, which is scheduling with nothing to run and nothing to pay for. See [docs/CONTENT.md](docs/CONTENT.md).
 - **Privacy by default** — no analytics, no advertising SDKs, no account, and nothing collected. Saved articles never leave the device.
 
 <details>
@@ -77,6 +81,7 @@ app/src/main/java/com/caceras/aibrief/
 ├── MainActivity.kt          Compose UI: feed, saved, about, article reader
 ├── NewsViewModel.kt         Feed state
 ├── data/NewsRepository.kt   RSS fetch, parsing, caching, saved articles
+├── data/PostContent.kt      Original posts: block model, parsing, scheduling
 ├── ui/                      Theme and shared components
 └── update/                  Direct-install self-updater (sideload builds only)
 ```

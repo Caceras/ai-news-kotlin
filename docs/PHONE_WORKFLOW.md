@@ -89,6 +89,49 @@ work starts rather than after.
 
 ---
 
+## Publishing your own writing
+
+The feed relays other people's reporting. You can also publish your own posts,
+and those work on a completely different clock:
+
+| You change | What you do | When it appears |
+|---|---|---|
+| A post | Tell me the post | Next time you tap **home** — seconds, no update |
+| The app itself | Tell me what to change | A build, then one tap on **install** |
+
+A post never needs a new build, because the app reads its posts straight from the
+repository each time the feed refreshes.
+
+### Asking for a post
+
+Say what you want to publish and roughly how it should read. You do not need to
+write it in any particular format — headings, quotes, bullets and images are all
+available, and I put it into the right shape.
+
+> Post something about small models running on-device. Open with why privacy is
+> the real argument, pull out a quote about benchmarks not being the point, and
+> end with three bullets on what is still missing.
+
+### Scheduling one
+
+Say when it should go live and it is published in advance but stays invisible
+until then:
+
+> Same post, but have it appear at 08:00 on Tuesday.
+
+Nothing runs on a timer to make that work — the app simply never shows a post
+that is not yet due — so a scheduled post cannot fail overnight.
+
+### Changing or removing one
+
+> Change the headline on the on-device models post.
+
+> Take down the post from last Tuesday.
+
+Both take effect on the next refresh.
+
+---
+
 ## When something looks wrong
 
 **The update line never appears.** The app only offers updates it can see. Check

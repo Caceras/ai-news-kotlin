@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "posts": [
+    {
+      "id": "2026-08-30-welcome",
+      "title": "AI Brief now publishes its own writing, not only other people's.",
+      "summary": "Original posts sit alongside the feed, and appear the moment they are published — no app update required.",
+      "author": "Rikard Caceras",
+      "category": "PRODUCTS",
+      "publishedAt": "2026-08-30T16:00:00Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Until now AI Brief only relayed other people's reporting. This post is the first piece of writing that belongs to the app itself, and it exists mainly to prove the route works."
+        },
+        {
+          "type": "heading",
+          "text": "Why this appeared without an update"
+        },
+        {
+          "type": "paragraph",
+          "text": "The app reads its posts from a single file in the repository every time the feed refreshes. Publishing is therefore a change to that file and nothing else — no build runs, no release is cut, and nothing has to be installed on the phone. Tap home and the post is simply there."
+        },
+        {
+          "type": "paragraph",
+          "text": "That matters because it separates two speeds. Changing how the app looks or behaves is a new build, which takes a few minutes and one tap to install. Changing what it says is immediate."
+        },
+        {
+          "type": "quote",
+          "text": "Posts are written as a short list of typed blocks rather than as markup, so a post can add new writing but never new styling.",
+          "attribution": "On keeping the design intact"
+        },
+        {
+          "type": "heading",
+          "text": "What a post can contain"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Paragraphs and headings, set in the type the app already uses",
+            "Pulled quotes, with an optional attribution line",
+            "Bulleted lists like this one",
+            "Images, which must be served over HTTPS"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A post can also be dated in the future. It stays in the file, invisible, until that moment passes and then appears on its own — which is how scheduling works here, with no server involved."
+        }
+      ]
+    }
+  ]
+}
