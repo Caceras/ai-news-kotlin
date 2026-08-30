@@ -44,10 +44,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Run unit tests
-        run: ./gradlew testSideloadUnitTest --stacktrace
+        run: scripts/ci-gradle.sh testSideloadUnitTest
 
       - name: Run Android lint
-        run: ./gradlew lintSideload --stacktrace
+        run: scripts/ci-gradle.sh lintSideload
 
       - name: Upload lint report
         if: always()
@@ -90,7 +90,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Build direct-install APK
-        run: ./gradlew assembleSideload --stacktrace -PbuildNumber=${{ steps.identity.outputs.build_number }}
+        run: scripts/ci-gradle.sh assembleSideload -PbuildNumber=${{ steps.identity.outputs.build_number }}
 
       - name: Stage release assets
         id: stage
