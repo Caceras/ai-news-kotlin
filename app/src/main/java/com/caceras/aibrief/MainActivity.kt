@@ -17,6 +17,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +37,9 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -52,9 +56,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -83,6 +89,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 private const val SUPPORT_EMAIL = "rikicaceras@gmail.com"
 
@@ -112,6 +119,27 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     val updateState by updateViewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(NavTab.HOME) }
     var selectedArticle by remember { mutableStateOf<NewsArticle?>(null) }
+    val pagerState = rememberPagerState(
+        initialPage = currentTab.ordinal,
+        pageCount = { NavTab.entries.size },
+    )
+    val scope = rememberCoroutineScope()
+    val homeListState = rememberLazyListState()
+    val savedListState = rememberLazyListState()
+    val aboutListState = rememberLazyListState()
+
+    fun selectTab(tab: NavTab) {
+        if (tab == NavTab.HOME && currentTab == NavTab.HOME) {
+            viewModel.refresh()
+            updateViewModel.checkForUpdate()
+        }
+        currentTab = tab
+        scope.launch { pagerState.animateScrollToPage(tab.ordinal) }
+    }
+
+    LaunchedEffect(pagerState.settledPage) {
+        currentTab = NavTab.entries[pagerState.settledPage]
+    }
 
     // Returning from the system settings screen is the moment a pending install
     // becomes possible, so the update finishes without another tap.
@@ -124,6 +152,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
             selectedArticle = null
         } else {
             currentTab = NavTab.HOME
+            scope.launch { pagerState.animateScrollToPage(NavTab.HOME.ordinal) }
         }
     }
 
@@ -135,10 +164,10 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         color = MaterialTheme.colorScheme.background,
     ) {
         AnimatedContent(
-            targetState = selectedArticle to currentTab,
+            targetState = selectedArticle,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
-            label = "screenTransition",
-        ) { (article, tab) ->
+            label = "articleTransition",
+        ) { article ->
             if (article != null) {
                 ArticleDetailScreen(
                     article = article,
@@ -148,44 +177,47 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                     onToggleSaved = { viewModel.toggleSaved(article) },
                     onNavigateTab = {
                         selectedArticle = null
-                        currentTab = it
+                        selectTab(it)
                     },
                 )
             } else {
-                when (tab) {
-                    NavTab.HOME -> FeedScreen(
-                        state = state,
-                        updateState = updateState,
-                        currentTab = currentTab,
-                        topPadding = topPadding,
-                        bottomPadding = bottomPadding,
-                        onTabSelected = {
-                            if (it == NavTab.HOME) {
-                                viewModel.refresh()
-                                updateViewModel.checkForUpdate()
-                            }
-                            currentTab = it
-                        },
-                        onSelectCategory = viewModel::selectCategory,
-                        onOpenArticle = { selectedArticle = it },
-                        onInstallUpdate = updateViewModel::downloadAndInstall,
-                        onGrantInstallPermission = updateViewModel::requestInstallPermission,
-                        onDismissUpdate = updateViewModel::dismiss,
-                    )
-                    NavTab.SAVED -> SavedScreen(
-                        articles = state.savedArticles,
-                        currentTab = currentTab,
-                        topPadding = topPadding,
-                        bottomPadding = bottomPadding,
-                        onTabSelected = { currentTab = it },
-                        onOpenArticle = { selectedArticle = it },
-                    )
-                    NavTab.ABOUT -> AboutScreen(
-                        currentTab = currentTab,
-                        topPadding = topPadding,
-                        bottomPadding = bottomPadding,
-                        onTabSelected = { currentTab = it },
-                    )
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    beyondViewportPageCount = 1,
+                ) { page ->
+                    when (NavTab.entries[page]) {
+                        NavTab.HOME -> FeedScreen(
+                            state = state,
+                            updateState = updateState,
+                            currentTab = currentTab,
+                            listState = homeListState,
+                            topPadding = topPadding,
+                            bottomPadding = bottomPadding,
+                            onTabSelected = ::selectTab,
+                            onSelectCategory = viewModel::selectCategory,
+                            onOpenArticle = { selectedArticle = it },
+                            onInstallUpdate = updateViewModel::downloadAndInstall,
+                            onGrantInstallPermission = updateViewModel::requestInstallPermission,
+                            onDismissUpdate = updateViewModel::dismiss,
+                        )
+                        NavTab.SAVED -> SavedScreen(
+                            articles = state.savedArticles,
+                            currentTab = currentTab,
+                            listState = savedListState,
+                            topPadding = topPadding,
+                            bottomPadding = bottomPadding,
+                            onTabSelected = ::selectTab,
+                            onOpenArticle = { selectedArticle = it },
+                        )
+                        NavTab.ABOUT -> AboutScreen(
+                            currentTab = currentTab,
+                            listState = aboutListState,
+                            topPadding = topPadding,
+                            bottomPadding = bottomPadding,
+                            onTabSelected = ::selectTab,
+                        )
+                    }
                 }
             }
         }
@@ -264,6 +296,7 @@ private fun FeedScreen(
     state: NewsUiState,
     updateState: UpdateState,
     currentTab: NavTab,
+    listState: LazyListState,
     topPadding: androidx.compose.ui.unit.Dp,
     bottomPadding: androidx.compose.ui.unit.Dp,
     onTabSelected: (NavTab) -> Unit,
@@ -278,6 +311,7 @@ private fun FeedScreen(
     }
 
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 28.dp,
@@ -349,12 +383,14 @@ private fun FeedScreen(
 private fun SavedScreen(
     articles: List<NewsArticle>,
     currentTab: NavTab,
+    listState: LazyListState,
     topPadding: androidx.compose.ui.unit.Dp,
     bottomPadding: androidx.compose.ui.unit.Dp,
     onTabSelected: (NavTab) -> Unit,
     onOpenArticle: (NewsArticle) -> Unit,
 ) {
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 28.dp,
@@ -410,6 +446,7 @@ private fun SavedScreen(
 @Composable
 private fun AboutScreen(
     currentTab: NavTab,
+    listState: LazyListState,
     topPadding: androidx.compose.ui.unit.Dp,
     bottomPadding: androidx.compose.ui.unit.Dp,
     onTabSelected: (NavTab) -> Unit,
@@ -418,6 +455,7 @@ private fun AboutScreen(
     val haptic = LocalHapticFeedback.current
 
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 28.dp,
