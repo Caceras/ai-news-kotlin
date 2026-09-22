@@ -29,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import java.io.File
+import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -56,11 +57,13 @@ object ArticleImageCache {
         val diskKey = hashKey(url)
         val diskFile = File(diskCacheDir, diskKey)
 
-        if (diskFile.exists() && diskFile.length() > 0) {
-            val decoded = runCatching { BitmapFactory.decodeFile(diskFile.absolutePath) }.getOrNull()
+        if (diskFile.exists() && diskFile.length() in 1..MAX_IMAGE_BYTES) {
+            val decoded = runCatching { decodeFileSafely(diskFile) }.getOrNull()
             if (decoded != null) {
                 memoryCache.put(url, decoded)
                 return@withContext decoded
+            } else {
+                runCatching { diskFile.delete() }
             }
         }
 
@@ -71,14 +74,32 @@ object ArticleImageCache {
             connection.readTimeout = 7_000
             connection.instanceFollowRedirects = true
             connection.setRequestProperty("User-Agent", "AI-Brief-Android/2.0")
-            if (connection.responseCode !in 200..299) return@runCatching null
+            if (connection.responseCode !in 200..299) {
+                connection.disconnect()
+                return@runCatching null
+            }
+            if (connection.contentLengthLong > MAX_IMAGE_BYTES) {
+                connection.disconnect()
+                return@runCatching null
+            }
 
-            val bytes = connection.inputStream.use { it.readBytes() }
+            val bytes = connection.inputStream.use { input ->
+                val output = ByteArrayOutputStream()
+                val buffer = ByteArray(16 * 1024)
+                var total = 0L
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read <= 0) break
+                    total += read
+                    if (total > MAX_IMAGE_BYTES) return@runCatching null
+                    output.write(buffer, 0, read)
+                }
+                output.toByteArray()
+            }
             connection.disconnect()
 
-            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return@runCatching null
+            val bitmap = decodeBytesSafely(bytes) ?: return@runCatching null
 
-            // Save to disk cache asynchronously
             runCatching {
                 FileOutputStream(diskFile).use { fos -> fos.write(bytes) }
             }
@@ -86,6 +107,39 @@ object ArticleImageCache {
             bitmap
         }.getOrNull()
     }
+
+    private fun decodeBytesSafely(bytes: ByteArray): Bitmap? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight)
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+    }
+
+    private fun decodeFileSafely(file: File): Bitmap? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.absolutePath, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight)
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+        return BitmapFactory.decodeFile(file.absolutePath, options)
+    }
+
+    private fun sampleSize(width: Int, height: Int): Int {
+        var sample = 1
+        while (width / sample > MAX_DECODE_DIMENSION || height / sample > MAX_DECODE_DIMENSION) {
+            sample *= 2
+        }
+        return sample
+    }
+
+    private const val MAX_IMAGE_BYTES = 12L * 1024L * 1024L
+    private const val MAX_DECODE_DIMENSION = 1600
 
     private fun hashKey(url: String): String {
         return runCatching {
