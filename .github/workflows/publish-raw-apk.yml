@@ -1,0 +1,36 @@
+name: Publish raw APK download
+
+on:
+  push:
+    branches: ["raw-apk-delivery"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download verified APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf out
+          mkdir out
+          gh release download build-110 --repo Caceras/ai-news-kotlin --pattern ai-brief.apk --dir out
+          test -s out/ai-brief.apk
+      - name: Publish binary on downloads branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan downloads
+          git rm -rf . >/dev/null 2>&1 || true
+          cp out/ai-brief.apk ai-brief-build-110.apk
+          printf '%s\n' 'AI Brief build 110 direct download branch.' > README.md
+          git add ai-brief-build-110.apk README.md
+          git commit -m "Publish AI Brief build 110 APK"
+          git push --force origin downloads
