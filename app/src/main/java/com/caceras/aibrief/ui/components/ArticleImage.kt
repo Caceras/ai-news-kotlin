@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import java.io.File
 import java.io.ByteArrayOutputStream
@@ -156,17 +157,16 @@ fun AsyncArticleImage(
     contentDescription: String?,
     modifier: Modifier = Modifier,
     aspectRatio: Float = 16f / 9f,
+    fallbackResource: Int? = null,
 ) {
     if (imageUrl.isNullOrBlank()) return
 
     val context = LocalContext.current
     var bitmap by remember(imageUrl) { mutableStateOf<Bitmap?>(null) }
-    var hasLoaded by remember(imageUrl) { mutableStateOf(false) }
 
     LaunchedEffect(imageUrl) {
         val loaded = ArticleImageCache.load(context, imageUrl)
         bitmap = loaded
-        hasLoaded = true
     }
 
     val alpha by animateFloatAsState(
@@ -183,6 +183,10 @@ fun AsyncArticleImage(
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
+        if (fallbackResource != null) {
+            Image(painterResource(fallbackResource), contentDescription,
+                contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        }
         bitmap?.let {
             Image(
                 bitmap = it.asImageBitmap(),

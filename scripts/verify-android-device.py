@@ -83,7 +83,7 @@ try:
     adb('shell', 'am', 'start', '-W', '-n', PACKAGE + '/.MainActivity')
     time.sleep(10)  # allow the bounded first refresh to fail while offline
     lead = json.loads(Path('content/posts.json').read_text())['posts'][0]['title']
-    require_text('A clearer view of AI.')
+    require_text('AI Brief')
     require_text('Offline edition')
     require_text(lead)
     capture('01-feed')
@@ -112,7 +112,7 @@ try:
     capture('05-about')
     tap('Latest') if visible('Latest') else adb('shell', 'input', 'keyevent', '4')
     # Back from a non-home tab returns to the edition.
-    require_text('A clearer view of AI.')
+    require_text('AI Brief')
     tap('Search articles')
     inputs = [n for n in hierarchy().iter('node') if n.get('class') == 'android.widget.EditText']
     if not inputs:
@@ -140,7 +140,7 @@ try:
         adb('shell','am','force-stop',PACKAGE)
         adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity')
         time.sleep(2)
-        require_text('A clearer view of AI.')
+        require_text('AI Brief')
         raw = adb('exec-out', 'screencap', binary=True)
         width, height, pixel_format = struct.unpack_from('<III', raw)
         if pixel_format != 1:

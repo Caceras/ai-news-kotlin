@@ -1,6 +1,6 @@
 package com.caceras.aibrief.ui.components
 
-import androidx.compose.foundation.Canvas
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,18 +19,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caceras.aibrief.R
@@ -40,46 +46,64 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/** Original illustrative still lifes, never photographs of reported events. */
+@DrawableRes
+private fun categoryArtwork(category: NewsCategory): Int = when (category) {
+    NewsCategory.RESEARCH -> R.drawable.editorial_research
+    NewsCategory.BUILDERS -> R.drawable.editorial_builders
+    NewsCategory.POLICY -> R.drawable.editorial_policy
+    else -> R.drawable.editorial_studio
+}
+
 @Composable
 fun ArticleArtwork(article: NewsArticle, modifier: Modifier = Modifier, featured: Boolean = false) {
+    val fallback = if (article.id == "2026-10-03-small-models") R.drawable.editorial_research
+        else categoryArtwork(article.category)
+    val ratio = if (featured) 16f / 9f else 1f
     if (!article.imageUrl.isNullOrBlank()) {
-        AsyncArticleImage(article.imageUrl, null, modifier, if (featured) 16f / 9f else 1f)
-    } else if (featured) {
+        AsyncArticleImage(article.imageUrl, null, modifier, ratio, fallbackResource = fallback)
+    } else {
         Image(
-            painter = painterResource(R.drawable.editorial_studio),
+            painter = painterResource(fallback),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = modifier.fillMaxWidth().aspectRatio(16f / 9f),
+            modifier = modifier.fillMaxWidth().aspectRatio(ratio),
         )
-    } else {
-        TopicIllustration(article.category, modifier.aspectRatio(1f))
     }
 }
 
 @Composable
 fun FeatureStory(article: NewsArticle, onClick: () -> Unit) {
     Surface(
-        shape = RoundedCornerShape(3.dp),
+        shape = RoundedCornerShape(4.dp),
         color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick),
+        modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}
+            .clickable(role = Role.Button, onClick = onClick),
     ) {
         Column {
             ArticleArtwork(article, featured = true)
-            Column(Modifier.padding(20.dp)) {
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
                 Text(
-                    text = "THE READING ROOM · ${article.category.label.uppercase(Locale.US)}",
-                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp),
+                    article.category.label.uppercase(Locale.US) + if (article.isOriginalPost) "  /  EXPLAINER" else "",
+                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.2.sp),
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Spacer(Modifier.height(8.dp))
-                Text(article.title, style = MaterialTheme.typography.headlineMedium)
-                Spacer(Modifier.height(10.dp))
-                Text(article.summary, style = MaterialTheme.typography.bodyMedium)
+                Text(article.title, style = MaterialTheme.typography.headlineMedium,
+                    maxLines = 4, overflow = TextOverflow.Ellipsis)
+                Spacer(Modifier.height(9.dp))
+                Text(article.summary, style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 3, overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(14.dp))
-                StoryProvenance(article)
-                Spacer(Modifier.height(16.dp))
-                Text("READ THE STORY  →", style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    StoryProvenance(article, Modifier.weight(1f))
+                    Text("Read story", style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(6.dp))
+                    Icon(Icons.AutoMirrored.Outlined.ArrowForward, null,
+                        Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                }
             }
         }
     }
@@ -88,22 +112,24 @@ fun FeatureStory(article: NewsArticle, onClick: () -> Unit) {
 @Composable
 fun StoryRow(article: NewsArticle, onClick: () -> Unit) {
     Surface(
-        shape = RoundedCornerShape(3.dp),
+        shape = RoundedCornerShape(4.dp),
         color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick),
+        modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}
+            .clickable(role = Role.Button, onClick = onClick),
     ) {
-        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-            ArticleArtwork(article, Modifier.size(88.dp))
-            Spacer(Modifier.width(16.dp))
+        Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            ArticleArtwork(article, Modifier.width(84.dp).height(96.dp).clip(RoundedCornerShape(2.dp)))
+            Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Text(
                     article.category.label.uppercase(Locale.US),
-                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.6.sp),
+                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.1.sp),
                     color = MaterialTheme.colorScheme.primary,
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(article.title, style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(5.dp))
+                Text(article.title, style = MaterialTheme.typography.titleMedium,
+                    maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Spacer(Modifier.height(8.dp))
                 StoryProvenance(article)
             }
         }
@@ -111,76 +137,50 @@ fun StoryRow(article: NewsArticle, onClick: () -> Unit) {
 }
 
 @Composable
-private fun StoryProvenance(article: NewsArticle) {
-    val date = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.US)
+private fun StoryProvenance(article: NewsArticle, modifier: Modifier = Modifier) {
+    val date = DateTimeFormatter.ofPattern("d MMM", Locale.US)
         .withZone(ZoneId.systemDefault()).format(article.publishedAt)
     Text(
-        text = "${article.source} · $date · ${article.readingTimeMinutes} min",
+        text = (if (article.isOriginalPost) "" else "${article.source} · ") +
+            "$date  ·  ${article.readingTimeMinutes} min read" +
+            (if (article.isOfflineBrief) " · Background reading" else ""),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    if (article.isOfflineBrief) Text(
-        "Offline explainer · background reading",
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier,
     )
 }
 
 @Composable
 fun TopicsStrip(onSelect: (NewsCategory) -> Unit) {
-    Column {
-        Text("Explore artificial intelligence", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(10.dp))
-        Text("A little more context. A clearer point of view.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(20.dp))
+    Column(Modifier.fillMaxWidth().background(Color(0xFF082638)).padding(vertical = 28.dp)) {
+        Text("A world worth understanding", style = MaterialTheme.typography.headlineMedium,
+            color = Color.White, modifier = Modifier.padding(horizontal = 20.dp).semantics { heading() })
+        Spacer(Modifier.height(8.dp))
+        Text("From the research lab to everyday life.", style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFFCBDBDF), modifier = Modifier.padding(horizontal = 20.dp))
+        Spacer(Modifier.height(22.dp))
         Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             NewsCategory.entries.filter { it != NewsCategory.ALL }.forEach { category ->
-                Column(
-                    Modifier.width(154.dp)
-                        .background(Color(0xFF082638))
+                Box(
+                    Modifier.width(148.dp).height(188.dp).clip(RoundedCornerShape(3.dp))
                         .clickable(role = Role.Button) { onSelect(category) },
                 ) {
-                    TopicIllustration(category, Modifier.fillMaxWidth().height(132.dp))
-                    Column(Modifier.padding(14.dp)) {
+                    Image(painterResource(categoryArtwork(category)), null,
+                        contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
+                        listOf(Color.Transparent, Color(0xE6081720)), startY = 80f)))
+                    Column(Modifier.align(Alignment.BottomStart).padding(14.dp)) {
                         Text(category.label, style = MaterialTheme.typography.titleLarge,
                             color = Color.White)
-                        Spacer(Modifier.height(8.dp))
-                        Text("EXPLORE  →", style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFD9E5E8))
+                        Spacer(Modifier.height(5.dp))
+                        Text("Explore  →", style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFFDAE5E8))
                     }
                 }
             }
-        }
-    }
-}
-
-/** Original, decorative artwork. It carries no factual information. */
-@Composable
-private fun TopicIllustration(category: NewsCategory, modifier: Modifier = Modifier) {
-    val palette = when (category) {
-        NewsCategory.RESEARCH -> Color(0xFFB8C9B7) to Color(0xFF345849)
-        NewsCategory.PRODUCTS -> Color(0xFFD9C2A3) to Color(0xFF836344)
-        NewsCategory.POLICY -> Color(0xFFB4C4CF) to Color(0xFF2D5067)
-        else -> Color(0xFFCFB2A1) to Color(0xFF835747)
-    }
-    Box(modifier.background(palette.first), contentAlignment = Alignment.Center) {
-        Canvas(Modifier.fillMaxSize()) {
-            val unit = size.minDimension
-            val center = Offset(size.width * .5f, size.height * .48f)
-            drawCircle(palette.second.copy(alpha = .12f), unit * .37f, center)
-            for (i in 1..4) {
-                drawCircle(palette.second.copy(alpha = .7f), unit * (.07f * i), center,
-                    style = Stroke(unit * .009f))
-            }
-            drawLine(palette.second, Offset(unit * .13f, size.height * .8f),
-                Offset(size.width - unit * .13f, size.height * .2f), unit * .012f)
-            drawCircle(palette.second, unit * .048f,
-                Offset(size.width * .68f, size.height * .3f))
         }
     }
 }

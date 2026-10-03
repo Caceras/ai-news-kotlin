@@ -14,89 +14,65 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.unit.sp
-import com.caceras.aibrief.data.FeedFreshness
-import com.caceras.aibrief.data.PostBlock
-import com.caceras.aibrief.ui.components.FeatureStory
-import com.caceras.aibrief.ui.components.StoryRow
-import com.caceras.aibrief.ui.components.TopicsStrip
-import com.caceras.aibrief.ui.components.ArticleArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Newspaper
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.caceras.aibrief.data.FeedFreshness
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
-import com.caceras.aibrief.ui.components.AsyncArticleImage
+import com.caceras.aibrief.data.PostBlock
+import com.caceras.aibrief.ui.components.ArticleArtwork
+import com.caceras.aibrief.ui.components.FeatureStory
 import com.caceras.aibrief.ui.components.PostBlockContent
+import com.caceras.aibrief.ui.components.StoryRow
+import com.caceras.aibrief.ui.components.TopicsStrip
 import com.caceras.aibrief.ui.theme.AiBriefTheme
 import com.caceras.aibrief.update.UpdateBanner
 import com.caceras.aibrief.update.UpdateManifest
@@ -126,11 +102,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class NavTab {
-    HOME,
-    SAVED,
-    ABOUT,
-}
+private enum class NavTab { HOME, SAVED, ABOUT }
 
 @Composable
 private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewModel) {
@@ -138,19 +110,26 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     val updateState by updateViewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(NavTab.HOME) }
     var selectedArticleId by rememberSaveable { mutableStateOf<String?>(null) }
+    var searchShown by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
     val selectedArticle = (state.articles + state.savedArticles)
         .firstOrNull { it.id == selectedArticleId }
-    val pagerState = rememberPagerState(
-        initialPage = currentTab.ordinal,
-        pageCount = { NavTab.entries.size },
-    )
+    val pagerState = rememberPagerState(initialPage = currentTab.ordinal,
+        pageCount = { NavTab.entries.size })
     val scope = rememberCoroutineScope()
     val homeListState = rememberLazyListState()
     val savedListState = rememberLazyListState()
     val aboutListState = rememberLazyListState()
+    val snackbar = remember { SnackbarHostState() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val keyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
     fun selectTab(tab: NavTab) {
+        keyboard?.hide()
+        searchShown = false
+        query = ""
         if (tab == NavTab.HOME && currentTab == NavTab.HOME) {
+            scope.launch { homeListState.animateScrollToItem(0) }
             viewModel.refresh()
             updateViewModel.checkForUpdate()
         }
@@ -158,95 +137,134 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         scope.launch { pagerState.animateScrollToPage(tab.ordinal) }
     }
 
-    LaunchedEffect(pagerState.settledPage) {
-        currentTab = NavTab.entries[pagerState.settledPage]
-    }
-
-    // Returning from the system settings screen is the moment a pending install
-    // becomes possible, so the update finishes without another tap.
+    LaunchedEffect(pagerState.settledPage) { currentTab = NavTab.entries[pagerState.settledPage] }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         (updateState as? UpdateState.NeedsPermission)?.let { updateViewModel.retryInstall(it.apk) }
     }
-
-    BackHandler(enabled = selectedArticle != null || currentTab != NavTab.HOME) {
-        if (selectedArticle != null) {
-            selectedArticleId = null
-        } else {
-            currentTab = NavTab.HOME
-            scope.launch { pagerState.animateScrollToPage(NavTab.HOME.ordinal) }
+    BackHandler(enabled = selectedArticle != null || searchShown || currentTab != NavTab.HOME) {
+        when {
+            selectedArticle != null -> selectedArticleId = null
+            searchShown -> { searchShown = false; query = ""; keyboard?.hide() }
+            else -> selectTab(NavTab.HOME)
         }
     }
 
-    // Keep the scrolling viewport inside system bars and display cutouts.
-    // Padding only the list's first/last items lets scrolled text cross them.
-    val safePadding = WindowInsets.safeDrawing.asPaddingValues()
-    val topPadding = 0.dp
-    val bottomPadding = 0.dp
+    // The entire viewport, including the reader and fixed navigation, respects
+    // system bars, cutouts and the keyboard rather than padding only list items.
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Box(Modifier.fillMaxSize().padding(WindowInsets.safeDrawing.asPaddingValues())) {
+            AnimatedContent(targetState = selectedArticle, modifier = Modifier.fillMaxSize(),
+                transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "articleTransition") { article ->
+                if (article != null) {
+                    ArticleDetailScreen(article, state.savedArticles.any { it.id == article.id },
+                        onToggleSaved = {
+                            val wasSaved = state.savedArticles.any { it.id == article.id }
+                            viewModel.toggleSaved(article)
+                            scope.launch {
+                                snackbar.currentSnackbarData?.dismiss()
+                                snackbar.showSnackbar(if (wasSaved) "Removed from your reading list"
+                                    else "Saved for offline reading", duration = SnackbarDuration.Short)
+                            }
+                        }, onBack = { selectedArticleId = null })
+                } else {
+                    Column(Modifier.fillMaxSize()) {
+                        JournalMasthead(
+                            isRefreshing = state.isRefreshing,
+                            onHome = { selectTab(NavTab.HOME) },
+                            onSearch = if (currentTab == NavTab.HOME) ({
+                                searchShown = !searchShown
+                                query = ""
+                                if (searchShown) viewModel.selectCategory(NewsCategory.ALL)
+                                else keyboard?.hide()
+                                scope.launch { homeListState.scrollToItem(0) }
+                            }) else null,
+                            onRefresh = if (currentTab == NavTab.HOME) ({
+                                viewModel.refresh(); updateViewModel.checkForUpdate()
+                            }) else null,
+                        )
+                        HorizontalPager(state = pagerState, modifier = Modifier.weight(1f),
+                            beyondViewportPageCount = 1) { page ->
+                            when (NavTab.entries[page]) {
+                                NavTab.HOME -> FeedScreen(state, updateState, homeListState,
+                                    searchShown, query, onQueryChange = { query = it },
+                                    onCloseSearch = { query = ""; searchShown = false; keyboard?.hide() },
+                                    onSelectCategory = viewModel::selectCategory,
+                                    onOpenArticle = { keyboard?.hide(); selectedArticleId = it.id },
+                                    onInstallUpdate = updateViewModel::downloadAndInstall,
+                                    onGrantInstallPermission = updateViewModel::requestInstallPermission,
+                                    onDismissUpdate = updateViewModel::dismiss,
+                                    onAbout = { selectTab(NavTab.ABOUT) })
+                                NavTab.SAVED -> SavedScreen(state.savedArticles, savedListState,
+                                    onOpenArticle = { selectedArticleId = it.id },
+                                    onBrowse = { selectTab(NavTab.HOME) })
+                                NavTab.ABOUT -> AboutScreen(aboutListState)
+                            }
+                        }
+                        if (!keyboardVisible) JournalNavigation(currentTab, ::selectTab)
+                    }
+                }
+            }
+            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter)
+                .padding(start = 16.dp, end = 16.dp,
+                    bottom = if (selectedArticle == null && !keyboardVisible) 78.dp else 16.dp))
+        }
+    }
+}
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
-    ) {
-        AnimatedContent(
-            targetState = selectedArticle,
-            modifier = Modifier.fillMaxSize().padding(safePadding),
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            label = "articleTransition",
-        ) { article ->
-            if (article != null) {
-                ArticleDetailScreen(
-                    article = article,
-                    isSaved = state.savedArticles.any { it.id == article.id },
-                    topPadding = topPadding,
-                    bottomPadding = bottomPadding,
-                    onToggleSaved = { viewModel.toggleSaved(article) },
-                    onBack = { selectedArticleId = null },
-                    onNavigateTab = {
-                        selectedArticleId = null
-                        selectTab(it)
-                    },
-                )
-            } else {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxSize(),
-                    beyondViewportPageCount = 1,
-                ) { page ->
-                    when (NavTab.entries[page]) {
-                        NavTab.HOME -> FeedScreen(
-                            state = state,
-                            updateState = updateState,
-                            currentTab = currentTab,
-                            listState = homeListState,
-                            topPadding = topPadding,
-                            bottomPadding = bottomPadding,
-                            onTabSelected = ::selectTab,
-                            onSelectCategory = viewModel::selectCategory,
-                            onOpenArticle = { selectedArticleId = it.id },
-                            onInstallUpdate = updateViewModel::downloadAndInstall,
-                            onGrantInstallPermission = updateViewModel::requestInstallPermission,
-                            onDismissUpdate = updateViewModel::dismiss,
-                            onRefresh = {
-                                viewModel.refresh()
-                                updateViewModel.checkForUpdate()
-                            },
-                        )
-                        NavTab.SAVED -> SavedScreen(
-                            articles = state.savedArticles,
-                            currentTab = currentTab,
-                            listState = savedListState,
-                            topPadding = topPadding,
-                            bottomPadding = bottomPadding,
-                            onTabSelected = ::selectTab,
-                            onOpenArticle = { selectedArticleId = it.id },
-                        )
-                        NavTab.ABOUT -> AboutScreen(
-                            currentTab = currentTab,
-                            listState = aboutListState,
-                            topPadding = topPadding,
-                            bottomPadding = bottomPadding,
-                            onTabSelected = ::selectTab,
-                        )
+@Composable
+private fun JournalMasthead(
+    isRefreshing: Boolean,
+    onHome: () -> Unit,
+    onSearch: (() -> Unit)?,
+    onRefresh: (() -> Unit)?,
+) {
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        Column {
+            Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Text("AI Brief", style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = 29.sp, lineHeight = 34.sp, letterSpacing = (-0.8).sp),
+                    modifier = Modifier.weight(1f).minimumInteractiveComponentSize()
+                        .clickable(role = Role.Button, onClick = onHome))
+                if (onSearch != null) IconButton(onClick = onSearch) {
+                    Icon(Icons.Outlined.Search, "Search articles", Modifier.size(22.dp))
+                }
+                if (onRefresh != null) IconButton(onClick = onRefresh, enabled = !isRefreshing) {
+                    if (isRefreshing) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 1.5.dp)
+                    else Icon(Icons.Outlined.Refresh, "Refresh edition", Modifier.size(22.dp))
+                }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        }
+    }
+}
+
+@Composable
+private fun JournalNavigation(activeTab: NavTab, onSelect: (NavTab) -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        Column {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Row(Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
+                NavTab.entries.forEach { tab ->
+                    val isSelected = activeTab == tab
+                    val color = if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    Column(Modifier.weight(1f).heightIn(min = 64.dp)
+                        .semantics { selected = isSelected }
+                        .clickable(role = Role.Tab) { onSelect(tab) }
+                        .padding(vertical = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center) {
+                        Icon(when (tab) {
+                            NavTab.HOME -> Icons.Outlined.Newspaper
+                            NavTab.SAVED -> if (isSelected) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder
+                            NavTab.ABOUT -> Icons.Outlined.Info
+                        }, null, Modifier.size(21.dp), tint = color)
+                        Spacer(Modifier.height(4.dp))
+                        Text(when (tab) { NavTab.HOME -> "Latest"; NavTab.SAVED -> "Saved"; NavTab.ABOUT -> "About" },
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
+                            color = color)
                     }
                 }
             }
@@ -254,172 +272,134 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     }
 }
 
-/** A magazine masthead, with explicit navigation and accessible actions. */
-@Composable
-private fun MinimalTopNav(
-    activeTab: NavTab?,
-    isRefreshing: Boolean = false,
-    onTabSelected: (NavTab) -> Unit,
-    onSearch: (() -> Unit)? = null,
-    onRefresh: (() -> Unit)? = null,
-) {
-    Column {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text("AI Brief", style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier.minimumInteractiveComponentSize()
-                        .clickable(role = Role.Button) { onTabSelected(NavTab.HOME) })
-                Text("THE INDEPENDENT AI JOURNAL", style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.sp, letterSpacing = 1.4.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            if (onSearch != null) IconButton(onClick = onSearch) {
-                Icon(Icons.Outlined.Search, contentDescription = "Search articles")
-            }
-            if (onRefresh != null) IconButton(onClick = onRefresh, enabled = !isRefreshing) {
-                if (isRefreshing) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                else Icon(Icons.Outlined.Refresh, contentDescription = "Refresh edition")
-            }
-            IconButton(onClick = { onTabSelected(NavTab.ABOUT) }) {
-                Icon(Icons.Outlined.Menu, contentDescription = "About, contact and privacy")
-            }
-        }
-        Spacer(Modifier.height(12.dp))
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
-            NavTextLink("Latest", activeTab == NavTab.HOME) { onTabSelected(NavTab.HOME) }
-            NavTextLink("Saved", activeTab == NavTab.SAVED) { onTabSelected(NavTab.SAVED) }
-            NavTextLink("About", activeTab == NavTab.ABOUT) { onTabSelected(NavTab.ABOUT) }
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-    }
-}
-
-@Composable
-private fun NavTextLink(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelLarge,
-        color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
-        fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
-        modifier = Modifier
-            .minimumInteractiveComponentSize()
-            .clickable(role = Role.Tab, onClick = onClick)
-            .semantics { this.selected = selected }
-            .padding(vertical = 4.dp),
-    )
-}
-
 @Composable
 private fun FeedScreen(
     state: NewsUiState,
     updateState: UpdateState,
-    currentTab: NavTab,
     listState: LazyListState,
-    topPadding: androidx.compose.ui.unit.Dp,
-    bottomPadding: androidx.compose.ui.unit.Dp,
-    onTabSelected: (NavTab) -> Unit,
+    searchShown: Boolean,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onCloseSearch: () -> Unit,
     onSelectCategory: (NewsCategory) -> Unit,
     onOpenArticle: (NewsArticle) -> Unit,
     onInstallUpdate: (UpdateManifest) -> Unit,
     onGrantInstallPermission: () -> Unit,
     onDismissUpdate: () -> Unit,
-    onRefresh: () -> Unit,
+    onAbout: () -> Unit,
 ) {
-    var searchShown by rememberSaveable { mutableStateOf(false) }
-    var query by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+    val focus = remember { FocusRequester() }
     val articles = state.articles.filter {
         (state.selectedCategory == NewsCategory.ALL || it.category == state.selectedCategory) &&
             (query.isBlank() || it.searchableText.contains(query.trim(), ignoreCase = true))
     }
     val lead = articles.firstOrNull()
+    LaunchedEffect(searchShown) { if (searchShown) focus.requestFocus() }
 
-    LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp),
-        contentPadding = PaddingValues(start = 20.dp, top = topPadding + 12.dp,
-            end = 20.dp, bottom = bottomPadding + 32.dp),
-    ) {
-        item("nav") {
-            MinimalTopNav(currentTab, state.isRefreshing, onTabSelected,
-                onSearch = { searchShown = !searchShown; if (!searchShown) query = "" },
-                onRefresh = onRefresh)
-            Spacer(Modifier.height(24.dp))
+    Column(Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp)) {
+        if (searchShown) {
+            OutlinedTextField(query, onQueryChange,
+                placeholder = { Text("Search the journal") },
+                leadingIcon = { Icon(Icons.Outlined.Search, null, Modifier.size(20.dp)) },
+                trailingIcon = { IconButton(onClick = onCloseSearch) {
+                    Icon(Icons.Outlined.Close, "Close search", Modifier.size(20.dp))
+                } },
+                singleLine = true, shape = RoundedCornerShape(8.dp),
+                textStyle = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)
+                    .focusRequester(focus),
+            )
         }
-        item("update") {
-            UpdateBanner(updateState, onInstallUpdate, onGrantInstallPermission, onDismissUpdate)
-        }
-        item("header") {
-            Text("A clearer view of AI.", style = MaterialTheme.typography.headlineLarge)
-            Spacer(Modifier.height(12.dp))
-            Text("Original briefings, useful context, and sources you can check.",
-                style = MaterialTheme.typography.bodyLarge)
-            Spacer(Modifier.height(12.dp))
-            val freshness = when (state.freshness) {
-                FeedFreshness.LIVE -> "Latest available edition"
-                FeedFreshness.CACHED -> "Saved edition · refresh to check for new writing"
-                FeedFreshness.OFFLINE -> "Offline edition · refresh when connected"
+        LazyColumn(state = listState, modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(bottom = 24.dp)) {
+            item("update") {
+                Box(Modifier.padding(horizontal = 20.dp)) {
+                    UpdateBanner(updateState, onInstallUpdate, onGrantInstallPermission, onDismissUpdate)
+                }
             }
-            Text(freshness, style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(20.dp))
-            if (searchShown) {
-                OutlinedTextField(
-                    value = query, onValueChange = { query = it },
-                    label = { Text("Search articles") }, singleLine = true,
-                    trailingIcon = {
-                        IconButton(onClick = { query = ""; searchShown = false }) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Close search")
+            if (!searchShown) item("edition") {
+                Column(Modifier.padding(horizontal = 20.dp)) {
+                    val date = state.articles.maxOfOrNull { it.publishedAt }
+                    Row(Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Text(date?.let { DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.US)
+                            .withZone(ZoneId.systemDefault()).format(it).uppercase(Locale.US) }
+                            ?: "THE JOURNAL",
+                            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = .9.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f))
+                        Spacer(Modifier.width(8.dp))
+                        Box(Modifier.size(4.dp).clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.onSurfaceVariant))
+                        Spacer(Modifier.width(5.dp))
+                        Text(when (state.freshness) {
+                            FeedFreshness.LIVE -> "Latest edition"
+                            FeedFreshness.CACHED -> "Cached edition"
+                            FeedFreshness.OFFLINE -> "Offline edition"
+                        }, style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    CategoryFilterRow(state.selectedCategory) { category ->
+                        onSelectCategory(category)
+                        scope.launch { listState.animateScrollToItem(0) }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
+            }
+            if (searchShown) item("results-label") {
+                Text("${articles.size} ${if (articles.size == 1) "story" else "stories"}" +
+                    if (query.isBlank()) " in the journal" else " found",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+            }
+            if (lead != null) {
+                if (!searchShown) {
+                    item("lead-${lead.id}") {
+                        Box(Modifier.padding(horizontal = 20.dp)) {
+                            FeatureStory(lead) { onOpenArticle(lead) }
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(12.dp))
+                    }
+                    if (articles.size > 1) item("more-label") {
+                        Text("More to explore", style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(start = 20.dp, top = 26.dp, bottom = 14.dp)
+                                .semantics { heading() })
+                    }
+                }
+                items(if (searchShown) articles else articles.drop(1), key = { it.id }) { article ->
+                    Box(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp)) {
+                        StoryRow(article) { onOpenArticle(article) }
+                    }
+                }
+            } else item("empty") {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 36.dp)) {
+                    Text(if (query.isBlank()) "More stories are on their way." else "No stories found.",
+                        style = MaterialTheme.typography.headlineMedium)
+                    Spacer(Modifier.height(12.dp))
+                    Text("Try a different topic or search term.", style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
-            CategoryFilterRow(state.selectedCategory, onSelectCategory)
-            Spacer(Modifier.height(20.dp))
-        }
-        if (lead != null) {
-            item("lead-${lead.id}") {
-                FeatureStory(lead) { onOpenArticle(lead) }
-                Spacer(Modifier.height(16.dp))
+            if (state.selectedCategory == NewsCategory.ALL && !searchShown) item("topics") {
+                Spacer(Modifier.height(22.dp))
+                TopicsStrip { category ->
+                    onSelectCategory(category)
+                    scope.launch { listState.animateScrollToItem(0) }
+                }
             }
-            items(articles.drop(1), key = { it.id }) { article ->
-                StoryRow(article) { onOpenArticle(article) }
-                Spacer(Modifier.height(12.dp))
-            }
-        } else item("empty") {
-            Text(if (query.isBlank()) "No stories in this topic yet." else "No stories match “$query”.",
-                style = MaterialTheme.typography.titleLarge)
-            Text("Try another topic or clear the search.", style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 8.dp))
-        }
-        if (state.selectedCategory == NewsCategory.ALL && query.isBlank()) item("topics") {
-            Spacer(Modifier.height(28.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Spacer(Modifier.height(28.dp))
-            TopicsStrip { category ->
-                onSelectCategory(category)
-                scope.launch { listState.animateScrollToItem(0) }
-            }
-        }
-        item("editorial-note") {
-            Spacer(Modifier.height(36.dp))
-            Column(Modifier.fillMaxWidth().background(Color(0xFF082638)).padding(24.dp)) {
-                Text("Independent. Curious. Useful.", style = MaterialTheme.typography.titleLarge,
-                    color = Color.White)
-                Spacer(Modifier.height(12.dp))
-                Text("Editor-published writing about artificial intelligence. Read, check the sources, and keep what matters on your saved shelf.",
-                    style = MaterialTheme.typography.bodyMedium, color = Color(0xFFD9E5E8))
-                Spacer(Modifier.height(14.dp))
-                Text("CONTACT THE EDITOR  →", style = MaterialTheme.typography.labelSmall,
-                    color = Color.White, modifier = Modifier.minimumInteractiveComponentSize()
-                        .clickable(role = Role.Button) { onTabSelected(NavTab.ABOUT) })
+            item("editorial-note") {
+                Column(Modifier.padding(horizontal = 20.dp, vertical = 24.dp)) {
+                    Text("A little context goes a long way.", style = MaterialTheme.typography.titleLarge)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Original writing. Primary sources. Space to think.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Meet AI Brief  →", style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.minimumInteractiveComponentSize()
+                            .clickable(role = Role.Button, onClick = onAbout))
+                }
             }
         }
     }
@@ -428,75 +408,184 @@ private fun FeedScreen(
 @Composable
 private fun SavedScreen(
     articles: List<NewsArticle>,
-    currentTab: NavTab,
     listState: LazyListState,
-    topPadding: androidx.compose.ui.unit.Dp,
-    bottomPadding: androidx.compose.ui.unit.Dp,
-    onTabSelected: (NavTab) -> Unit,
     onOpenArticle: (NewsArticle) -> Unit,
+    onBrowse: () -> Unit,
 ) {
-    LazyColumn(
-        state = listState,
+    LazyColumn(state = listState,
         modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp),
-        contentPadding = PaddingValues(
-            start = 20.dp,
-            top = topPadding + 12.dp,
-            end = 20.dp,
-            bottom = bottomPadding + 44.dp,
-        ),
-    ) {
-        item("nav") {
-            MinimalTopNav(
-                activeTab = currentTab,
-                onTabSelected = onTabSelected,
-            )
-            Spacer(Modifier.height(28.dp))
-        }
-
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 32.dp)) {
         item("header") {
-            Text(
-                text = "Saved",
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Spacer(Modifier.height(14.dp))
-            Text(
-                text = "Reads preserved locally on this device.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Spacer(Modifier.height(36.dp))
+            Text("Your reading list", style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.semantics { heading() })
+            Spacer(Modifier.height(8.dp))
+            Text("Good reads, kept for later.", style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(24.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            if (articles.isNotEmpty()) Text(
+                "${articles.size} ${if (articles.size == 1) "story" else "stories"} · available offline",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 16.dp))
         }
-
-        if (articles.isNotEmpty()) {
-            items(articles, key = { it.id }) { article ->
-                EditorialArticleRow(
-                    article = article,
-                    onClick = { onOpenArticle(article) },
-                )
+        items(articles, key = { it.id }) { article ->
+            StoryRow(article) { onOpenArticle(article) }
+            Spacer(Modifier.height(10.dp))
+        }
+        if (articles.isEmpty()) item("empty") {
+            Column(Modifier.fillMaxWidth().padding(vertical = 42.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(Modifier.size(64.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center) {
+                    Icon(Icons.Outlined.BookmarkBorder, null, Modifier.size(27.dp),
+                        tint = MaterialTheme.colorScheme.primary)
+                }
                 Spacer(Modifier.height(22.dp))
-            }
-        } else {
-            item("empty") {
-                Text(
-                    text = "Nothing saved yet. Tap any article to read and save it for offline access.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.widthIn(max = 480.dp),
-                )
+                Text("Keep a good read", style = MaterialTheme.typography.headlineMedium)
+                Spacer(Modifier.height(10.dp))
+                Text("Save a story while you read.\nIt will be here, even when you’re offline.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(22.dp))
+                Button(onClick = onBrowse, shape = RoundedCornerShape(4.dp)) { Text("Explore the latest") }
             }
         }
     }
 }
 
 @Composable
-private fun AboutScreen(
-    currentTab: NavTab,
-    listState: LazyListState,
-    topPadding: androidx.compose.ui.unit.Dp,
-    bottomPadding: androidx.compose.ui.unit.Dp,
-    onTabSelected: (NavTab) -> Unit,
+private fun CategoryFilterRow(selectedCategory: NewsCategory, onSelectCategory: (NewsCategory) -> Unit) {
+    val haptic = LocalHapticFeedback.current
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+        NewsCategory.entries.forEach { category ->
+            val isSelected = category == selectedCategory
+            Column(Modifier.width(IntrinsicSize.Max).widthIn(min = 48.dp).heightIn(min = 48.dp)
+                .semantics { selected = isSelected }
+                .clickable(role = Role.Tab) {
+                    if (!isSelected) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onSelectCategory(category)
+                }, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(category.label, style = MaterialTheme.typography.labelLarge,
+                    fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 12.dp, bottom = 10.dp))
+                Box(Modifier.fillMaxWidth().height(2.dp).background(
+                    if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ArticleDetailScreen(
+    article: NewsArticle,
+    isSaved: Boolean,
+    onToggleSaved: () -> Unit,
+    onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    Column(Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp)) {
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            Column {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back to stories", Modifier.size(22.dp))
+                    }
+                    Text("AI Brief", style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f).padding(start = 4.dp))
+                    IconButton(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onToggleSaved()
+                    }) { Icon(if (isSaved) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder,
+                        if (isSaved) "Remove from saved" else "Save article", Modifier.size(22.dp),
+                        tint = if (isSaved) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) }
+                    IconButton(onClick = { context.shareArticle(article) }) {
+                        Icon(Icons.Outlined.Share, "Share article", Modifier.size(21.dp))
+                    }
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+        }
+        LazyColumn(modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 26.dp, bottom = 40.dp)) {
+            item("header") {
+                SelectionContainer {
+                    Column {
+                        Text(article.category.label.uppercase(Locale.US) +
+                            if (article.isOriginalPost) "  /  EXPLAINER" else "",
+                            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.2.sp),
+                            color = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.height(12.dp))
+                        Text(article.title, style = MaterialTheme.typography.headlineLarge,
+                            modifier = Modifier.semantics { heading() })
+                        if (article.isOriginalPost && article.summary.isNotBlank()) {
+                            Spacer(Modifier.height(14.dp))
+                            Text(article.summary, style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Spacer(Modifier.height(20.dp))
+                        Text(article.author?.let { "By $it" } ?: article.source,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Medium)
+                        Spacer(Modifier.height(4.dp))
+                        Text("${formatArticleDate(article.publishedAt)} · ${article.readingTimeMinutes} min read" +
+                            if (article.author != null) " · ${article.source}" else "",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                if (article.isOfflineBrief) Text("Offline explainer · background reading",
+                    style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 10.dp))
+                Spacer(Modifier.height(24.dp))
+            }
+            if (article.isOriginalPost || !article.imageUrl.isNullOrBlank()) item("image") {
+                ArticleArtwork(article, Modifier.fillMaxWidth().clip(RoundedCornerShape(3.dp)), featured = true)
+                if (article.imageUrl.isNullOrBlank()) Text("AI-generated editorial illustration",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp))
+                Spacer(Modifier.height(26.dp))
+            }
+            item("prose") {
+                SelectionContainer {
+                    Column {
+                        if (article.isOriginalPost) article.blocks.forEachIndexed { index, block ->
+                            if (index > 0) Spacer(Modifier.height(20.dp))
+                            PostBlockContent(block)
+                        } else Text(article.summary, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+                Spacer(Modifier.height(30.dp))
+            }
+            item("actions") {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(Modifier.height(20.dp))
+                if (article.url.isNotBlank()) OutlinedButton(
+                    onClick = { context.openExternalUrl(article.url) }, shape = RoundedCornerShape(4.dp)) {
+                    Text(if (article.isOfflineBrief) "Open context" else "Read original source")
+                    Spacer(Modifier.width(8.dp))
+                    Icon(Icons.AutoMirrored.Outlined.OpenInNew, null, Modifier.size(16.dp))
+                }
+                Text(if (article.isOriginalPost) "Published by AI Brief · Caceras" else "Reporting and research from ${article.source}.",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(16.dp))
+                Text("Back to stories  ←", style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.minimumInteractiveComponentSize().clickable(role = Role.Button, onClick = onBack))
+            }
+        }
+    }
+}
+
+@Composable
+private fun AboutScreen(listState: LazyListState) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
@@ -505,22 +594,14 @@ private fun AboutScreen(
         modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp),
         contentPadding = PaddingValues(
             start = 20.dp,
-            top = topPadding + 12.dp,
+            top = 24.dp,
             end = 20.dp,
-            bottom = bottomPadding + 44.dp,
+            bottom = 44.dp,
         ),
     ) {
-        item("nav") {
-            MinimalTopNav(
-                activeTab = currentTab,
-                onTabSelected = onTabSelected,
-            )
-            Spacer(Modifier.height(28.dp))
-        }
-
         item("header") {
             Text(
-                text = "About",
+                text = "About AI Brief",
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -531,12 +612,12 @@ private fun AboutScreen(
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.widthIn(max = 520.dp),
             )
-            Spacer(Modifier.height(36.dp))
+            Spacer(Modifier.height(28.dp))
         }
 
         item("sources") {
             Text(
-                text = "Sources",
+                text = "Our editorial approach",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -616,241 +697,6 @@ private fun AboutScreen(
             Text(
                 text = "Version ${BuildConfig.VERSION_NAME} (build ${BuildConfig.BUILD_NUMBER})",
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-/** Minimal text-first category filter row: all  research  products  policy  builders */
-@Composable
-private fun CategoryFilterRow(
-    selectedCategory: NewsCategory,
-    onSelectCategory: (NewsCategory) -> Unit,
-) {
-    val haptic = LocalHapticFeedback.current
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
-    ) {
-        NewsCategory.entries.forEach { category ->
-            val selected = category == selectedCategory
-            Text(
-                text = category.label,
-                style = MaterialTheme.typography.labelLarge,
-                color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
-                modifier = Modifier
-                    .minimumInteractiveComponentSize()
-                    .semantics { this.selected = selected }
-                    .clickable(
-                        role = Role.Tab,
-                        onClick = {
-                            if (!selected) {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            }
-                            onSelectCategory(category)
-                        },
-                    )
-                    .padding(vertical = 4.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun EditorialArticleRow(article: NewsArticle, onClick: () -> Unit) {
-    StoryRow(article, onClick)
-}
-
-/** A readable native article with source links, local saving, and sharing. */
-@Composable
-private fun ArticleDetailScreen(
-    article: NewsArticle,
-    isSaved: Boolean,
-    topPadding: androidx.compose.ui.unit.Dp,
-    bottomPadding: androidx.compose.ui.unit.Dp,
-    onToggleSaved: () -> Unit,
-    onBack: () -> Unit,
-    onNavigateTab: (NavTab) -> Unit,
-) {
-    val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp),
-        contentPadding = PaddingValues(
-            start = 20.dp,
-            top = topPadding + 12.dp,
-            end = 20.dp,
-            bottom = bottomPadding + 44.dp,
-        ),
-    ) {
-        item("nav") {
-            MinimalTopNav(
-                activeTab = null,
-                onTabSelected = onNavigateTab,
-            )
-            Spacer(Modifier.height(12.dp))
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f).minimumInteractiveComponentSize()
-                    .clickable(role = Role.Button, onClick = onBack),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Back to stories", style = MaterialTheme.typography.labelMedium)
-                }
-                IconButton(onClick = onToggleSaved) {
-                    Icon(if (isSaved) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder,
-                        contentDescription = if (isSaved) "Remove from saved" else "Save article")
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-        }
-
-        item("header") {
-            SelectionContainer {
-                Column {
-                    Text(
-                        text = article.title,
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    Spacer(Modifier.height(14.dp))
-                    val meta = "${formatArticleDate(article.publishedAt)}  •  ${article.source}  •  ${article.readingTimeMinutes} min read"
-                    Text(
-                        text = meta,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    article.author?.let { author ->
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = "By $author",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-            if (article.isOriginalPost && article.summary.isNotBlank()) {
-                Text(article.summary, style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(top = 18.dp))
-            }
-            if (article.isOfflineBrief) Text("Offline explainer · background reading, not breaking news",
-                style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 10.dp))
-            Spacer(Modifier.height(28.dp))
-        }
-
-        if (article.isOriginalPost || !article.imageUrl.isNullOrBlank()) {
-            item("image") {
-                ArticleArtwork(article, Modifier.fillMaxWidth(), featured = true)
-                if (article.imageUrl.isNullOrBlank()) Text(
-                    "Illustrative artwork generated with AI; not a reported event.",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-                Spacer(Modifier.height(28.dp))
-            }
-        }
-
-        item("prose") {
-            SelectionContainer {
-                Column {
-                    if (article.isOriginalPost) {
-                        // An original post carries its own body; the summary is
-                        // only the standfirst already shown in the feed.
-                        article.blocks.forEachIndexed { index, block ->
-                            if (index > 0) Spacer(Modifier.height(20.dp))
-                            PostBlockContent(block)
-                        }
-                    } else {
-                        Text(
-                            text = article.summary,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                    }
-                }
-            }
-            Spacer(Modifier.height(36.dp))
-        }
-
-        item("actions") {
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Spacer(Modifier.height(28.dp))
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // An original post has no external source to open.
-                if (article.url.isNotBlank()) Surface(
-                    modifier = Modifier
-                        .minimumInteractiveComponentSize()
-                        .clickable(
-                            role = Role.Button,
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                context.openExternalUrl(article.url)
-                            },
-                        ),
-                    color = Color.Transparent,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground),
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = if (article.isOfflineBrief) "Open context" else "Read original source",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onBackground,
-                        )
-                    }
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                IconButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onToggleSaved()
-                    },
-                ) {
-                    Icon(
-                        imageVector = if (isSaved) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder,
-                        contentDescription = if (isSaved) "Remove from saved" else "Save article",
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        context.shareArticle(article)
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Share,
-                        contentDescription = "Share article",
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-            }
-            }
-            Spacer(Modifier.height(32.dp))
-            Text(
-                text = if (article.isOriginalPost) {
-                    "Written for AI Brief."
-                } else {
-                    "AI Brief links directly to original reporting and research. Content is supplied by the listed publishers."
-                },
-                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
