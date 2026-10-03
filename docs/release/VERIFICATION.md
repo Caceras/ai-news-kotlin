@@ -17,7 +17,7 @@ Prepared and checked on 3 October 2026. App source: **9e1ddb9c8d4e86bc835a16e2e9
 
 ## Native reader evidence
 
-The minified, non-debuggable internal-sharing APK was installed on an Android 9/API 29 x86_64 emulator with a 4 KB page size. The exact final candidate passed fresh offline launch, native article reading, source display, saving/removing-control state, saved persistence after process recreation, About/privacy text, body search, and rendering at 200% text scale. No AI Brief crash was present in the captured AndroidRuntime log. See android-device.json for the individual assertions.
+The minified, non-debuggable internal-sharing APK was installed on an Android 10/API 29 x86_64 emulator with a 4 KB page size. The exact final candidate passed fresh offline launch, native article reading, source display, saving/removing-control state, saved persistence after process recreation, About/privacy text, body search, and rendering at 200% text scale. No AI Brief crash was present in the captured AndroidRuntime log. See android-device.json for the individual assertions.
 
 Visual inspection found text scrolling under system bars; version 113 fixes the scrolling viewport using safe drawing insets. Screenshots were recaptured on that version. An earlier search-check failure was a test selector expecting a result above the fold; the check now scrolls to the result.
 
