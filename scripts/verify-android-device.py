@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import struct
 import time
 import xml.etree.ElementTree as ET
 
@@ -12,7 +13,10 @@ PACKAGE = 'com.caceras.aibrief'
 OUT = Path('device-evidence')
 OUT.mkdir(exist_ok=True)
 OUT.joinpath('result.json').unlink(missing_ok=True)
+for prior_screen in OUT.glob('*.png'):
+    prior_screen.unlink()
 checks = []
+dark_mode_verified = False
 ADB_TIMEOUT = int(os.environ.get('AIBRIEF_DEVICE_TIMEOUT', '45'))
 
 
@@ -130,13 +134,26 @@ try:
     require_text('AI Brief')
     capture('07-large-text')
     adb('shell','settings','put','system','font_scale','1.0')
-    adb('shell','cmd','uimode','night','yes')
-    adb('shell','am','force-stop',PACKAGE)
-    adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity')
-    time.sleep(2)
-    require_text('A clearer view of AI.')
-    capture('08-dark-feed')
-    checks.append('Large text and dark mode render')
+    checks.append('Large text at 200 percent renders')
+    night_status = adb('shell','cmd','uimode','night','yes').strip()
+    if 'Night mode: yes' in night_status:
+        adb('shell','am','force-stop',PACKAGE)
+        adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity')
+        time.sleep(2)
+        require_text('A clearer view of AI.')
+        raw = adb('exec-out', 'screencap', binary=True)
+        width, height, pixel_format = struct.unpack_from('<III', raw)
+        if pixel_format != 1:
+            raise AssertionError('Cannot verify dark-mode pixels in format ' + str(pixel_format))
+        offset = len(raw) - width * height * 4
+        pixel = raw[offset + (100 * width + 12) * 4:][:3]
+        if max(pixel) >= 64:
+            raise AssertionError('Dark mode did not render a dark page background')
+        capture('08-dark-feed')
+        dark_mode_verified = True
+        checks.append('Dark mode renders a verified dark background')
+    else:
+        checks.append('Dark mode not exercised: emulator OS refused night mode (' + night_status + ')')
     log = adb('logcat','-d','-s','AndroidRuntime:E')
     if 'Process: '+PACKAGE in log:
         raise AssertionError('App crash in logcat')
@@ -144,7 +161,8 @@ try:
     OUT.joinpath('result.json').write_text(json.dumps({'passed': True,'checks':checks,
         'source_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         'android_sdk':adb('shell','getprop','ro.build.version.sdk').strip(),
-        'page_size':adb('shell','getconf','PAGESIZE').strip()},indent=2)+'\n')
+        'page_size':adb('shell','getconf','PAGESIZE').strip(),
+        'dark_mode_verified': dark_mode_verified},indent=2)+'\n')
 finally:
     OUT.joinpath('android-runtime.log').write_text(adb('logcat','-d','-s','AndroidRuntime:E'))
     if not OUT.joinpath('result.json').exists():

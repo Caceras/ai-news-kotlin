@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -176,8 +177,11 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         }
     }
 
-    val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    // Keep the scrolling viewport inside system bars and display cutouts.
+    // Padding only the list's first/last items lets scrolled text cross them.
+    val safePadding = WindowInsets.safeDrawing.asPaddingValues()
+    val topPadding = 0.dp
+    val bottomPadding = 0.dp
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -185,6 +189,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     ) {
         AnimatedContent(
             targetState = selectedArticle,
+            modifier = Modifier.fillMaxSize().padding(safePadding),
             transitionSpec = { fadeIn() togetherWith fadeOut() },
             label = "articleTransition",
         ) { article ->
