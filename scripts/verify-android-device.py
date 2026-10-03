@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Smoke-test the real native reader through Android accessibility semantics."""
 import json
+import hashlib
 import os
 from pathlib import Path
 import re
@@ -73,7 +74,18 @@ def scroll_until(needle, reverse=False):
 
 
 try:
-    adb('install', '--no-streaming', '-r', 'app/build/outputs/apk/internalSharing/app-internalSharing.apk')
+    candidate = Path('app/build/outputs/apk/internalSharing/app-internalSharing.apk')
+    if os.environ.get('AIBRIEF_SKIP_INSTALL') == '1':
+        paths = adb('shell', 'pm', 'path', PACKAGE).splitlines()
+        base = next((p.removeprefix('package:') for p in paths if p.endswith('/base.apk')), None)
+        if not base:
+            raise AssertionError('No installed APK to verify')
+        installed = adb('exec-out', 'cat', base, binary=True)
+        if hashlib.sha256(installed).digest() != hashlib.sha256(candidate.read_bytes()).digest():
+            raise AssertionError('Installed APK differs from the exact candidate')
+        checks.append('Installed APK bytes match the exact candidate')
+    else:
+        adb('install', '--no-streaming', '-r', str(candidate))
     adb('shell', 'wm', 'size', '1080x1920')
     adb('shell', 'settings', 'put', 'secure', 'show_ime_with_hard_keyboard', '1')
     adb('shell', 'svc', 'wifi', 'disable')
@@ -160,6 +172,7 @@ try:
     checks.append('No AI Brief crash in logcat')
     OUT.joinpath('result.json').write_text(json.dumps({'passed': True,'checks':checks,
         'source_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+        'app_source_sha':os.environ.get('AIBRIEF_APP_SOURCE_SHA') or subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         'android_sdk':adb('shell','getprop','ro.build.version.sdk').strip(),
         'page_size':adb('shell','getconf','PAGESIZE').strip(),
         'dark_mode_verified': dark_mode_verified},indent=2)+'\n')
