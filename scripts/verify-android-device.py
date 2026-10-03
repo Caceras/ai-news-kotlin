@@ -30,7 +30,8 @@ def hierarchy():
 def visible(needle, root=None):
     root = hierarchy() if root is None else root
     return [node for node in root.iter('node')
-            if needle in (node.get('text', '') + ' ' + node.get('content-desc', ''))]
+            if needle in (node.get('text', '') + ' ' + node.get('content-desc', ''))
+            and node.get('bounds', '[0,0][0,0]') != '[0,0][0,0]']
 
 
 def require_text(needle):
@@ -56,12 +57,13 @@ def capture(name):
     OUT.joinpath(name + '.png').write_bytes(adb('exec-out', 'screencap', '-p', binary=True))
 
 
-def scroll_until(needle):
+def scroll_until(needle, reverse=False):
     for _ in range(12):
         if visible(needle):
             checks.append('Readable after scrolling: ' + needle)
             return
-        adb('shell', 'input', 'swipe', '540', '1550', '540', '650', '350')
+        start, end = ('650', '1550') if reverse else ('1550', '650')
+        adb('shell', 'input', 'swipe', '540', start, '540', end, '350')
         time.sleep(.6)
     raise AssertionError('Cannot read: ' + needle)
 
@@ -117,8 +119,9 @@ try:
     adb('shell','input','text','benchmark')
     adb('shell','input','keyevent','4')
     time.sleep(1)
-    require_text('A model score is a starting point')
+    scroll_until('A model score is a starting point')
     capture('06-search')
+    scroll_until('Close search', reverse=True)
     tap('Close search')
     adb('shell','settings','put','system','font_scale','2.0')
     adb('shell','am','force-stop',PACKAGE)

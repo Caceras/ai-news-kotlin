@@ -1,0 +1,14 @@
+{
+  "artifact": "ai-brief-internal-sharing-2.2.0-112.apk",
+  "versionCode": 112,
+  "versionName": "2.2.0",
+  "source_sha": "9f0629e",
+  "sha256": "22511a860a35c5a0af7986c9430f52dc87dfb2d292d58ed85743f66ee9c038ce",
+  "size_bytes": 3673584,
+  "signing": "Android debug certificate; only for Internal app sharing, where Google re-signs it",
+  "drive_file_id": "1YsTlOU9n8t7i9fgUwiOq13KRuKrY_k60",
+  "url": "https://drive.google.com/file/d/1YsTlOU9n8t7i9fgUwiOq13KRuKrY_k60/view?usp=drivesdk",
+  "verification": "Drive file re-downloaded; SHA-256 matches local APK",
+  "play_upload_status": "not uploaded",
+  "github_status": "write denied HTTP 403; commits local only"
+}
