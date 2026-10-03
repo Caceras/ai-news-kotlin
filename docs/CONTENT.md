@@ -3,6 +3,8 @@
 The launch edition carries original writing published by AI Brief. External RSS
 feeds are disabled until their reuse permissions are checked.
 
+**Delivery status:** the new editor/workflow are prepared locally; GitHub repository writes are currently denied (HTTP 403). Deploy the Pages site and publish the workflow after write access is restored.
+
 ## Publish without editing code
 
 Tell Codex **“Publish this AI Brief article”** with your text, byline, topic and
@@ -14,6 +16,8 @@ into Briefing and run it. A green check confirms publication.
 The workflow validates before writing and rejects duplicate submissions and
 invalid source links. The web editor prepares clipboard data only; publication
 requires the owner's GitHub access. Readers need no account.
+
+Keep no more than 200 posts in the active edition. Ask Codex to archive older writing when needed; Git history and previously saved device copies can retain it.
 
 The sections below describe the content format for developers.
 
@@ -60,11 +64,12 @@ Dates are UTC, in the form `2026-08-30T16:00:00Z`.
       "id": "2026-08-30-welcome",
       "title": "The headline, shown in the feed and at the top of the post.",
       "summary": "One or two lines of standfirst, shown under the headline.",
-      "author": "Rikard Caceras",
+      "author": "AI Brief editorial",
       "category": "PRODUCTS",
       "publishedAt": "2026-08-30T16:00:00Z",
       "blocks": [
-        { "type": "paragraph", "text": "..." }
+        { "type": "paragraph", "text": "Explain the evidence in your own words, say what it means for a reader, and distinguish a measured result from a claim. Review the source before publishing." },
+        { "type": "link", "text": "Primary source: NIST", "url": "https://www.nist.gov/itl/ai-risk-management-framework" }
       ]
     }
   ]

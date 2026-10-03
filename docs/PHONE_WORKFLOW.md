@@ -4,7 +4,9 @@ Describe changes in plain language. Codex handles implementation, verification a
 
 ## Install and update the phone-test app
 
-Use the **ai-brief.apk** download in the verified GitHub release. The rolling fallback is:
+For the current prepared edition, [download phone-test version 113 from Drive](https://drive.google.com/file/d/1kkzvrZimOSLIaeI0Uvh_pb1I-3eMfwvr/view?usp=drivesdk). GitHub currently denies repository writes, so this version has not been published there.
+
+After repository publication resumes, use **ai-brief.apk** from the verified build-specific GitHub release. The rolling fallback is:
 
 https://github.com/Caceras/ai-news-kotlin/releases/latest/download/ai-brief.apk
 
@@ -13,6 +15,8 @@ Android may ask to allow installation from your browser. The direct-install test
 If an update is refused, tell Codex the exact message and build number before uninstalling: saved articles are local and uninstalling deletes them. The app does not promise that a differently signed Play/internal-sharing installation can update the sideload one in place.
 
 ## Publish daily
+
+The editor and authenticated workflow are prepared locally. They become available after GitHub repository writes are restored and the Pages site is deployed. See the launch plan for delivery status.
 
 Tell Codex **“Publish this AI Brief article”** with your writing and checked source links. Add the author/topic and a publication time if you want to schedule it. There is no required writing format and no app update.
 

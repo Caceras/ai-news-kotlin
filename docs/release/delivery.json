@@ -1,14 +1,21 @@
 {
-  "artifact": "ai-brief-internal-sharing-2.2.0-112.apk",
-  "versionCode": 112,
+  "artifact": "ai-brief-internal-sharing-2.2.0-113.apk",
+  "versionCode": 113,
   "versionName": "2.2.0",
-  "source_sha": "9f0629e",
-  "sha256": "22511a860a35c5a0af7986c9430f52dc87dfb2d292d58ed85743f66ee9c038ce",
+  "source_sha": "9e1ddb9c8d4e86bc835a16e2e95aa0dfaa827282",
+  "sha256": "f4f6a116a0802b4a119467dadba654ddcfec5cfd1eb3ad589253323b7cc84c0f",
   "size_bytes": 3673584,
   "signing": "Android debug certificate; only for Internal app sharing, where Google re-signs it",
-  "drive_file_id": "1YsTlOU9n8t7i9fgUwiOq13KRuKrY_k60",
-  "url": "https://drive.google.com/file/d/1YsTlOU9n8t7i9fgUwiOq13KRuKrY_k60/view?usp=drivesdk",
+  "drive_file_id": "1bSdK7lws5eavmF6JDwRXOusRhiYAY6Nq",
+  "url": "https://drive.google.com/file/d/1bSdK7lws5eavmF6JDwRXOusRhiYAY6Nq/view?usp=drivesdk",
   "verification": "Drive file re-downloaded; SHA-256 matches local APK",
   "play_upload_status": "not uploaded",
-  "github_status": "write denied HTTP 403; commits local only"
+  "github_status": "write denied HTTP 403; commits local only",
+  "phone_test": {
+    "drive_file_id": "1kkzvrZimOSLIaeI0Uvh_pb1I-3eMfwvr",
+    "url": "https://drive.google.com/file/d/1kkzvrZimOSLIaeI0Uvh_pb1I-3eMfwvr/view?usp=drivesdk",
+    "sha256": "b7b4012001f78f89858c5f8ac01a49b661be9da476457998d9ef0b1e82a2c109",
+    "certificate": "matches existing build 111"
+  },
+  "launch_plan_url": "https://drive.google.com/file/d/1xgE-QzSpQc7ALwoMAT2TwkdZPSWg-51Q/view?usp=drivesdk"
 }

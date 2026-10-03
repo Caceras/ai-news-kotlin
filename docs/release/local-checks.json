@@ -1,7 +1,7 @@
 {
   "package": "com.caceras.aibrief",
   "versionName": "2.2.0",
-  "versionCode": 112,
+  "versionCode": 113,
   "targetSdk": 36,
   "minSdk": 26,
   "release_unit_tests": 33,
@@ -10,8 +10,13 @@
   "release_lint_errors": 0,
   "native_elf_alignment": 16384,
   "apk_zip_alignment": 16384,
-  "runtime_status": "local Android 9 emulator verification running; accelerated CI blocked by GitHub write access",
+  "runtime_status": "passed native reader smoke checks on Android 9/API 29",
   "sideload_certificate_sha256": "c00167a32b1d36729f80e505950f6cf90915b31a75d731a0539aa6dbbfed21ff",
   "repository_publish_status": "HTTP 403 Resource not accessible by integration; source committed locally only",
-  "public_pages_status": "prepared locally; GitHub Pages not enabled or deployed"
+  "public_pages_status": "prepared locally; GitHub Pages not enabled or deployed",
+  "sideload_unit_tests": 33,
+  "sideload_unit_failures": 0,
+  "sideload_lint_errors": 0,
+  "dark_mode_status": "not exercised: Android 9 emulator refuses night mode; supported current device still required",
+  "native_smoke_source_sha": "9e1ddb9c8d4e86bc835a16e2e95aa0dfaa827282"
 }

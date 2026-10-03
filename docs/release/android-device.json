@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "checks": [
+    "Visible: A clearer view of AI.",
+    "Visible: Offline edition",
+    "Visible: AI is useful. Knowing when to trust it is the real skill.",
+    "Visible: Save article",
+    "Visible: Remove from saved",
+    "Readable after scrolling: Primary source: NIST",
+    "Visible: AI is useful. Knowing when to trust it is the real skill.",
+    "Visible: AI is useful. Knowing when to trust it is the real skill.",
+    "Saved article survives process recreation",
+    "Readable after scrolling: Read the privacy policy",
+    "Visible: Privacy",
+    "Visible: A clearer view of AI.",
+    "Readable after scrolling: A model score is a starting point",
+    "Readable after scrolling: Close search",
+    "Visible: AI Brief",
+    "Large text at 200 percent renders",
+    "Dark mode not exercised: emulator OS refused night mode (Night mode: no)",
+    "No AI Brief crash in logcat"
+  ],
+  "source_sha": "9e1ddb9c8d4e86bc835a16e2e95aa0dfaa827282",
+  "android_sdk": "29",
+  "page_size": "4096",
+  "dark_mode_verified": false
+}

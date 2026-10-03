@@ -4,6 +4,8 @@ A native Kotlin/Jetpack Compose publication about artificial intelligence. The e
 
 **Today's account action:** verify the Play account's contact email and phone, then confirm an internal upload before the actual deadline. Google explicitly permits Internal app sharing/testing when the app is not ready for public release. See the [researched launch plan](docs/PLAY_LAUNCH_PLAN.md) and [release checklist](PLAY_RELEASE_CHECKLIST.md). A GitHub build is not evidence of Play submission or account rescue.
 
+**Delivery status (3 October 2026):** the new source and workflows are committed locally. Connected GitHub access currently rejects writes with HTTP 403, so the Pages links and publishing workflow below are prepared but not live. The deadline APK has been uploaded and checked in Drive; see the launch plan for its link. Repository publication will resume after write access is restored.
+
 ## Reading and publishing
 
 - Original, dated explainers and briefings with linked primary sources.
