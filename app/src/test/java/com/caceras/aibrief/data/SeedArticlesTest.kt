@@ -42,7 +42,14 @@ class SeedArticlesTest {
             summary = longSummary,
             category = NewsCategory.RESEARCH,
         )
-        assertTrue(longArticle.readingTimeMinutes >= 4)
+        assertTrue(longArticle.readingTimeMinutes >= 2)
+
+        val longBody = shortArticle.copy(
+            blocks = listOf(PostBlock.Paragraph((1..1000).joinToString(" ") { "word$it" })),
+        )
+        assertTrue("An original article's body must count toward its reading estimate",
+            longBody.readingTimeMinutes >= 5)
+        assertTrue(longBody.searchableText.contains("word1000"))
     }
 
     @Test

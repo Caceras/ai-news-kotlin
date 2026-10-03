@@ -1,0 +1,43 @@
+name: Publish a briefing
+
+on:
+  workflow_dispatch:
+    inputs:
+      briefing:
+        description: Briefing copied from the AI Brief editor
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: editorial-publishing
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test the publishing safeguards
+        run: python scripts/test_publishing.py
+      - name: Validate and add the briefing
+        env:
+          # Untrusted prose is data, never interpolated into shell commands.
+          POST_DRAFT_JSON: ${{ inputs.briefing }}
+        run: python scripts/publish-post.py
+      - name: Publish the edition
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add content/posts.json
+          git commit -m 'Publish a sourced AI Brief editorial briefing'
+          git push origin HEAD:main

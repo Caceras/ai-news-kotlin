@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+<rect width="1024" height="500" fill="#082638"/>
+<circle cx="880" cy="200" r="260" fill="#214a53"/><circle cx="840" cy="210" r="180" fill="none" stroke="#95af9b" stroke-width="2"/><circle cx="840" cy="210" r="125" fill="none" stroke="#95af9b" stroke-width="2"/><circle cx="840" cy="210" r="70" fill="none" stroke="#95af9b" stroke-width="2"/>
+<path d="M665 370 L950 80" fill="none" stroke="#d9c2a3" stroke-width="3"/><circle cx="908" cy="120" r="18" fill="#d9c2a3"/>
+<text x="64" y="80" fill="#b9d0d4" font-family="DejaVu Sans" font-size="20" letter-spacing="4">AI BRIEF</text>
+<text x="60" y="204" fill="#ffffff" font-family="DejaVu Serif" font-size="64">A clearer view</text>
+<text x="60" y="282" fill="#ffffff" font-family="DejaVu Serif" font-size="64">of AI.</text>
+<text x="64" y="363" fill="#d9e5e8" font-family="DejaVu Sans" font-size="24">Original writing. Sources you can check.</text>
+<text x="64" y="440" fill="#b9d0d4" font-family="DejaVu Sans" font-size="18">RESEARCH  /  PRODUCTS  /  POLICY  /  BUILDERS</text>
+</svg>

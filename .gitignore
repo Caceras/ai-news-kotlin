@@ -10,7 +10,7 @@ keystore.properties
 !signing/sideload.jks
 *.apk
 *.aab
-index.html
+/index.html
 *.iml
 .DS_Store
 captures/

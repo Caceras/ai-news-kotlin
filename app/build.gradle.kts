@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /**
  * Play Store signing material is supplied locally and is never committed.
- * Absent the file, only the `sideload` and `debug` variants can be assembled.
+ * Absent the file, `sideload`, `internalSharing` and `debug` can be assembled.
  */
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -60,6 +60,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("int", "BUILD_NUMBER", "$buildNumber")
+        // The first Play edition publishes our own writing. External feeds can
+        // be enabled later after the publisher's reuse permissions are checked.
+        buildConfigField("boolean", "EXTERNAL_FEEDS_ENABLED", "false")
     }
 
     compileOptions {
@@ -133,6 +136,14 @@ android {
             buildConfigField("boolean", "SELF_UPDATE_ENABLED", "true")
             buildConfigField("String", "UPDATE_MANIFEST_URL", "\"$updateManifestUrl\"")
         }
+
+        // Only for Play Console's Internal App Sharing upload page. Google
+        // re-signs these uploads; this is not an upload key for testing tracks.
+        create("internalSharing") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+        }
     }
 
     lint {
@@ -151,6 +162,27 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+
+// A fresh installation has a useful, fully readable edition even offline.
+// Runtime publishing still reads content/posts.json without an app update.
+val bundleEditorialContent by tasks.registering(Copy::class) {
+    from(rootProject.file("content/posts.json"))
+    into(layout.buildDirectory.dir("generated/editorialAssets"))
+}
+android.sourceSets.getByName("main").assets.srcDir(
+    layout.buildDirectory.dir("generated/editorialAssets"),
+)
+tasks.named("preBuild").configure { dependsOn(bundleEditorialContent) }
+
+// Never accidentally hand an unsigned production artifact to the owner.
+tasks.matching { it.name == "bundleRelease" || it.name == "assembleRelease" }.configureEach {
+    doFirst {
+        check(keystoreProperties.getProperty("storeFile") != null) {
+            "Play releases require the private upload key in keystore.properties. " +
+                "Use assembleInternalSharing for today's Internal App Sharing upload."
         }
     }
 }

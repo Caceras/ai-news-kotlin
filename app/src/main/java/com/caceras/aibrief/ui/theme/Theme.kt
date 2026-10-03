@@ -11,10 +11,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-private val PureBlack = Color(0xFF111111)
+private val PureBlack = Color(0xFF182320)
 private val PureWhite = Color(0xFFFFFFFF)
-private val LightMuted = Color(0xFF6E6D68)
-private val LightDivider = Color(0xFFEEEEEC)
+private val LightMuted = Color(0xFF626760)
+private val LightDivider = Color(0xFFDDDED7)
 
 private val DarkBackground = Color(0xFF0E0E0D)
 private val DarkText = Color(0xFFEDEDE8)
@@ -22,13 +22,13 @@ private val DarkMuted = Color(0xFF8E8D88)
 private val DarkDivider = Color(0xFF222220)
 
 private val LightColors = lightColorScheme(
-    primary = PureBlack,
+    primary = Color(0xFF123A4B),
     onPrimary = PureWhite,
-    background = PureWhite,
+    background = Color(0xFFF3F3EF),
     onBackground = PureBlack,
     surface = PureWhite,
     onSurface = PureBlack,
-    surfaceVariant = Color(0xFFF7F7F5),
+    surfaceVariant = Color(0xFFE9EAE3),
     onSurfaceVariant = LightMuted,
     outline = Color(0xFFDCDCD8),
     outlineVariant = LightDivider,
@@ -49,31 +49,31 @@ private val DarkColors = darkColorScheme(
 
 private val AppTypography = androidx.compose.material3.Typography(
     headlineLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Serif,
+        fontWeight = FontWeight.Normal,
         fontSize = 32.sp,
         lineHeight = 38.sp,
-        letterSpacing = (-0.8).sp,
+        letterSpacing = (-0.4).sp,
     ),
     headlineMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = 30.sp,
+        fontFamily = FontFamily.Serif,
+        fontWeight = FontWeight.Normal,
+        fontSize = 27.sp,
+        lineHeight = 33.sp,
         letterSpacing = (-0.4).sp,
     ),
     titleLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
+        fontFamily = FontFamily.Serif,
+        fontWeight = FontWeight.Normal,
+        fontSize = 23.sp,
+        lineHeight = 29.sp,
         letterSpacing = (-0.2).sp,
     ),
     titleMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
     ),
     titleSmall = TextStyle(
         fontFamily = FontFamily.SansSerif,

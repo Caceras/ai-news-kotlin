@@ -1,0 +1,62 @@
+name: Verify Android device
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact source commit to verify
+        required: true
+        type: string
+      build_number:
+        description: Android release build number to match
+        required: true
+        default: '12'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  device:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build the Play-compatible candidate
+        env:
+          DEVICE_BUILD_NUMBER: ${{ inputs.build_number }}
+        run: |
+          set -euo pipefail
+          [[ "$DEVICE_BUILD_NUMBER" =~ ^[0-9]{1,8}$ ]] || exit 1
+          scripts/ci-gradle.sh assembleInternalSharing -PbuildNumber="$DEVICE_BUILD_NUMBER"
+      - name: Enable accelerated Android emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Verify native reader and capture screens
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -camera-back none
+          script: python3 scripts/verify-android-device.py
+      - name: Upload device evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-device-evidence
+          path: device-evidence/
+          if-no-files-found: error

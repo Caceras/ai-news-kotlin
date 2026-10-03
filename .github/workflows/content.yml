@@ -1,0 +1,21 @@
+name: Validate editorial content
+
+on:
+  push:
+    branches: [main]
+    paths: ['content/**', 'scripts/publish-post.py', '.github/workflows/content.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/test_publishing.py
+      - run: python scripts/publish-post.py --validate

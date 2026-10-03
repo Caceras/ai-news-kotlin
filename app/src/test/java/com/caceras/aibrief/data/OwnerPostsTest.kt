@@ -214,6 +214,7 @@ class OwnerPostsTest {
             PostBlock.Bullets(listOf("one", "two")),
             PostBlock.Image("https://example.com/a.png", "Cap"),
             PostBlock.Image("https://example.com/b.png", null),
+            PostBlock.Link("Primary source", "https://example.com/source"),
         )
 
         assertEquals(blocks, OwnerPosts.decodeBlocks(OwnerPosts.encodeBlocks(blocks)))
@@ -222,5 +223,16 @@ class OwnerPostsTest {
     @Test
     fun `encoding no blocks decodes back to none`() {
         assertEquals(emptyList<PostBlock>(), OwnerPosts.decodeBlocks(OwnerPosts.encodeBlocks(emptyList())))
+    }
+
+    @Test
+    fun `source links reject plaintext urls and empty labels`() {
+        val raw = document(post(extra = ""","blocks":[
+            {"type":"link","text":"Insecure","url":"http://example.com"},
+            {"type":"link","text":" ","url":"https://example.com"},
+            {"type":"link","text":"Primary source","url":"https://example.com/source"}
+        ]"""))
+        assertEquals(listOf(PostBlock.Link("Primary source", "https://example.com/source")),
+            OwnerPosts.published(raw, now).single().blocks)
     }
 }

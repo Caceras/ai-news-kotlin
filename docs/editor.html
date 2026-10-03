@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Publish a briefing · AI Brief</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f3f3ef;color:#182320;font:16px/1.6 system-ui,sans-serif}
+    header,main{max-width:760px;margin:auto;padding:24px}header{border-bottom:1px solid #ddd}
+    a{color:#123a4b}header a{font:30px Georgia,serif;text-decoration:none}h1,h2{font-family:Georgia,serif;font-weight:400;line-height:1.2}
+    h1{font-size:36px;margin:18px 0}form{background:white;padding:24px;margin-top:28px;border-radius:4px}
+    label{display:block;font-weight:600;margin:20px 0 7px}input,textarea,select{width:100%;font:inherit;border:1px solid #9caaa2;border-radius:3px;padding:12px;background:white;color:#182320;min-height:48px}
+    textarea{resize:vertical}input:focus,textarea:focus,select:focus,button:focus,a:focus{outline:3px solid #94b7c8;outline-offset:3px}
+    small{display:block;color:#626760;margin-top:5px}button,.button{display:inline-block;border:0;border-radius:3px;padding:14px 20px;background:#123a4b;color:white;font:600 16px system-ui;cursor:pointer;text-decoration:none;min-height:48px}
+    .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.secondary{background:#e9eae3;color:#182320}
+    #status{min-height:32px;color:#123a4b}.note{background:#082638;color:white;padding:24px;margin-top:24px}.note h2{margin:0 0 12px}.note a{color:white}
+    details{margin:20px 0}summary{cursor:pointer;padding:12px 0}footer{padding:28px 0;color:#626760;font-size:14px}
+    @media(max-width:480px){header,main{padding:20px}form{padding:18px}h1{font-size:30px}}
+  </style>
+</head>
+<body>
+  <header><a href="index.html">AI Brief</a> <span style="float:right">The editor’s desk</span></header>
+  <main>
+    <h1>Write something worth reading.</h1>
+    <p>Compose your briefing here, then publish it using your GitHub account. Readers get it on their next refresh, without an app update.</p>
+    <form id="editor">
+      <label for="title">Headline</label><input id="title" required maxlength="180" placeholder="What changed, and why does it matter?">
+      <label for="summary">Short introduction</label><textarea id="summary" required rows="3" maxlength="500" placeholder="One or two sentences that help readers decide to open the story."></textarea>
+      <label for="author">Byline</label><input id="author" required maxlength="120" value="AI Brief editorial">
+      <label for="category">Topic</label><select id="category"><option value="PRODUCTS">Products</option><option value="RESEARCH">Research</option><option value="POLICY">Policy</option><option value="BUILDERS">Builders</option></select>
+      <label for="body">Your story</label><textarea id="body" required rows="14" minlength="120" maxlength="20000" placeholder="Write in your own words. Separate paragraphs with a blank line."></textarea>
+      <small>Optional: start a section heading with ##, a quote with &gt;, or each bullet with -.</small>
+      <label for="sources">Source links</label><textarea id="sources" required rows="4" placeholder="One https:// link per line"></textarea>
+      <small>Link to the primary sources you checked. Do not paste another publisher’s article.</small>
+      <details><summary>Schedule or add a cover image</summary>
+        <label for="publishedAt">Publication time</label><input id="publishedAt" type="datetime-local"><small>Leave blank to publish now. Time uses your current local timezone. Scheduled text is public in the repository before it appears in the app.</small>
+        <label for="imageUrl">Cover image link</label><input id="imageUrl" type="url" placeholder="https://"><small>Use an image you own or have permission to publish. Leave blank to use AI Brief’s illustrative artwork.</small>
+      </details>
+      <div class="actions"><button type="submit">Copy briefing</button><a class="button secondary" id="publish" href="https://github.com/Caceras/ai-news-kotlin/actions/workflows/publish-post.yml" target="_blank" rel="noopener">Open publishing ↗</a></div>
+      <p id="status" role="status" aria-live="polite"></p>
+      <details id="copyFallback"><summary>Show the copied briefing</summary><textarea id="payload" readonly rows="7" aria-label="Briefing to paste into publishing"></textarea></details>
+    </form>
+    <div class="note"><h2>One final step.</h2><p>After copying, open publishing. Choose <strong>Run workflow</strong>, keep the main branch, paste into the <strong>Briefing</strong> field, and run it. A green check confirms publication. Refresh AI Brief after a few minutes.</p><p>Only people with publishing access to your GitHub repository can publish. Nothing in this editor is sent until you run publishing. You can also give your draft and source links to Codex and ask it to publish.</p></div>
+    <footer><a href="contact.html">Contact</a> · <a href="privacy.html">Privacy policy</a></footer>
+  </main>
+  <script>
+    const field=id=>document.getElementById(id);
+    function secureUrl(raw){const u=new URL(raw);if(u.protocol!=='https:'||u.username||u.password)throw Error('Use public HTTPS links without a login in the address.');return u.href;}
+    field('editor').addEventListener('submit',async event=>{
+      event.preventDefault();
+      try{
+        const sources=field('sources').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).map(url=>({text:new URL(url).hostname,url:secureUrl(url)}));
+        if(!sources.length)throw Error('Add at least one source link.');
+        const draft={title:field('title').value.trim(),summary:field('summary').value.trim(),author:field('author').value.trim(),category:field('category').value,body:field('body').value.trim(),sources};
+        if(!draft.title||!draft.summary||draft.body.length<120)throw Error('Add a headline, introduction, and readable story.');
+        if(field('publishedAt').value)draft.publishedAt=new Date(field('publishedAt').value).toISOString();
+        if(field('imageUrl').value.trim())draft.imageUrl=secureUrl(field('imageUrl').value.trim());
+        const payload=JSON.stringify(draft);field('payload').value=payload;
+        try{await navigator.clipboard.writeText(payload);field('status').textContent='Copied. Open publishing to publish your briefing.';}
+        catch(error){field('copyFallback').open=true;field('payload').focus();field('payload').select();field('status').textContent='Select and copy the briefing below, then open publishing.';}
+      }catch(error){field('status').textContent=error.message;}
+    });
+  </script>
+</body>
+</html>

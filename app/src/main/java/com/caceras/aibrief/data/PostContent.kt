@@ -22,6 +22,9 @@ sealed interface PostBlock {
     data class Bullets(val items: List<String>) : PostBlock
 
     data class Image(val url: String, val caption: String? = null) : PostBlock
+
+    /** A primary source or further reading; no embedded browser or scripts. */
+    data class Link(val text: String, val url: String) : PostBlock
 }
 
 /**
@@ -135,6 +138,10 @@ object OwnerPosts {
                     )
                 }
 
+            "link" -> json.optString("url").trim()
+                .takeIf { it.startsWith("https://") }
+                ?.let { url -> json.text()?.let { PostBlock.Link(it, url) } }
+
             else -> null
         }
 
@@ -171,6 +178,11 @@ object OwnerPosts {
                         .put("type", "image")
                         .put("url", block.url)
                         .put("caption", block.caption)
+
+                    is PostBlock.Link -> JSONObject()
+                        .put("type", "link")
+                        .put("text", block.text)
+                        .put("url", block.url)
                 },
             )
         }

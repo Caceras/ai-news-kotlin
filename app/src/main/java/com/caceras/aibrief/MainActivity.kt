@@ -14,6 +14,22 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.unit.sp
+import com.caceras.aibrief.data.FeedFreshness
+import com.caceras.aibrief.data.PostBlock
+import com.caceras.aibrief.ui.components.FeatureStory
+import com.caceras.aibrief.ui.components.StoryRow
+import com.caceras.aibrief.ui.components.TopicsStrip
+import com.caceras.aibrief.ui.components.ArticleArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -92,6 +108,8 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 
 private const val SUPPORT_EMAIL = "rikicaceras@gmail.com"
+private const val PRIVACY_URL = "https://caceras.github.io/ai-news-kotlin/privacy.html"
+private const val CONTACT_URL = "https://caceras.github.io/ai-news-kotlin/contact.html"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,7 +136,9 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val updateState by updateViewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(NavTab.HOME) }
-    var selectedArticle by remember { mutableStateOf<NewsArticle?>(null) }
+    var selectedArticleId by rememberSaveable { mutableStateOf<String?>(null) }
+    val selectedArticle = (state.articles + state.savedArticles)
+        .firstOrNull { it.id == selectedArticleId }
     val pagerState = rememberPagerState(
         initialPage = currentTab.ordinal,
         pageCount = { NavTab.entries.size },
@@ -149,7 +169,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
 
     BackHandler(enabled = selectedArticle != null || currentTab != NavTab.HOME) {
         if (selectedArticle != null) {
-            selectedArticle = null
+            selectedArticleId = null
         } else {
             currentTab = NavTab.HOME
             scope.launch { pagerState.animateScrollToPage(NavTab.HOME.ordinal) }
@@ -175,8 +195,9 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                     topPadding = topPadding,
                     bottomPadding = bottomPadding,
                     onToggleSaved = { viewModel.toggleSaved(article) },
+                    onBack = { selectedArticleId = null },
                     onNavigateTab = {
-                        selectedArticle = null
+                        selectedArticleId = null
                         selectTab(it)
                     },
                 )
@@ -196,10 +217,14 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                             bottomPadding = bottomPadding,
                             onTabSelected = ::selectTab,
                             onSelectCategory = viewModel::selectCategory,
-                            onOpenArticle = { selectedArticle = it },
+                            onOpenArticle = { selectedArticleId = it.id },
                             onInstallUpdate = updateViewModel::downloadAndInstall,
                             onGrantInstallPermission = updateViewModel::requestInstallPermission,
                             onDismissUpdate = updateViewModel::dismiss,
+                            onRefresh = {
+                                viewModel.refresh()
+                                updateViewModel.checkForUpdate()
+                            },
                         )
                         NavTab.SAVED -> SavedScreen(
                             articles = state.savedArticles,
@@ -208,7 +233,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                             topPadding = topPadding,
                             bottomPadding = bottomPadding,
                             onTabSelected = ::selectTab,
-                            onOpenArticle = { selectedArticle = it },
+                            onOpenArticle = { selectedArticleId = it.id },
                         )
                         NavTab.ABOUT -> AboutScreen(
                             currentTab = currentTab,
@@ -224,52 +249,44 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     }
 }
 
-/** Pure minimal top text navigation: home  saved  about */
+/** A magazine masthead, with explicit navigation and accessible actions. */
 @Composable
 private fun MinimalTopNav(
     activeTab: NavTab?,
     isRefreshing: Boolean = false,
     onTabSelected: (NavTab) -> Unit,
+    onSearch: (() -> Unit)? = null,
+    onRefresh: (() -> Unit)? = null,
 ) {
-    val haptic = LocalHapticFeedback.current
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(28.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        NavTextLink(
-            text = "home",
-            selected = activeTab == NavTab.HOME,
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onTabSelected(NavTab.HOME)
-            },
-        )
-        NavTextLink(
-            text = "saved",
-            selected = activeTab == NavTab.SAVED,
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onTabSelected(NavTab.SAVED)
-            },
-        )
-        NavTextLink(
-            text = "about",
-            selected = activeTab == NavTab.ABOUT,
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onTabSelected(NavTab.ABOUT)
-            },
-        )
-        if (isRefreshing) {
-            Spacer(Modifier.weight(1f))
-            CircularProgressIndicator(
-                modifier = Modifier.size(14.dp),
-                strokeWidth = 1.5.dp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+    Column {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("AI Brief", style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.minimumInteractiveComponentSize()
+                        .clickable(role = Role.Button) { onTabSelected(NavTab.HOME) })
+                Text("THE INDEPENDENT AI JOURNAL", style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 10.sp, letterSpacing = 1.4.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (onSearch != null) IconButton(onClick = onSearch) {
+                Icon(Icons.Outlined.Search, contentDescription = "Search articles")
+            }
+            if (onRefresh != null) IconButton(onClick = onRefresh, enabled = !isRefreshing) {
+                if (isRefreshing) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                else Icon(Icons.Outlined.Refresh, contentDescription = "Refresh edition")
+            }
+            IconButton(onClick = { onTabSelected(NavTab.ABOUT) }) {
+                Icon(Icons.Outlined.Menu, contentDescription = "About, contact and privacy")
+            }
         }
+        Spacer(Modifier.height(12.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+            NavTextLink("Latest", activeTab == NavTab.HOME) { onTabSelected(NavTab.HOME) }
+            NavTextLink("Saved", activeTab == NavTab.SAVED) { onTabSelected(NavTab.SAVED) }
+            NavTextLink("About", activeTab == NavTab.ABOUT) { onTabSelected(NavTab.ABOUT) }
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
 
@@ -287,6 +304,7 @@ private fun NavTextLink(
         modifier = Modifier
             .minimumInteractiveComponentSize()
             .clickable(role = Role.Tab, onClick = onClick)
+            .semantics { this.selected = selected }
             .padding(vertical = 4.dp),
     )
 }
@@ -305,75 +323,98 @@ private fun FeedScreen(
     onInstallUpdate: (UpdateManifest) -> Unit,
     onGrantInstallPermission: () -> Unit,
     onDismissUpdate: () -> Unit,
+    onRefresh: () -> Unit,
 ) {
+    var searchShown by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
     val articles = state.articles.filter {
-        state.selectedCategory == NewsCategory.ALL || it.category == state.selectedCategory
+        (state.selectedCategory == NewsCategory.ALL || it.category == state.selectedCategory) &&
+            (query.isBlank() || it.searchableText.contains(query.trim(), ignoreCase = true))
     }
+    val lead = articles.firstOrNull()
 
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = 28.dp,
-            top = topPadding + 28.dp,
-            end = 28.dp,
-            bottom = bottomPadding + 44.dp,
-        ),
+        modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp),
+        contentPadding = PaddingValues(start = 20.dp, top = topPadding + 12.dp,
+            end = 20.dp, bottom = bottomPadding + 32.dp),
     ) {
         item("nav") {
-            MinimalTopNav(
-                activeTab = currentTab,
-                isRefreshing = state.isRefreshing,
-                onTabSelected = onTabSelected,
-            )
-            Spacer(Modifier.height(44.dp))
+            MinimalTopNav(currentTab, state.isRefreshing, onTabSelected,
+                onSearch = { searchShown = !searchShown; if (!searchShown) query = "" },
+                onRefresh = onRefresh)
+            Spacer(Modifier.height(24.dp))
         }
-
         item("update") {
-            UpdateBanner(
-                state = updateState,
-                onInstall = onInstallUpdate,
-                onGrantPermission = onGrantInstallPermission,
-                onDismiss = onDismissUpdate,
-            )
+            UpdateBanner(updateState, onInstallUpdate, onGrantInstallPermission, onDismissUpdate)
         }
-
         item("header") {
-            Text(
-                text = "AI Brief",
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Spacer(Modifier.height(14.dp))
-            Text(
-                text = "A calm, text-first read on artificial intelligence models, research, and policy.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.widthIn(max = 520.dp),
-            )
-            Spacer(Modifier.height(28.dp))
-            CategoryFilterRow(
-                selectedCategory = state.selectedCategory,
-                onSelectCategory = onSelectCategory,
-            )
-            Spacer(Modifier.height(36.dp))
-        }
-
-        if (articles.isNotEmpty()) {
-            items(articles, key = { it.id }) { article ->
-                EditorialArticleRow(
-                    article = article,
-                    onClick = { onOpenArticle(article) },
-                )
-                Spacer(Modifier.height(22.dp))
+            Text("A clearer view of AI.", style = MaterialTheme.typography.headlineLarge)
+            Spacer(Modifier.height(12.dp))
+            Text("Original briefings, useful context, and sources you can check.",
+                style = MaterialTheme.typography.bodyLarge)
+            Spacer(Modifier.height(12.dp))
+            val freshness = when (state.freshness) {
+                FeedFreshness.LIVE -> "Latest available edition"
+                FeedFreshness.CACHED -> "Saved edition · refresh to check for new writing"
+                FeedFreshness.OFFLINE -> "Offline edition · refresh when connected"
             }
-        } else {
-            item("empty") {
-                Text(
-                    text = "No articles found in this category.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Text(freshness, style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(20.dp))
+            if (searchShown) {
+                OutlinedTextField(
+                    value = query, onValueChange = { query = it },
+                    label = { Text("Search articles") }, singleLine = true,
+                    trailingIcon = {
+                        IconButton(onClick = { query = ""; searchShown = false }) {
+                            Icon(Icons.Outlined.Close, contentDescription = "Close search")
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
                 )
+                Spacer(Modifier.height(12.dp))
+            }
+            CategoryFilterRow(state.selectedCategory, onSelectCategory)
+            Spacer(Modifier.height(20.dp))
+        }
+        if (lead != null) {
+            item("lead-${lead.id}") {
+                FeatureStory(lead) { onOpenArticle(lead) }
+                Spacer(Modifier.height(16.dp))
+            }
+            items(articles.drop(1), key = { it.id }) { article ->
+                StoryRow(article) { onOpenArticle(article) }
+                Spacer(Modifier.height(12.dp))
+            }
+        } else item("empty") {
+            Text(if (query.isBlank()) "No stories in this topic yet." else "No stories match “$query”.",
+                style = MaterialTheme.typography.titleLarge)
+            Text("Try another topic or clear the search.", style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp))
+        }
+        if (state.selectedCategory == NewsCategory.ALL && query.isBlank()) item("topics") {
+            Spacer(Modifier.height(28.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(Modifier.height(28.dp))
+            TopicsStrip { category ->
+                onSelectCategory(category)
+                scope.launch { listState.animateScrollToItem(0) }
+            }
+        }
+        item("editorial-note") {
+            Spacer(Modifier.height(36.dp))
+            Column(Modifier.fillMaxWidth().background(Color(0xFF082638)).padding(24.dp)) {
+                Text("Independent. Curious. Useful.", style = MaterialTheme.typography.titleLarge,
+                    color = Color.White)
+                Spacer(Modifier.height(12.dp))
+                Text("Editor-published writing about artificial intelligence. Read, check the sources, and keep what matters on your saved shelf.",
+                    style = MaterialTheme.typography.bodyMedium, color = Color(0xFFD9E5E8))
+                Spacer(Modifier.height(14.dp))
+                Text("CONTACT THE EDITOR  →", style = MaterialTheme.typography.labelSmall,
+                    color = Color.White, modifier = Modifier.minimumInteractiveComponentSize()
+                        .clickable(role = Role.Button) { onTabSelected(NavTab.ABOUT) })
             }
         }
     }
@@ -391,11 +432,11 @@ private fun SavedScreen(
 ) {
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp),
         contentPadding = PaddingValues(
-            start = 28.dp,
-            top = topPadding + 28.dp,
-            end = 28.dp,
+            start = 20.dp,
+            top = topPadding + 12.dp,
+            end = 20.dp,
             bottom = bottomPadding + 44.dp,
         ),
     ) {
@@ -404,7 +445,7 @@ private fun SavedScreen(
                 activeTab = currentTab,
                 onTabSelected = onTabSelected,
             )
-            Spacer(Modifier.height(44.dp))
+            Spacer(Modifier.height(28.dp))
         }
 
         item("header") {
@@ -456,11 +497,11 @@ private fun AboutScreen(
 
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp),
         contentPadding = PaddingValues(
-            start = 28.dp,
-            top = topPadding + 28.dp,
-            end = 28.dp,
+            start = 20.dp,
+            top = topPadding + 12.dp,
+            end = 20.dp,
             bottom = bottomPadding + 44.dp,
         ),
     ) {
@@ -469,7 +510,7 @@ private fun AboutScreen(
                 activeTab = currentTab,
                 onTabSelected = onTabSelected,
             )
-            Spacer(Modifier.height(44.dp))
+            Spacer(Modifier.height(28.dp))
         }
 
         item("header") {
@@ -480,7 +521,7 @@ private fun AboutScreen(
             )
             Spacer(Modifier.height(14.dp))
             Text(
-                text = "AI Brief is a quiet, independent reader for artificial intelligence research, product engineering, and policy.",
+                text = "AI Brief is an independent journal about artificial intelligence. Original editorial explainers and briefings are published by Caceras, with sources you can check.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.widthIn(max = 520.dp),
@@ -496,7 +537,7 @@ private fun AboutScreen(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Live feeds are fetched directly from MIT News, Google AI Research, Hugging Face, and VentureBeat. Each story attributes its original author, date, and link.",
+                text = "Each story names its publisher, publication date and author when available. Original explainers include links to primary sources. The launch edition includes AI-assisted editorial writing; the app does not generate answers or images from reader prompts.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -511,10 +552,15 @@ private fun AboutScreen(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "No accounts, no analytics tracking, no advertising SDKs. Saved reads remain entirely on your device. The app connects only to fetch public RSS feeds.",
+                text = "No accounts, advertising SDKs or analytics trackers. Saved articles and search queries stay on this device. The app fetches our public edition and any article images over HTTPS. Hosting providers receive normal connection metadata such as your IP address. Clear app storage or uninstall to delete saved articles and caches.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
+            Spacer(Modifier.height(12.dp))
+            Text("Read the privacy policy ↗", style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.minimumInteractiveComponentSize()
+                    .clickable(role = Role.Button) { context.openExternalUrl(PRIVACY_URL) })
             Spacer(Modifier.height(32.dp))
         }
 
@@ -530,6 +576,11 @@ private fun AboutScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
+            Spacer(Modifier.height(12.dp))
+            Text("Publisher and contact details ↗", style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.minimumInteractiveComponentSize()
+                    .clickable(role = Role.Button) { context.openExternalUrl(CONTACT_URL) })
             Spacer(Modifier.height(20.dp))
             Surface(
                 modifier = Modifier
@@ -583,12 +634,13 @@ private fun CategoryFilterRow(
         NewsCategory.entries.forEach { category ->
             val selected = category == selectedCategory
             Text(
-                text = category.label.lowercase(Locale.US),
+                text = category.label,
                 style = MaterialTheme.typography.labelLarge,
                 color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
                 modifier = Modifier
                     .minimumInteractiveComponentSize()
+                    .semantics { this.selected = selected }
                     .clickable(
                         role = Role.Tab,
                         onClick = {
@@ -604,45 +656,12 @@ private fun CategoryFilterRow(
     }
 }
 
-/** Clean editorial row matching the reference screenshot: Date on left, Title on right */
 @Composable
-private fun EditorialArticleRow(
-    article: NewsArticle,
-    onClick: () -> Unit,
-) {
-    val haptic = LocalHapticFeedback.current
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .minimumInteractiveComponentSize()
-            .clickable(
-                role = Role.Button,
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onClick()
-                },
-            )
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.Top,
-    ) {
-        Text(
-            text = formatArticleDate(article.publishedAt),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(125.dp),
-        )
-        Spacer(Modifier.width(12.dp))
-        Text(
-            text = article.title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f),
-        )
-    }
+private fun EditorialArticleRow(article: NewsArticle, onClick: () -> Unit) {
+    StoryRow(article, onClick)
 }
 
-/** Article Reader View matching Reference 3 layout */
+/** A readable native article with source links, local saving, and sharing. */
 @Composable
 private fun ArticleDetailScreen(
     article: NewsArticle,
@@ -650,17 +669,18 @@ private fun ArticleDetailScreen(
     topPadding: androidx.compose.ui.unit.Dp,
     bottomPadding: androidx.compose.ui.unit.Dp,
     onToggleSaved: () -> Unit,
+    onBack: () -> Unit,
     onNavigateTab: (NavTab) -> Unit,
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp),
         contentPadding = PaddingValues(
-            start = 28.dp,
-            top = topPadding + 28.dp,
-            end = 28.dp,
+            start = 20.dp,
+            top = topPadding + 12.dp,
+            end = 20.dp,
             bottom = bottomPadding + 44.dp,
         ),
     ) {
@@ -669,7 +689,21 @@ private fun ArticleDetailScreen(
                 activeTab = null,
                 onTabSelected = onNavigateTab,
             )
-            Spacer(Modifier.height(44.dp))
+            Spacer(Modifier.height(12.dp))
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.weight(1f).minimumInteractiveComponentSize()
+                    .clickable(role = Role.Button, onClick = onBack),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Back to stories", style = MaterialTheme.typography.labelMedium)
+                }
+                IconButton(onClick = onToggleSaved) {
+                    Icon(if (isSaved) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder,
+                        contentDescription = if (isSaved) "Remove from saved" else "Save article")
+                }
+            }
+            Spacer(Modifier.height(16.dp))
         }
 
         item("header") {
@@ -697,16 +731,23 @@ private fun ArticleDetailScreen(
                     }
                 }
             }
+            if (article.isOriginalPost && article.summary.isNotBlank()) {
+                Text(article.summary, style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 18.dp))
+            }
+            if (article.isOfflineBrief) Text("Offline explainer · background reading, not breaking news",
+                style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 10.dp))
             Spacer(Modifier.height(28.dp))
         }
 
-        if (!article.imageUrl.isNullOrBlank()) {
+        if (article.isOriginalPost || !article.imageUrl.isNullOrBlank()) {
             item("image") {
-                AsyncArticleImage(
-                    imageUrl = article.imageUrl,
-                    contentDescription = "Cover image for ${article.title}",
-                    modifier = Modifier.fillMaxWidth(),
-                    aspectRatio = 16f / 9f,
+                ArticleArtwork(article, Modifier.fillMaxWidth(), featured = true)
+                if (article.imageUrl.isNullOrBlank()) Text(
+                    "Illustrative artwork generated with AI; not a reported event.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
                 )
                 Spacer(Modifier.height(28.dp))
             }
@@ -737,10 +778,7 @@ private fun ArticleDetailScreen(
         item("actions") {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Spacer(Modifier.height(28.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 // An original post has no external source to open.
                 if (article.url.isNotBlank()) Surface(
                     modifier = Modifier
@@ -773,7 +811,7 @@ private fun ArticleDetailScreen(
                         )
                     }
                 }
-                Spacer(Modifier.weight(1f))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 IconButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -798,6 +836,7 @@ private fun ArticleDetailScreen(
                         tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
+            }
             }
             Spacer(Modifier.height(32.dp))
             Text(
@@ -834,7 +873,18 @@ private fun Context.openExternalUrl(url: String) {
 private fun Context.shareArticle(article: NewsArticle) {
     val shareIntent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, "${article.title}\n${article.url}")
+        putExtra(Intent.EXTRA_TEXT, buildString {
+            append(article.title)
+            append("\n\n")
+            append(article.summary)
+            if (article.url.isNotBlank()) { append("\n\n"); append(article.url) }
+            if (article.isOriginalPost) {
+                article.blocks.filterIsInstance<PostBlock.Link>().forEach {
+                    append("\n\n${it.text}: ${it.url}")
+                }
+                append("\n\nFrom AI Brief")
+            }
+        })
     }
     val chooser = Intent.createChooser(shareIntent, "Share article")
     try {

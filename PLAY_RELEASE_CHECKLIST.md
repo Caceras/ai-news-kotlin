@@ -1,52 +1,54 @@
-# Google Play Store Release Checklist
+# AI Brief Play release checklist
 
-## 1. News and Magazine Policy Compliance
-- [ ] **In-App Contact Information**: Verify that the in-app "About" screen shows the support email (`rikicaceras@gmail.com`) and that the same contact URL/email is entered in Play Console.
-- [ ] **Publisher Provenance**: Verify each story displays its original publisher name (e.g., MIT News, Google AI, Hugging Face, VentureBeat), author byline when available, publication date, and a direct link to the original source.
-- [ ] **Editorial Notes Attribution**: Verify offline brief items are clearly labeled and not misrepresented as real-time wire feeds.
-- [ ] **Console Declaration**: Under **Policy and programs > App content > News and Magazine apps**, complete the declaration indicating this is a news reader app.
+For the researched plan and official sources, read [docs/PLAY_LAUNCH_PLAN.md](docs/PLAY_LAUNCH_PLAN.md). A local build is not evidence of Play submission or account rescue.
 
-## 2. Privacy Policy & Data Safety
-- [ ] **Host Privacy Policy**: Host `PRIVACY.md` at a stable public HTTPS URL (e.g. GitHub Pages or website).
-- [ ] **Play Console Privacy Link**: Under **App content > Privacy Policy**, submit the hosted URL.
-- [ ] **Data Safety Questionnaire**:
-  - **Data collection**: Select **No** (The app does not collect or share any user data).
-  - **Data encryption**: All network traffic uses HTTPS / TLS encryption (`usesCleartextTraffic="false"`).
-  - **Account creation**: No account required.
-  - **Tracking**: No third-party tracking or advertising SDKs included.
+## Today's inactivity action
 
-## 3. Store Listing & Assets
-- [ ] **App Title**: AI Brief
-- [ ] **Short Description** (max 80 chars): A quiet, minimal reader for artificial intelligence research and news.
-- [ ] **Full Description**: Editorial overview highlighting typography-first reading, live research feeds, offline reading shelf, and privacy by design.
-- [ ] **App Icon**: 512 × 512 PNG (32-bit color, no transparency, max 1024KB).
-- [ ] **Feature Graphic**: 1024 × 500 JPG or PNG.
-- [ ] **Phone Screenshots**: At least 4 high-resolution screenshots capturing the Home Feed, Category Filter, Saved Shelf, and Article Reader view in both Light and Dark modes.
+- [ ] Contact email verified and saved in **Developer account > Account details**.
+- [ ] Contact phone number verified and saved in the same account.
+- [ ] **ai-brief-internal-sharing.apk** uploaded and confirmed through **Internal app sharing**, or a correctly signed AAB rolled out on Internal testing. Retain receipt, timestamp and link.
+- [ ] Recheck the inactivity issue. If unresolved, contact developer support immediately with receipts; do not assume an extension.
+- [ ] Check Android developer verification for **com.caceras.aibrief**, separately from the screenshot's **Com.caceras** draft.
 
-## 4. Release Build & Upload
-- [ ] **Register a Play developer account**: a one-time $25 fee to Google. Nothing else in this project costs money.
-- [ ] **Create the upload key** (once, and never commit it):
-  ```bash
-  keytool -genkeypair -keystore upload-keystore.jks -storetype PKCS12 \
-    -alias upload -keyalg RSA -keysize 2048 -validity 10950
-  ```
-- [ ] **Configure signing**: copy `keystore.properties.example` to `keystore.properties` and fill in the four values.
-- [ ] **Generate Release Bundle**:
-  ```bash
-  ./gradlew bundleRelease
-  ```
-- [ ] **Verify Artifact**:
-  - Path: `app/build/outputs/bundle/release/app-release.aab`
-  - Version name from `aibrief.versionName` in `gradle.properties`
-  - Signed with the upload key, **not** the sideload key
-- [ ] **Confirm the Play build carries no sideload traces**: the AAB must not declare `REQUEST_INSTALL_PACKAGES`, which Google Play restricts. It is declared only in `app/src/sideload/AndroidManifest.xml` and so cannot reach the `release` variant. Verify after building:
-  ```bash
-  # Expect no output.
-  bundletool dump manifest --bundle app/build/outputs/bundle/release/app-release.aab \
-    | grep REQUEST_INSTALL_PACKAGES
-  ```
-- [ ] **Closed Testing Track**: Upload the AAB to Internal or Closed Testing to verify live device performance before production rollout.
+## Production eligibility and signing
 
-## 5. Migrating Off the Direct-Install Build
-- [ ] **Uninstall the sideload build from every test device first.** The Play artifact is signed with a different key, so Android will refuse to install it over a direct-install copy. Saved articles are device-local and will not survive the switch.
-- [ ] **Confirm `versionCode` continuity**: the Play track must start above the highest `versionCode` ever published to the direct-install channel, so bump `aibrief.versionCodeBase` in `gradle.properties` if the two sequences would otherwise collide.
+- [ ] Confirm account type, creation date and production-access status.
+- [ ] If applicable: 12 genuine closed testers continuously opted in for 14 days, feedback recorded, issues addressed, and production access approved.
+- [ ] Use the established private upload key if this package has prior Play uploads. For a new identity, securely create/back up the upload key and enroll in Play App Signing.
+- [ ] Configure keystore.properties locally or the four PLAY_* repository secrets for **Build signed Play bundle**.
+- [ ] Choose a versionCode greater than prior Play uploads and verify the package is **com.caceras.aibrief**.
+- [ ] Build the signed **release AAB**; the internal-sharing APK and sideload APK are different delivery artifacts.
+- [ ] Check signature, certificate, version, target SDK, native-library compatibility and SHA-256.
+- [ ] Verify **REQUEST_INSTALL_PACKAGES** and the sideload updater/provider are absent from the Play artifact.
+
+## Publication and policy
+
+- [ ] News & Magazines category and self-declaration completed truthfully.
+- [ ] Every article shows its publisher, date and author when available; original posts include working primary-source links.
+- [ ] Launch content is useful and current; a real routine exists for new original writing. Offline explainers are visibly labeled.
+- [ ] Text, photographs, logos and graphics are owned or licensed. RSS availability alone is not permission.
+- [ ] In-app contact link and news declaration both use **https://caceras.github.io/ai-news-kotlin/contact.html**.
+- [ ] Support email **rikicaceras@gmail.com** is correct and monitored.
+- [ ] Privacy policy loads publicly at **https://caceras.github.io/ai-news-kotlin/privacy.html**, and the app links it.
+- [ ] Data safety is completed from actual app and hosting data practices. Do not blindly select “No”: audit IP/request handling by GitHub and any image host.
+- [ ] Ads, app access, actual target audience, IARC questionnaire and every applicable Console “Needs attention” declaration completed accurately.
+- [ ] No reviewer login is needed. Use [docs/STORE_LISTING.md](docs/STORE_LISTING.md) for access instructions and listing copy.
+
+## Store assets
+
+- [ ] Title **AI Brief** (under 30 characters), short description at most 80 characters, full description under 4,000 characters.
+- [ ] App icon: **512 × 512**, 32-bit PNG, at most 1,024 KB; follow Play icon rules.
+- [ ] Feature graphic: **1024 × 500**, JPEG or 24-bit PNG without alpha.
+- [ ] **At least two actual app screenshots** are required. Four 1080 × 1920 portrait screenshots are recommended for promotional eligibility, not the minimum listing requirement.
+- [ ] Screenshots show the real release candidate, no invented UI/reviews/awards. Dimensions are 320–3840 px and maximum side is at most twice the minimum side.
+
+## Final quality gate
+
+- [ ] Unit tests and release lint passed on the candidate.
+- [ ] Fresh/offline launch, refresh failure, all topics/search, article body/source links, save/remove/share, About/contact/privacy checked.
+- [ ] Back, browser return, rotation, large text, light/dark mode, background/resume and state restoration checked on actual app builds.
+- [ ] Owner checks the phone-test build on a real phone; switching to a differently signed Play installation is planned before uninstalling any existing app with saved data.
+- [ ] Signed release AAB installed from a Play testing track; inspect pre-launch report if generated and fix material issues.
+- [ ] Recheck public URLs and declarations immediately before submission. Submit only when the above production gates are satisfied.
+
+No production-signed AAB, completed Play declarations, testing eligibility or Google approval should be reported until corresponding evidence exists.

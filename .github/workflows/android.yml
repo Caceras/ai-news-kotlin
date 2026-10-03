@@ -1,6 +1,6 @@
 # Builds AI Brief and publishes it where a phone can install it in one tap.
 #
-# Every push to main produces a signed direct-install APK and a GitHub Release
+# Every app-code push to main produces a signed direct-install APK and a GitHub Release
 # containing both the APK and an `update.json` manifest. The installed app polls
 # that manifest, so pushing to main is the whole publish action — nothing else
 # has to be run by hand.
@@ -16,6 +16,13 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'content/**'
+      - 'docs/**'
+      - '**.md'
+      - 'scripts/publish-post.py'
+      - '.github/workflows/publish-post.yml'
+      - '.github/workflows/content.yml'
   workflow_dispatch:
 
 permissions:
@@ -47,7 +54,7 @@ jobs:
         run: scripts/ci-gradle.sh testSideloadUnitTest
 
       - name: Run Android lint
-        run: scripts/ci-gradle.sh lintSideload
+        run: scripts/ci-gradle.sh lintSideload lintRelease
 
       - name: Upload lint report
         if: always()
@@ -90,7 +97,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Build direct-install APK
-        run: scripts/ci-gradle.sh assembleSideload -PbuildNumber=${{ steps.identity.outputs.build_number }}
+        run: scripts/ci-gradle.sh assembleSideload assembleInternalSharing -PbuildNumber=${{ steps.identity.outputs.build_number }}
 
       - name: Stage release assets
         id: stage
@@ -100,6 +107,7 @@ jobs:
           apk="$(find app/build/outputs/apk/sideload -name '*.apk' -print -quit)"
           test -n "$apk" || { echo "::error::No APK was produced"; exit 1; }
           cp "$apk" release/ai-brief.apk
+          cp app/build/outputs/apk/internalSharing/app-internalSharing.apk release/ai-brief-internal-sharing.apk
 
           # The notes shown in the app's update banner are the commit subject.
           notes="$(git log -1 --pretty=%s)"
@@ -118,6 +126,7 @@ jobs:
           echo "$notes" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
           cat release/update.json
+          (cd release && sha256sum ai-brief.apk ai-brief-internal-sharing.apk update.json) > release/SHA256SUMS.txt
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -141,7 +150,10 @@ jobs:
             "$NOTES" > release/notes.md
           gh release create "${{ steps.identity.outputs.tag }}" \
             release/ai-brief.apk \
+            release/ai-brief-internal-sharing.apk \
             release/update.json \
+            release/SHA256SUMS.txt \
+            --target "${GITHUB_SHA}" \
             --title "AI Brief ${{ steps.identity.outputs.version_name }} (build ${{ steps.identity.outputs.build_number }})" \
             --notes-file release/notes.md \
             --latest

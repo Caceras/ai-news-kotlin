@@ -3,6 +3,7 @@ package com.caceras.aibrief.data
 import android.content.Context
 import android.text.Html
 import android.util.Xml
+import com.caceras.aibrief.BuildConfig
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -48,8 +49,21 @@ data class NewsArticle(
     /** True for an original post, which has no external article to link out to. */
     val isOriginalPost: Boolean get() = blocks.isNotEmpty()
 
+    val searchableText: String
+        get() = listOf(title, summary, source, author.orEmpty()).joinToString(" ") +
+            " " + blocks.joinToString(" ") { block ->
+                when (block) {
+                    is PostBlock.Paragraph -> block.text
+                    is PostBlock.Heading -> block.text
+                    is PostBlock.Quote -> block.text
+                    is PostBlock.Bullets -> block.items.joinToString(" ")
+                    is PostBlock.Image -> block.caption.orEmpty()
+                    is PostBlock.Link -> block.text
+                }
+            }
+
     val readingTimeMinutes: Int
-        get() = ((title.split(Regex("\\s+")).size + summary.split(Regex("\\s+")).size) / 45 + 1).coerceIn(1, 15)
+        get() = ((searchableText.trim().split(Regex("\\s+")).size + 199) / 200).coerceIn(1, 30)
 }
 
 enum class FeedFreshness {
@@ -77,135 +91,103 @@ class NewsRepository(context: Context) {
         Context.MODE_PRIVATE,
     )
 
+    private val bundledPosts = context.applicationContext.assets.open("posts.json")
+        .bufferedReader().use { it.readText() }
+
+    private fun localPostsRaw(): String =
+        preferences.getString(OWNER_POSTS_KEY, null) ?: bundledPosts
+
+    private fun visiblePosts(raw: String): List<NewsArticle> =
+        OwnerPosts.published(raw).map { it.toArticle() }
+
     fun initialLoad(): NewsLoad {
-        val cached = cachedArticles()
-        return if (!cached.isNullOrEmpty()) {
-            NewsLoad(
-                articles = cached,
-                freshness = FeedFreshness.CACHED,
-                updatedAt = cachedAt(),
-            )
-        } else {
-            NewsLoad(
-                articles = SeedArticles.create(),
-                freshness = FeedFreshness.OFFLINE,
-            )
-        }
+        val posts = visiblePosts(localPostsRaw())
+        val feedCache = if (BuildConfig.EXTERNAL_FEEDS_ENABLED) {
+            cachedArticles().orEmpty().filterNot { it.id.startsWith("post-") }
+        } else emptyList()
+        val articles = (posts + feedCache).distinctBy { it.id }
+            .sortedByDescending { it.publishedAt }
+        val hasCache = preferences.contains(OWNER_POSTS_KEY) || feedCache.isNotEmpty()
+        return NewsLoad(
+            articles = articles.ifEmpty { SeedArticles.create() },
+            freshness = if (hasCache) FeedFreshness.CACHED else FeedFreshness.OFFLINE,
+            updatedAt = cachedAt(),
+        )
     }
 
     suspend fun loadLatest(): NewsLoad = withContext(Dispatchers.IO) {
-        // Original posts and the news feeds are independent sources, so they are
-        // fetched together and neither waits on the other.
-        val (liveArticles, ownerPosts) = coroutineScope {
-            val feedJobs = feeds.map { feed ->
-                async {
-                    try {
-                        fetchFeed(feed)
-                    } catch (error: Exception) {
-                        if (error is CancellationException) throw error
-                        emptyList()
-                    }
-                }
+        val (liveArticles, postDocument) = coroutineScope {
+            val feedJob = async {
+                if (BuildConfig.EXTERNAL_FEEDS_ENABLED) {
+                    feeds.map { feed ->
+                        async {
+                            try {
+                                fetchFeed(feed)
+                            } catch (error: Exception) {
+                                if (error is CancellationException) throw error
+                                emptyList()
+                            }
+                        }
+                    }.awaitAll().flatten()
+                } else emptyList()
             }
             val postJob = async {
                 try {
-                    fetchOwnerPosts()
+                    fetchOwnerPostDocument()
                 } catch (error: Exception) {
                     if (error is CancellationException) throw error
-                    emptyList()
+                    null
                 }
             }
-            // Identity is keyed on id rather than url throughout: every RSS story
-            // derives its id from its link, so this is the same comparison, but
-            // original posts have no link to be distinct by.
-            val articles = feedJobs.awaitAll().flatten()
-                .distinctBy { it.id }
-                .sortedByDescending { it.publishedAt }
-            articles to postJob.await()
+            feedJob.await() to postJob.await()
         }
 
-        if (liveArticles.isNotEmpty()) {
-            val cached = cachedArticles().orEmpty()
-            val refreshedArticles = (liveArticles + cached.filter { cachedArticle ->
-                liveArticles.none { liveArticle -> liveArticle.id == cachedArticle.id }
-            })
-                .distinctBy { it.id }
-                .sortedByDescending { it.publishedAt }
-                .take(MAX_ARTICLES)
-            val fallback = SeedArticles.create().filter { seed ->
-                refreshedArticles.none { article -> article.id == seed.id }
-            }
-            cacheLiveArticles(withOwnerPosts(ownerPosts, refreshedArticles))
-            NewsLoad(
-                articles = withOwnerPosts(
-                    ownerPosts,
-                    (refreshedArticles + fallback).take(MAX_ARTICLES),
-                ),
-                freshness = FeedFreshness.LIVE,
-                updatedAt = Instant.now(),
-            )
-        } else {
-            // Every feed failed. Original posts are fetched separately and may
-            // still have arrived, so they are merged into whatever is shown.
-            cachedArticles()?.let { cached ->
-                NewsLoad(
-                    articles = withOwnerPosts(ownerPosts, cached),
-                    freshness = FeedFreshness.CACHED,
-                    updatedAt = cachedAt(),
-                )
-            } ?: NewsLoad(
-                articles = withOwnerPosts(ownerPosts, SeedArticles.create()),
-                freshness = FeedFreshness.OFFLINE,
-            )
+        if (postDocument != null) {
+            // Cache the document, not only today's visible posts. Scheduled
+            // writing becomes visible on a later refresh even when offline.
+            preferences.edit().putString(OWNER_POSTS_KEY, postDocument).apply()
         }
+        val posts = visiblePosts(postDocument ?: localPostsRaw())
+        val feedArticles = if (BuildConfig.EXTERNAL_FEEDS_ENABLED) {
+            (liveArticles + cachedArticles().orEmpty().filterNot { it.id.startsWith("post-") })
+                .distinctBy { it.id }.sortedByDescending { it.publishedAt }.take(MAX_ARTICLES)
+        } else emptyList()
+        val refreshed = postDocument != null || liveArticles.isNotEmpty()
+        if (refreshed) cacheLiveArticles(feedArticles)
+        val articles = (posts + feedArticles).distinctBy { it.id }
+            .sortedByDescending { it.publishedAt }
+        NewsLoad(
+            articles = articles.ifEmpty { SeedArticles.create() },
+            freshness = when {
+                refreshed -> FeedFreshness.LIVE
+                preferences.contains(OWNER_POSTS_KEY) || feedArticles.isNotEmpty() -> FeedFreshness.CACHED
+                else -> FeedFreshness.OFFLINE
+            },
+            updatedAt = cachedAt(),
+        )
     }
 
-    /**
-     * Places [posts] into [articles], newest first.
-     *
-     * Posts are added before the article cap is applied rather than after, so a
-     * busy news day can never push the owner's own writing out of the feed.
-     */
-    private fun withOwnerPosts(
-        posts: List<NewsArticle>,
-        articles: List<NewsArticle>,
-    ): List<NewsArticle> =
-        if (posts.isEmpty()) {
-            articles
-        } else {
-            (posts + articles)
-                .distinctBy { it.id }
-                .sortedByDescending { it.publishedAt }
-        }
-
-    /**
-     * Reads the posts the owner has published, as articles the feed can show.
-     *
-     * The document is fetched straight from the repository rather than bundled
-     * into the app, so publishing a post is a commit and needs no new build and
-     * no update on the phone. Posts dated in the future are withheld until due.
-     */
-    private fun fetchOwnerPosts(): List<NewsArticle> {
+    /** A malformed update keeps the last good document and bundled edition. */
+    private fun fetchOwnerPostDocument(): String? {
         val connection = URL(OWNER_POSTS_URL).openConnection() as HttpURLConnection
         return try {
             connection.connectTimeout = NETWORK_TIMEOUT_MILLIS
             connection.readTimeout = NETWORK_TIMEOUT_MILLIS
             connection.instanceFollowRedirects = true
             connection.setRequestProperty("Accept", "application/json")
-            connection.setRequestProperty("User-Agent", "AI-Brief-Android/2.0")
-
-            if (connection.responseCode !in 200..299) return emptyList()
+            connection.setRequestProperty("User-Agent", "AI-Brief-Android/${BuildConfig.VERSION_NAME}")
+            if (connection.responseCode !in 200..299) return null
             val body = connection.inputStream.bufferedReader().use { it.readText() }
-            OwnerPosts.published(body).map { it.toArticle() }
+            val document = runCatching { JSONObject(body) }.getOrNull() ?: return null
+            val declared = document.optJSONArray("posts") ?: return null
+            val parsed = OwnerPosts.parse(body)
+            if (parsed.size != declared.length() || parsed.any { it.blocks.isEmpty() }) return null
+            body
         } finally {
             connection.disconnect()
         }
     }
 
-    /**
-     * An original post has no external article behind it, so [NewsArticle.url]
-     * is deliberately blank and the reader hides its "read the original" action.
-     */
     private fun OwnerPost.toArticle(): NewsArticle = NewsArticle(
         id = "post-$id",
         title = title,
@@ -453,6 +435,7 @@ class NewsRepository(context: Context) {
     private fun stableId(url: String): String = "article-${url.hashCode().toUInt().toString(16)}"
 
     private companion object {
+        const val OWNER_POSTS_KEY = "owner_posts_document"
         const val SAVED_ARTICLES_KEY = "saved_articles"
         const val CACHED_ARTICLES_KEY = "cached_articles"
         const val CACHED_AT_KEY = "cached_at"

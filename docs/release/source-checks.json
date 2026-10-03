@@ -1,0 +1,32 @@
+[
+  {
+    "url": "https://opensource.org/ai/open-source-ai-definition",
+    "status": 200,
+    "final_url": "https://opensource.org/ai/open-source-ai-definition"
+  },
+  {
+    "url": "https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall",
+    "status": 200,
+    "final_url": "https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall"
+  },
+  {
+    "url": "https://huggingface.co/docs/hub/model-cards",
+    "status": 200,
+    "final_url": "https://huggingface.co/docs/hub/model-cards"
+  },
+  {
+    "url": "https://huggingface.co/docs/transformers/quantization/overview",
+    "status": 200,
+    "final_url": "https://huggingface.co/docs/transformers/quantization/overview"
+  },
+  {
+    "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+    "status": 200,
+    "final_url": "https://www.nist.gov/itl/ai-risk-management-framework"
+  },
+  {
+    "url": "https://huggingface.co/docs/evaluate/index",
+    "status": 200,
+    "final_url": "https://huggingface.co/docs/evaluate/index"
+  }
+]

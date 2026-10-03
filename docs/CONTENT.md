@@ -1,8 +1,21 @@
 # Publishing original posts
 
-AI Brief carries two kinds of story. Most are relayed from public news feeds.
-The rest are **original posts**, written for the app itself, and this is how they
-are published.
+The launch edition carries original writing published by AI Brief. External RSS
+feeds are disabled until their reuse permissions are checked.
+
+## Publish without editing code
+
+Tell Codex **“Publish this AI Brief article”** with your text, byline, topic and
+checked source links. Codex validates and commits the edition; no Android update
+is needed. You can also use [the mobile editor](https://caceras.github.io/ai-news-kotlin/editor.html):
+copy the completed briefing, open publishing, choose Run workflow on main, paste
+into Briefing and run it. A green check confirms publication.
+
+The workflow validates before writing and rejects duplicate submissions and
+invalid source links. The web editor prepares clipboard data only; publication
+requires the owner's GitHub access. Readers need no account.
+
+The sections below describe the content format for developers.
 
 ---
 
@@ -12,13 +25,13 @@ A post is a change to a single file — `content/posts.json` — and nothing els
 
 The app reads that file directly from the repository every time the feed
 refreshes. No build runs, no release is cut, and nothing is installed on the
-phone. Publish a post and it is there on the next refresh.
+phone. Publish a post and it appears on a refresh once GitHub’s content cache has updated, which can take a few minutes.
 
 That splits the project into two speeds, which is the whole point:
 
 | Changing | What happens | How long |
 |---|---|---|
-| **What the app says** — a post | A file is committed | Seconds, no update |
+| **What the app says** — a post | A file is committed | After refresh and content-cache propagation, no update |
 | **What the app is** — code, layout, behaviour | A build, then one tap on `install` | Minutes |
 
 ---
@@ -30,7 +43,8 @@ That splits the project into two speeds, which is the whole point:
 A post dated in the future is carried in the file but withheld until that moment
 passes, after which it appears on its own. Nothing runs on a schedule to make
 this happen — the app simply never shows a post that is not yet due — so
-scheduling costs nothing and cannot fail while you are asleep.
+scheduling needs no background server task. Device time and a later refresh still matter.
+Future-dated writing is already public in the repository; keep confidential drafts outside it.
 
 Dates are UTC, in the form `2026-08-30T16:00:00Z`.
 
@@ -62,16 +76,16 @@ Dates are UTC, in the form `2026-08-30T16:00:00Z`.
 | `id` | ✅ | Any stable string. Dating it keeps the file readable. Changing it republishes the post as a new story. |
 | `title` | ✅ | |
 | `publishedAt` | ✅ | UTC instant. Also the schedule — see above. |
-| `summary` | | Standfirst under the headline. |
-| `author` | | Omit for no byline. |
+| `summary` | ✅ | Standfirst under the headline. |
+| `author` | ✅ | Byline or publication name. |
 | `category` | | `RESEARCH`, `PRODUCTS`, `POLICY`, `BUILDERS`, or `ALL`. Anything unrecognised falls back to `ALL`. |
 | `imageUrl` | | Must be `https://`. |
-| `blocks` | | The body. Without it the post opens as a blank page. |
+| `blocks` | ✅ | A readable body and at least one HTTPS source link. |
 
 A post missing `id`, `title`, or a valid `publishedAt` is skipped rather than
 shown broken. `app/src/test/.../PublishedPostsFileTest.kt` parses the real file
 on every build and fails if a post would silently vanish, so a bad edit is
-caught before it reaches the phone.
+caught during Android validation. The publishing workflow also validates before committing; direct JSON edits bypass that pre-publication gate.
 
 ---
 
@@ -85,6 +99,8 @@ post looking like it belongs.
 { "type": "paragraph", "text": "Body copy." }
 
 { "type": "heading",   "text": "A section heading." }
+
+{ "type": "link",      "text": "Primary source", "url": "https://example.com/source" }
 
 { "type": "quote",     "text": "A pulled quote.",
                        "attribution": "Optional line beneath it" }

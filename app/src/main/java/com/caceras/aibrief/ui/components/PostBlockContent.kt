@@ -1,6 +1,10 @@
 package com.caceras.aibrief.ui.components
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -12,9 +16,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.caceras.aibrief.data.PostBlock
 
@@ -107,6 +115,25 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+
+        is PostBlock.Link -> {
+            val context = LocalContext.current
+            Text(
+                text = "${block.text} ↗",
+                style = MaterialTheme.typography.bodyLarge.copy(textDecoration = TextDecoration.Underline),
+                color = MaterialTheme.colorScheme.primary,
+                modifier = modifier
+                    .minimumInteractiveComponentSize()
+                    .clickable(role = Role.Button) {
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(block.url)))
+                        } catch (_: ActivityNotFoundException) {
+                            // Devices without a browser can still read the full post.
+                        }
+                    }
+                    .padding(vertical = 8.dp),
+            )
         }
     }
 }

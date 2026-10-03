@@ -2,50 +2,300 @@
   "version": 1,
   "posts": [
     {
-      "id": "2026-08-30-welcome",
-      "title": "AI Brief now publishes its own writing, not only other people's.",
-      "summary": "Original posts sit alongside the feed, and appear the moment they are published — no app update required.",
-      "author": "Rikard Caceras",
+      "id": "2026-10-03-trust-ai",
+      "title": "AI is useful. Knowing when to trust it is the real skill.",
+      "summary": "A practical way to decide where a model helps, where it needs checking, and where a person should keep the final say.",
+      "author": "AI Brief editorial",
       "category": "PRODUCTS",
-      "publishedAt": "2026-08-30T16:00:00Z",
+      "publishedAt": "2026-10-03T04:32:25Z",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Until now AI Brief only relayed other people's reporting. This post is the first piece of writing that belongs to the app itself, and it exists mainly to prove the route works."
+          "text": "An AI answer can sound confident while being wrong. Fluency tells you that a model can produce a convincing sequence of words; it does not establish that the answer is accurate, current, or suitable for your situation. That distinction matters whether you are drafting an email, reviewing a document, or making a decision that affects another person."
         },
         {
           "type": "heading",
-          "text": "Why this appeared without an update"
+          "text": "Start with the decision, not the model"
         },
         {
           "type": "paragraph",
-          "text": "The app reads its posts from a single file in the repository every time the feed refreshes. Publishing is therefore a change to that file and nothing else — no build runs, no release is cut, and nothing has to be installed on the phone. Tap home and the post is simply there."
-        },
-        {
-          "type": "paragraph",
-          "text": "That matters because it separates two speeds. Changing how the app looks or behaves is a new build, which takes a few minutes and one tap to install. Changing what it says is immediate."
-        },
-        {
-          "type": "quote",
-          "text": "Posts are written as a short list of typed blocks rather than as markup, so a post can add new writing but never new styling.",
-          "attribution": "On keeping the design intact"
-        },
-        {
-          "type": "heading",
-          "text": "What a post can contain"
+          "text": "Write down the task you want help with and the cost of an error. A brainstorming suggestion is usually easy to discard. A medical recommendation, a legal interpretation, or a decision about someone’s access to a service has a different consequence. The amount of checking should follow that consequence."
         },
         {
           "type": "bullets",
           "items": [
-            "Paragraphs and headings, set in the type the app already uses",
-            "Pulled quotes, with an optional attribution line",
-            "Bulleted lists like this one",
-            "Images, which must be served over HTTPS"
+            "Use AI to create options and first drafts when you can inspect the result.",
+            "Verify factual claims against a primary source, including dates and quoted figures.",
+            "Keep a person responsible for decisions with serious consequences.",
+            "Avoid putting private information into a service until you understand its data practices."
           ]
         },
         {
+          "type": "heading",
+          "text": "Make the check part of the workflow"
+        },
+        {
           "type": "paragraph",
-          "text": "A post can also be dated in the future. It stays in the file, invisible, until that moment passes and then appears on its own — which is how scheduling works here, with no server involved."
+          "text": "Ask what evidence would change your mind before accepting an answer. Keep the source open beside the draft. If the answer is uncertain or the evidence is missing, say so rather than filling the gap with a plausible guess. The NIST AI Risk Management Framework offers a broader way to think about these risks: govern the work, map its context, measure what matters, and manage the remaining risk."
+        },
+        {
+          "type": "paragraph",
+          "text": "This is an editorial explainer, not professional advice. It is a starting point for a more deliberate way to use AI."
+        },
+        {
+          "type": "link",
+          "text": "Primary source: NIST AI Risk Management Framework",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ]
+    },
+    {
+      "id": "2026-10-03-model-scores",
+      "title": "A model score is a starting point, not a verdict.",
+      "summary": "Benchmarks are useful evidence. The question is whether they measure the work you actually need a model to do.",
+      "author": "AI Brief editorial",
+      "category": "RESEARCH",
+      "publishedAt": "2026-10-03T04:31:25Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A leaderboard compresses many choices into a small number: which tasks were included, how examples were collected, what counts as a correct answer, and which settings were used. A higher score can be helpful, but it is not a promise that a model will be better on your own documents, language, or workflow."
+        },
+        {
+          "type": "heading",
+          "text": "Build a small test around real work"
+        },
+        {
+          "type": "paragraph",
+          "text": "Collect representative examples before selecting a model. Include ordinary requests, difficult requests, and cases where the system should decline or ask for more information. Keep a separate set of examples that you do not use while tuning prompts. Otherwise you can accidentally optimize for your test rather than for future use."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Define what a successful answer looks like before running the comparison.",
+            "Check accuracy alongside latency, cost, and the ability to recover from an error.",
+            "Review failures individually; an average can hide an important weakness.",
+            "Record the model version, prompt, settings, and evaluation date."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Understand the metric"
+        },
+        {
+          "type": "paragraph",
+          "text": "Different metrics answer different questions. In classification, precision and recall describe different kinds of mistakes. For generated text, a numerical similarity score may miss factual errors or an answer that is unsafe in context. Use human review where the task requires judgment, and document the limitations of that review."
+        },
+        {
+          "type": "paragraph",
+          "text": "The useful outcome is a clear account of where the system works and where it does not. A benchmark is one part of that account, alongside evidence from the actual task."
+        },
+        {
+          "type": "link",
+          "text": "Further reading: Hugging Face Evaluate",
+          "url": "https://huggingface.co/docs/evaluate/index"
+        },
+        {
+          "type": "link",
+          "text": "Primary source: Google classification metrics",
+          "url": "https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall"
+        }
+      ]
+    },
+    {
+      "id": "2026-10-03-open-weights",
+      "title": "What “open weights” actually gives you",
+      "summary": "A downloadable model is a useful starting point. Its license and the rest of the system still deserve a careful read.",
+      "author": "AI Brief editorial",
+      "category": "BUILDERS",
+      "publishedAt": "2026-10-03T04:30:25Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Model weights are the learned parameters used during inference. When those weights can be downloaded, developers may be able to run the model on their own infrastructure, inspect its behavior, and adapt it. The practical freedoms depend on the license and on whether the other pieces needed to use or modify the system are available."
+        },
+        {
+          "type": "heading",
+          "text": "Downloadable is not a complete license"
+        },
+        {
+          "type": "paragraph",
+          "text": "Read the model card and the actual license rather than relying on a repository tag. Some licenses restrict commercial use, redistribution, particular applications, or the size of the organization using the model. A license can also impose attribution requirements. The source code and the training data may have separate terms."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Check the exact repository and model version you plan to use.",
+            "Read the license, use restrictions, and model-card limitations.",
+            "Keep a copy of the relevant terms with your deployment records.",
+            "Evaluate the model on your own task before exposing it to other people."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Know which kind of openness you mean"
+        },
+        {
+          "type": "paragraph",
+          "text": "The Open Source Initiative’s Open Source AI Definition considers more than access to weights. It describes freedoms to use, study, modify, and share a system, together with the information needed to exercise those freedoms. Do not assume every model described as open meets that definition."
+        },
+        {
+          "type": "paragraph",
+          "text": "Open weights can broaden experimentation and give teams more control over deployment. They do not remove the responsibility to check rights, protect private data, and measure failures."
+        },
+        {
+          "type": "link",
+          "text": "Primary source: Open Source AI Definition",
+          "url": "https://opensource.org/ai/open-source-ai-definition"
+        },
+        {
+          "type": "link",
+          "text": "Further reading: Hugging Face model cards",
+          "url": "https://huggingface.co/docs/hub/model-cards"
+        }
+      ]
+    },
+    {
+      "id": "2026-10-03-human-oversight",
+      "title": "Keep a human decision in the loop",
+      "summary": "Oversight works best when someone has the context, authority, and time to challenge the system.",
+      "author": "AI Brief editorial",
+      "category": "POLICY",
+      "publishedAt": "2026-10-03T04:29:25Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Putting a person at the end of an automated process does not automatically make that process safe. The reviewer needs enough information to understand the recommendation, enough time to inspect it, and a meaningful way to disagree. Otherwise a review can become a habit of approving whatever the system suggests."
+        },
+        {
+          "type": "heading",
+          "text": "Design an actual decision point"
+        },
+        {
+          "type": "paragraph",
+          "text": "Name the decision the person owns. Show the relevant evidence, the important uncertainty, and the effect of accepting the recommendation. Make it possible to pause the process or use another route. Where mistakes matter, record the decision and provide a way for affected people to question it."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Assign responsibility to a named role, rather than to “the user.”",
+            "Make the supporting evidence available at the point of review.",
+            "Allow reviewers to override or stop the automated step.",
+            "Use recurring errors and feedback to change the workflow."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Review the surrounding system"
+        },
+        {
+          "type": "paragraph",
+          "text": "Risk is shaped by the whole workflow, not just by a model’s output. A tool used to organize notes has a different context from one used to recommend access to a loan or a public service. NIST’s AI Risk Management Framework encourages teams to understand this context and revisit risks as systems and circumstances change."
+        },
+        {
+          "type": "paragraph",
+          "text": "This is a general editorial explainer. It does not determine whether a particular deployment complies with a law or a sector-specific obligation. For those decisions, use the applicable rules and qualified advice."
+        },
+        {
+          "type": "link",
+          "text": "Primary source: NIST AI Risk Management Framework",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ]
+    },
+    {
+      "id": "2026-10-03-small-models",
+      "title": "When a smaller model is the better choice",
+      "summary": "Choose the smallest system that does the job reliably. Measure the tradeoffs before assuming that bigger is better.",
+      "author": "AI Brief editorial",
+      "category": "PRODUCTS",
+      "publishedAt": "2026-10-03T04:28:25Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A large general-purpose model can be useful when a task needs broad knowledge or complex reasoning. It can also demand more memory, longer response times, and a larger operating budget. A smaller model may be a sensible fit for a narrow task when it meets the quality you need."
+        },
+        {
+          "type": "heading",
+          "text": "Make the constraints visible"
+        },
+        {
+          "type": "paragraph",
+          "text": "Consider where the model will run, how much memory is available, and whether an internet connection is dependable. On-device inference can keep a particular inference request local, but that does not establish that the entire application is private. Downloads, analytics, synchronization, and other services need their own review."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Compare models using the same representative examples.",
+            "Measure latency and memory on the hardware people will actually use.",
+            "Check output quality after applying quantization or other optimizations.",
+            "Document the conditions in which the model fails or needs a fallback."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Treat efficiency as a testable claim"
+        },
+        {
+          "type": "paragraph",
+          "text": "Quantization represents parameters with lower precision to reduce memory requirements. Its practical effect depends on the model, the format, and the runtime. The result may change output quality or performance, so test the exact configuration you intend to ship."
+        },
+        {
+          "type": "paragraph",
+          "text": "The goal is a reliable experience inside your real constraints. If a smaller model achieves that goal, the unused capacity of a larger one may offer little benefit. If it does not, a clear fallback is more valuable than a confident claim about efficiency."
+        },
+        {
+          "type": "link",
+          "text": "Technical reference: Transformers quantization",
+          "url": "https://huggingface.co/docs/transformers/quantization/overview"
+        }
+      ]
+    },
+    {
+      "id": "2026-10-03-check-the-source",
+      "title": "Read the source before you share the story",
+      "summary": "A short checklist for separating a research finding, a product announcement, and somebody’s interpretation of them.",
+      "author": "AI Brief editorial",
+      "category": "RESEARCH",
+      "publishedAt": "2026-10-03T04:27:25Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "AI headlines can collapse very different kinds of evidence into the same language. A research paper describes a study under particular conditions. A model card describes a release and its limitations. A product announcement describes what an organization says it is offering. An editorial interpretation adds another layer. Reading the source helps you tell those layers apart."
+        },
+        {
+          "type": "heading",
+          "text": "Follow the link all the way back"
+        },
+        {
+          "type": "paragraph",
+          "text": "Look for the original paper, model card, dataset, documentation, or public statement. Check the publication date and the version. A recent headline may refer to an older experiment, and documentation can change after an article was published. Keep the distinction visible when you summarize it."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Identify who made the claim and what evidence supports it.",
+            "Check which dataset, baseline, hardware, or setting was used.",
+            "Read the stated limitations and any conditions attached to the result.",
+            "Keep measured results separate from predictions about future use."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Share the uncertainty too"
+        },
+        {
+          "type": "paragraph",
+          "text": "If you cannot verify an important claim, leave it out or say what is missing. A careful summary can be concise: what changed, why it might matter, what remains uncertain, and where to read more. A source link should help a reader check the claim, rather than merely decorate it."
+        },
+        {
+          "type": "paragraph",
+          "text": "Model cards are one useful example of structured documentation. They can record intended use, training information, evaluation results, and limitations. Their presence is helpful; their contents still need to be read critically."
+        },
+        {
+          "type": "link",
+          "text": "Technical reference: Hugging Face model cards",
+          "url": "https://huggingface.co/docs/hub/model-cards"
         }
       ]
     }
