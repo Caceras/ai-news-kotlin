@@ -4,12 +4,14 @@
   "versionCode": 112,
   "targetSdk": 36,
   "minSdk": 26,
-  "release_unit_tests": 31,
+  "release_unit_tests": 33,
   "release_unit_failures": 0,
   "publishing_tests": 4,
   "release_lint_errors": 0,
   "native_elf_alignment": 16384,
   "apk_zip_alignment": 16384,
-  "runtime_status": "awaiting accelerated Android device verification",
-  "sideload_certificate_sha256": "c00167a32b1d36729f80e505950f6cf90915b31a75d731a0539aa6dbbfed21ff"
+  "runtime_status": "local Android 9 emulator verification running; accelerated CI blocked by GitHub write access",
+  "sideload_certificate_sha256": "c00167a32b1d36729f80e505950f6cf90915b31a75d731a0539aa6dbbfed21ff",
+  "repository_publish_status": "HTTP 403 Resource not accessible by integration; source committed locally only",
+  "public_pages_status": "prepared locally; GitHub Pages not enabled or deployed"
 }

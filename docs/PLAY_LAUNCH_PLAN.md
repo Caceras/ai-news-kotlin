@@ -4,10 +4,14 @@ Prepared 3 October 2026 for `Caceras/ai-news-kotlin`, package **`com.caceras.aib
 
 The immediate goal is to complete Google's inactivity actions before the account's cutoff. The production goal is a useful, regularly updated native publication with accurate declarations and evidence of testing. No developer can promise first-review acceptance, but the plan below addresses the specific avoidable rejection risks in this repository.
 
+## Delivery status
+
+The redesigned source is prepared and committed locally. GitHub currently rejects repository writes with HTTP 403 (`Resource not accessible by integration`), so the new release and publishing workflows are **not yet published** there. The prepared internal-sharing APK is available in Drive. The contact/privacy pages and daily editor are prepared locally; the GitHub Pages URLs below must be deployed and verified before production. Reconnecting GitHub with repository write access will let Codex finish that publication. No Play Console upload or account-warning clearance is claimed.
+
 ## 1. Do these account actions today
 
 1. Sign in to the account showing the warning. In **Developer account > Account details**, verify the **contact email and phone number**, then **Save**. Save evidence of both verified states.
-2. Download **`ai-brief-internal-sharing.apk`** from the new AI Brief GitHub release. Upload that file through [Internal app sharing](https://play.google.com/console/internal-app-sharing), then select **Confirm upload**. Save the upload confirmation, timestamp and resulting link.
+2. Download the prepared **[AI Brief Internal app sharing APK](https://drive.google.com/file/d/1YsTlOU9n8t7i9fgUwiOq13KRuKrY_k60/view?usp=drivesdk)** from your Drive. Upload that file through [Internal app sharing](https://play.google.com/console/internal-app-sharing), then select **Confirm upload**. Save the upload confirmation, timestamp and resulting link.
 3. Return to **Policy status > Issue details** and check the inactivity notice. Keep the closure email: its exact cutoff controls, and the screenshots show only a date. Do not assume a particular midnight timezone.
 4. If the warning persists, Internal app sharing is unavailable, or verification fails, use Play Console Help to contact developer support immediately with the account ID, closure notice, verification evidence and upload receipt. Use the draft below. Do not rely on an unanswered support request as a granted extension.
 5. Separately inspect **Android developer verification** for this exact package. The screenshot's `Com.caceras` draft is a different package. Do not rename this app to match it, replace its key, or delete the draft to address inactivity.

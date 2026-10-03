@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Smoke-test the real native reader through Android accessibility semantics."""
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -10,11 +11,13 @@ import xml.etree.ElementTree as ET
 PACKAGE = 'com.caceras.aibrief'
 OUT = Path('device-evidence')
 OUT.mkdir(exist_ok=True)
+OUT.joinpath('result.json').unlink(missing_ok=True)
 checks = []
+ADB_TIMEOUT = int(os.environ.get('AIBRIEF_DEVICE_TIMEOUT', '45'))
 
 
 def adb(*args, binary=False):
-    return subprocess.check_output(['adb', *args], text=not binary, timeout=45)
+    return subprocess.check_output(['adb', *args], text=not binary, timeout=ADB_TIMEOUT)
 
 
 def hierarchy():
@@ -64,7 +67,7 @@ def scroll_until(needle):
 
 
 try:
-    adb('install', '-r', 'app/build/outputs/apk/internalSharing/app-internalSharing.apk')
+    adb('install', '--no-streaming', '-r', 'app/build/outputs/apk/internalSharing/app-internalSharing.apk')
     adb('shell', 'wm', 'size', '1080x1920')
     adb('shell', 'settings', 'put', 'secure', 'show_ime_with_hard_keyboard', '1')
     adb('shell', 'svc', 'wifi', 'disable')

@@ -14,6 +14,7 @@ keystore.properties
 *.iml
 .DS_Store
 captures/
+device-evidence/
 
 # Python bytecode from the brand asset generators.
 __pycache__/

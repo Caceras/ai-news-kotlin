@@ -109,8 +109,8 @@ class NewsRepository(context: Context) {
             .sortedByDescending { it.publishedAt }
         val hasCache = preferences.contains(OWNER_POSTS_KEY) || feedCache.isNotEmpty()
         return NewsLoad(
-            articles = articles.ifEmpty { SeedArticles.create() },
-            freshness = if (hasCache) FeedFreshness.CACHED else FeedFreshness.OFFLINE,
+            articles = articles.ifEmpty { visiblePosts(bundledPosts).ifEmpty { SeedArticles.create() } },
+            freshness = if (hasCache && articles.isNotEmpty()) FeedFreshness.CACHED else FeedFreshness.OFFLINE,
             updatedAt = cachedAt(),
         )
     }
@@ -157,8 +157,9 @@ class NewsRepository(context: Context) {
         val articles = (posts + feedArticles).distinctBy { it.id }
             .sortedByDescending { it.publishedAt }
         NewsLoad(
-            articles = articles.ifEmpty { SeedArticles.create() },
+            articles = articles.ifEmpty { visiblePosts(bundledPosts).ifEmpty { SeedArticles.create() } },
             freshness = when {
+                articles.isEmpty() -> FeedFreshness.OFFLINE
                 refreshed -> FeedFreshness.LIVE
                 preferences.contains(OWNER_POSTS_KEY) || feedArticles.isNotEmpty() -> FeedFreshness.CACHED
                 else -> FeedFreshness.OFFLINE
@@ -178,10 +179,7 @@ class NewsRepository(context: Context) {
             connection.setRequestProperty("User-Agent", "AI-Brief-Android/${BuildConfig.VERSION_NAME}")
             if (connection.responseCode !in 200..299) return null
             val body = connection.inputStream.bufferedReader().use { it.readText() }
-            val document = runCatching { JSONObject(body) }.getOrNull() ?: return null
-            val declared = document.optJSONArray("posts") ?: return null
-            val parsed = OwnerPosts.parse(body)
-            if (parsed.size != declared.length() || parsed.any { it.blocks.isEmpty() }) return null
+            if (!OwnerPosts.isEditorialDocument(body)) return null
             body
         } finally {
             connection.disconnect()

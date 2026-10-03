@@ -51,6 +51,20 @@ data class OwnerPost(
 /** Reads `content/posts.json`, the document that carries every original post. */
 object OwnerPosts {
 
+    /** A remote edition must keep the reader's complete, sourced publication intact. */
+    fun isEditorialDocument(raw: String): Boolean {
+        val document = runCatching { JSONObject(raw) }.getOrNull() ?: return false
+        if (document.optInt("version") != 1) return false
+        val declared = document.optJSONArray("posts") ?: return false
+        if (declared.length() !in 1..200) return false
+        val posts = parse(raw)
+        return posts.size == declared.length() && posts.all { post ->
+            post.summary.isNotBlank() && !post.author.isNullOrBlank() &&
+                post.blocks.any { it is PostBlock.Link } &&
+                post.blocks.any { it is PostBlock.Paragraph || it is PostBlock.Quote || it is PostBlock.Bullets }
+        }
+    }
+
     /**
      * Returns every post in [raw] that is due at [now], newest first.
      *

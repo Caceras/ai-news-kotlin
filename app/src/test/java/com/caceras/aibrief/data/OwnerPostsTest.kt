@@ -2,11 +2,31 @@ package com.caceras.aibrief.data
 
 import java.time.Instant
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class OwnerPostsTest {
+
+    @Test
+    fun `incomplete remote editions cannot replace the bundled publication`() {
+        assertFalse(OwnerPosts.isEditorialDocument("not json"))
+        assertFalse(OwnerPosts.isEditorialDocument(document()))
+        assertFalse(OwnerPosts.isEditorialDocument(document(post(extra =
+            ""","summary":"Intro","author":"Editor","blocks":[{"type":"paragraph","text":"Unsourced body"}]"""))))
+    }
+
+    @Test
+    fun `complete sourced scheduled editions are accepted but duplicate ids are not`() {
+        val complete = post(publishedAt = "2027-01-01T00:00:00Z", extra =
+            ""","summary":"Intro","author":"Editor","blocks":[
+                {"type":"paragraph","text":"Original writing"},
+                {"type":"link","text":"Evidence","url":"https://www.nist.gov/"}]""")
+        assertTrue(OwnerPosts.isEditorialDocument(document(complete)))
+        assertFalse(OwnerPosts.isEditorialDocument(document(complete, complete)))
+        assertFalse(OwnerPosts.isEditorialDocument(document(complete).replace("\"version\":1", "\"version\":2")))
+    }
 
     private val now = Instant.parse("2026-08-30T12:00:00Z")
 
