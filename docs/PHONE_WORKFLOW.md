@@ -4,7 +4,7 @@ Describe changes in plain language. Codex handles implementation, verification a
 
 ## Install and update the phone-test app
 
-For the current prepared edition, [download phone-test version 113 from Drive](https://drive.google.com/file/d/1kkzvrZimOSLIaeI0Uvh_pb1I-3eMfwvr/view?usp=drivesdk). GitHub currently denies repository writes, so this version has not been published there.
+For the current prepared edition, [download phone-test version 114 from Drive](https://drive.google.com/file/d/13fyPtv6XPSJdiF5wdOuPhIZgYExjO4D4/view?usp=drivesdk). GitHub currently denies repository writes, so this version has not been published there.
 
 After repository publication resumes, use **ai-brief.apk** from the verified build-specific GitHub release. The rolling fallback is:
 

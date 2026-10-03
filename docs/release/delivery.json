@@ -1,21 +1,24 @@
 {
-  "artifact": "ai-brief-internal-sharing-2.2.0-113.apk",
-  "versionCode": 113,
-  "versionName": "2.2.0",
-  "source_sha": "9e1ddb9c8d4e86bc835a16e2e95aa0dfaa827282",
-  "sha256": "f4f6a116a0802b4a119467dadba654ddcfec5cfd1eb3ad589253323b7cc84c0f",
-  "size_bytes": 3673584,
+  "artifact": "AI-Brief-2.2.1-114-internal-sharing.apk",
+  "versionCode": 114,
+  "versionName": "2.2.1",
+  "source_sha": "cab39cfa54ddf9e282506f4290f740c26511afca",
+  "sha256": "2d9481c6210ed4684b76e144733926495e2e4b79f08ac775ee66d9f2072396ed",
+  "size_bytes": 2294372,
   "signing": "Android debug certificate; only for Internal app sharing, where Google re-signs it",
-  "drive_file_id": "1bSdK7lws5eavmF6JDwRXOusRhiYAY6Nq",
-  "url": "https://drive.google.com/file/d/1bSdK7lws5eavmF6JDwRXOusRhiYAY6Nq/view?usp=drivesdk",
-  "verification": "Drive file re-downloaded; SHA-256 matches local APK",
+  "drive_file_id": "1hxK1ojphsmx3oTsHuyB97-J_KtF_Tkbt",
+  "url": "https://drive.google.com/file/d/1hxK1ojphsmx3oTsHuyB97-J_KtF_Tkbt/view?usp=drivesdk",
+  "verification": "Both Drive APKs re-downloaded; SHA-256 matches local APKs",
   "play_upload_status": "not uploaded",
   "github_status": "write denied HTTP 403; commits local only",
   "phone_test": {
-    "drive_file_id": "1kkzvrZimOSLIaeI0Uvh_pb1I-3eMfwvr",
-    "url": "https://drive.google.com/file/d/1kkzvrZimOSLIaeI0Uvh_pb1I-3eMfwvr/view?usp=drivesdk",
-    "sha256": "b7b4012001f78f89858c5f8ac01a49b661be9da476457998d9ef0b1e82a2c109",
-    "certificate": "matches existing build 111"
+    "drive_file_id": "13fyPtv6XPSJdiF5wdOuPhIZgYExjO4D4",
+    "url": "https://drive.google.com/file/d/13fyPtv6XPSJdiF5wdOuPhIZgYExjO4D4/view?usp=drivesdk",
+    "sha256": "2d4fca5bfb6d6571d4332e62c2d75b5bad51978eed0aab2251cddfafed765efe",
+    "size_bytes": 2311232,
+    "certificate": "matches existing build 111 and previous phone-test versions"
   },
+  "native_verification": "exact-candidate checks passed on Android 10/API 29, including 200 percent text scale",
+  "native_check_script_sha": "0e7bedb94737f85cd059a95f572c26f64864c107",
   "launch_plan_url": "https://drive.google.com/file/d/1xgE-QzSpQc7ALwoMAT2TwkdZPSWg-51Q/view?usp=drivesdk"
 }

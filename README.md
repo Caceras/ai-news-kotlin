@@ -16,7 +16,7 @@ A native Kotlin/Jetpack Compose publication about artificial intelligence. The e
 
 Publish through [the mobile editor](https://caceras.github.io/ai-news-kotlin/editor.html), or ask Codex to publish your writing with source links. The authenticated publisher workflow validates and updates content/posts.json; the app reads it at runtime. Content-only changes do not trigger Android builds. See [the daily publishing guide](docs/CONTENT.md).
 
-External RSS code is retained but disabled in the launch edition. Check publisher reuse permissions and update privacy/Data safety declarations before enabling it. The bundled cover is original AI-generated illustrative artwork, labeled in the reader.
+External RSS code is retained but disabled in the launch edition. Check publisher reuse permissions and update privacy/Data safety declarations before enabling it. Bundled editorial illustrations are original AI-generated artwork, labeled in the reader. Headlines and text use bundled Newsreader and DM Sans fonts.
 
 ## Delivery identities
 

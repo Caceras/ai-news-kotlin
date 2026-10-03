@@ -1,7 +1,8 @@
 {
   "passed": true,
   "checks": [
-    "Visible: A clearer view of AI.",
+    "Installed APK bytes match the exact candidate",
+    "Visible: AI Brief",
     "Visible: Offline edition",
     "Visible: AI is useful. Knowing when to trust it is the real skill.",
     "Visible: Save article",
@@ -12,7 +13,7 @@
     "Saved article survives process recreation",
     "Readable after scrolling: Read the privacy policy",
     "Visible: Privacy",
-    "Visible: A clearer view of AI.",
+    "Visible: AI Brief",
     "Readable after scrolling: A model score is a starting point",
     "Readable after scrolling: Close search",
     "Visible: AI Brief",
@@ -20,7 +21,8 @@
     "Dark mode not exercised: emulator OS refused night mode (Night mode: no)",
     "No AI Brief crash in logcat"
   ],
-  "source_sha": "9e1ddb9c8d4e86bc835a16e2e95aa0dfaa827282",
+  "source_sha": "0e7bedb94737f85cd059a95f572c26f64864c107",
+  "app_source_sha": "cab39cfa54ddf9e282506f4290f740c26511afca",
   "android_sdk": "29",
   "page_size": "4096",
   "dark_mode_verified": false

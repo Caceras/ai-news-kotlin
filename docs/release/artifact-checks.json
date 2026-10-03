@@ -1,0 +1,81 @@
+{
+  "source_sha": "cab39cfa54ddf9e282506f4290f740c26511afca",
+  "variants": {
+    "internalSharing": {
+      "bytes": 2294372,
+      "sha256": "2d9481c6210ed4684b76e144733926495e2e4b79f08ac775ee66d9f2072396ed",
+      "manifest": [
+        "package: name='com.caceras.aibrief' versionCode='114' versionName='2.2.1' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "sdkVersion:'26'",
+        "targetSdkVersion:'36'"
+      ],
+      "signature": [
+        "Signer #1 certificate DN: C=US, O=Android, CN=Android Debug",
+        "Signer #1 certificate SHA-256 digest: 933158492503e98b13f1664ab1edc7a5303ad9dad0ef5e99cb46915981329a46",
+        "Signer #1 certificate SHA-1 digest: d203c78858d2c5fa0660a1ecafcd0e085f4e6f26",
+        "Signer #1 certificate MD5 digest: 0bc8322e0321ebdc8c81074ada87e66c"
+      ],
+      "zipalign_16kb": true
+    },
+    "sideload": {
+      "bytes": 2311232,
+      "sha256": "2d4fca5bfb6d6571d4332e62c2d75b5bad51978eed0aab2251cddfafed765efe",
+      "manifest": [
+        "package: name='com.caceras.aibrief' versionCode='114' versionName='2.2.1' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+        "sdkVersion:'26'",
+        "targetSdkVersion:'36'"
+      ],
+      "signature": [
+        "Signer #1 certificate DN: CN=AI Brief Sideload, OU=Direct Install, O=AI Brief, L=Stockholm, C=SE",
+        "Signer #1 certificate SHA-256 digest: c00167a32b1d36729f80e505950f6cf90915b31a75d731a0539aa6dbbfed21ff",
+        "Signer #1 certificate SHA-1 digest: 8a8e30a978d9a8cf8d36970147e88e5fd1970b3d",
+        "Signer #1 certificate MD5 digest: 677fbeff0f7aadbb0ef5c6b57d65907c"
+      ],
+      "zipalign_16kb": true
+    }
+  },
+  "release_lint": {
+    "Error": 0,
+    "Warning": 17
+  },
+  "release_unit_tests": {
+    "count": 33,
+    "failures": 0
+  },
+  "sideload_lint": {
+    "Error": 0,
+    "Warning": 17
+  },
+  "sideload_unit_tests": {
+    "count": 33,
+    "failures": 0
+  },
+  "native_elf_load_alignment": {
+    "lib/arm64-v8a/libandroidx.graphics.path.so": [
+      16384,
+      16384,
+      16384
+    ],
+    "lib/armeabi-v7a/libandroidx.graphics.path.so": [
+      16384,
+      16384,
+      16384
+    ],
+    "lib/x86/libandroidx.graphics.path.so": [
+      16384,
+      16384,
+      16384
+    ],
+    "lib/x86_64/libandroidx.graphics.path.so": [
+      16384,
+      16384,
+      16384
+    ]
+  },
+  "bundled_posts": 6,
+  "bundled_font_license_files": [
+    "assets/licenses/dmsans-OFL.txt",
+    "assets/licenses/newsreader-OFL.txt"
+  ],
+  "internal_sharing_has_install_permission": false
+}
