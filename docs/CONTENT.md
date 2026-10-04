@@ -3,7 +3,7 @@
 The launch edition carries original writing published by AI Brief. External RSS
 feeds are disabled until their reuse permissions are checked.
 
-**Delivery status:** the new editor/workflow are prepared locally; GitHub repository writes are currently denied (HTTP 403). Deploy the Pages site and publish the workflow after write access is restored.
+**Delivery status (4 October 2026):** the [publishing workflow](https://github.com/Caceras/ai-news-kotlin/actions/workflows/publish-post.yml), nine-article edition and featured image files are live on GitHub. The mobile editor is committed under `docs/editor.html`; GitHub Pages activation is still denied with HTTP 403 because the connection lacks the required site-settings access. Use the workflow directly while Pages is unavailable.
 
 ## Publish without editing code
 

@@ -16,7 +16,7 @@ If an update is refused, tell Codex the exact message and build number before un
 
 ## Publish daily
 
-The editor and authenticated workflow are prepared locally. They become available after GitHub repository writes are restored and the Pages site is deployed. See the launch plan for delivery status.
+The authenticated [publishing workflow](https://github.com/Caceras/ai-news-kotlin/actions/workflows/publish-post.yml) and 4 October edition are live on GitHub. The editor is committed, but GitHub Pages activation is still denied with HTTP 403. Use the workflow directly until the owner enables Pages from main, /docs. See the launch plan for delivery status.
 
 Tell Codex **“Publish this AI Brief article”** with your writing and checked source links. Add the author/topic and a publication time if you want to schedule it. There is no required writing format and no app update.
 

@@ -2,6 +2,334 @@
   "version": 1,
   "posts": [
     {
+      "id": "2026-10-04-141708-before-an-ai-agent-acts-decide-what-it-may-do",
+      "title": "Before an AI agent acts, decide what it may do",
+      "summary": "Useful agents need clear limits. Check the tools, account permissions and approval steps before letting software act on your behalf.",
+      "author": "AI Brief editorial",
+      "category": "BUILDERS",
+      "publishedAt": "2026-10-04T14:17:08Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A useful AI assistant might find an overdue invoice, draft a reminder and prepare an email. An agent with broader access could also send the message, change the invoice or delete the original file. Those are different jobs, even if they begin with the same request: “Help me sort this out.”"
+        },
+        {
+          "type": "paragraph",
+          "text": "That is why choosing an agent involves more than comparing the quality of its answers. It also means deciding which actions the software is allowed to take, which accounts it can reach and when it must stop for a decision."
+        },
+        {
+          "type": "paragraph",
+          "text": "The OWASP Gen AI Security Project calls the risk of giving a model too much room to act “excessive agency.” Its guidance identifies three separate sources of trouble: too many functions, too many permissions and too much autonomy. Each deserves its own check."
+        },
+        {
+          "type": "heading",
+          "text": "Start with a small, useful job"
+        },
+        {
+          "type": "paragraph",
+          "text": "Imagine a studio that wants an agent to prepare a weekly spending summary. It needs to read a particular folder of receipts and produce a draft report. It does not need permission to alter bank details, pay suppliers or remove records."
+        },
+        {
+          "type": "paragraph",
+          "text": "A sensible first setup gives it access to that folder and a place to save drafts. The studio can then inspect what the agent actually does before adding another capability. This is an editorial example, rather than a claim about a particular commercial product."
+        },
+        {
+          "type": "paragraph",
+          "text": "For a reader comparing agent products, the practical question is specific: can the connection grant access to selected files and a limited set of actions? “Connect your account” tells you little about the scope of that connection."
+        },
+        {
+          "type": "heading",
+          "text": "Enforce the boundary where the action happens"
+        },
+        {
+          "type": "paragraph",
+          "text": "A sentence telling a model to be careful can guide its behaviour. The account or tool it uses must also enforce the boundary. An agent that only needs to read information should use a connection that cannot write or delete it."
+        },
+        {
+          "type": "paragraph",
+          "text": "OWASP recommends checking authorisation in the systems that perform the action, rather than leaving the model to decide whether its own request is permitted. This matters even when the agent sounds confident and has followed earlier instructions correctly."
+        },
+        {
+          "type": "paragraph",
+          "text": "It also matters when the agent reads material from outside your control. A webpage, email or document can contain instructions designed to redirect a model. OWASP describes this as indirect prompt injection. The agent may encounter the text while carrying out a legitimate task; the text should not acquire the authority of your original request."
+        },
+        {
+          "type": "heading",
+          "text": "Make consequential actions visible"
+        },
+        {
+          "type": "paragraph",
+          "text": "For an action such as sending an external message, approving a payment or deleting a file, a useful review screen should show the proposed action and its details. Seeing the recipient, message and attachment is more helpful than approving an unexplained “continue” button."
+        },
+        {
+          "type": "paragraph",
+          "text": "OWASP recommends human approval for high-impact actions. That does not require approving every harmless step. The point is to match the amount of autonomy to the consequences, while keeping the permission boundary in place."
+        },
+        {
+          "type": "paragraph",
+          "text": "Activity records and rate limits add another layer. They can help someone spot a problem and reduce how far it spreads, but OWASP distinguishes those measures from controls that prevent excessive agency in the first place."
+        },
+        {
+          "type": "heading",
+          "text": "A quick check before connecting an account"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Name the job you want the agent to complete and the files it actually needs.",
+            "Check whether reading, writing, sending and deleting are separate permissions.",
+            "Look for a clear preview before consequential actions, plus a way to revoke access.",
+            "Find out where completed actions are recorded and who can review them."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "An agent becomes easier to use when its capabilities are understandable. Begin with a bounded task, observe its behaviour and expand access deliberately. The quality of the answer matters; so does the amount of authority behind it."
+        },
+        {
+          "type": "paragraph",
+          "text": "Editorial note: AI-assisted explainer, checked against the linked primary sources on 4 October 2026. AI-generated editorial illustration of an agent and a key; a visual metaphor for permissions, not a real product or event."
+        },
+        {
+          "type": "heading",
+          "text": "Sources & further reading"
+        },
+        {
+          "type": "link",
+          "text": "OWASP: LLM06:2025 — Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+        },
+        {
+          "type": "link",
+          "text": "OWASP: LLM01:2025 — Prompt Injection",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+        }
+      ],
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-agent-permissions.webp"
+    },
+    {
+      "id": "2026-10-04-141707-when-ai-answers-from-your-files-follow-the-evidence",
+      "title": "When AI answers from your files, follow the evidence",
+      "summary": "Document-connected AI can shorten the route to an answer. Its usefulness still depends on the passage, date, context and access behind each citation.",
+      "author": "AI Brief editorial",
+      "category": "RESEARCH",
+      "publishedAt": "2026-10-04T14:17:07Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "An employee asks a workplace assistant, “How much notice do I need to give before taking leave?” The answer arrives in seconds, with a link to the company handbook. It looks reassuring. But the link opens last year's handbook, and the relevant paragraph applies only to one office."
+        },
+        {
+          "type": "paragraph",
+          "text": "This example illustrates an important limit of AI connected to documents. Finding a source is useful. Finding the right source, using the relevant passage and explaining its scope are separate pieces of work."
+        },
+        {
+          "type": "paragraph",
+          "text": "Retrieval-augmented generation, usually shortened to RAG, connects a language model to material it can retrieve while answering a question. It is commonly used for assistants that search company files, product manuals or other collections. It can make an answer more relevant and easier to inspect, provided the underlying retrieval works well."
+        },
+        {
+          "type": "heading",
+          "text": "What happens between the question and the answer"
+        },
+        {
+          "type": "paragraph",
+          "text": "In a typical RAG workflow, a search system finds passages related to the question. The application supplies selected passages to the model, which uses that context to compose a response. This is different from retraining the model whenever a document changes."
+        },
+        {
+          "type": "paragraph",
+          "text": "Google's grounding documentation describes grounding as connecting model output to verifiable sources. It says this can reduce invented content and provide links that support an audit of the response. That is a useful benefit, but it leaves the reader with a job: inspect the evidence behind the answer."
+        },
+        {
+          "type": "paragraph",
+          "text": "Microsoft's RAG overview sets out several practical challenges. Questions may use different words from the documents. Relevant information may live across several systems. Models accept limited amounts of input, so retrieval has to select concise, useful material. Private files also require access controls."
+        },
+        {
+          "type": "heading",
+          "text": "Check the passage, date and scope"
+        },
+        {
+          "type": "paragraph",
+          "text": "For the leave-policy question, a strong response would point to the current policy and the passage that applies to the employee's location. A document title alone would not establish either fact."
+        },
+        {
+          "type": "paragraph",
+          "text": "When an answer matters, open its citation and check three things. First, does the passage actually support the claim? Second, is the document current? Third, do the conditions in the document match the situation in the question?"
+        },
+        {
+          "type": "paragraph",
+          "text": "A source can be real while the answer still overstates what it says. A passage might describe a default rule and then list exceptions. A fluent response can lose those exceptions during summarisation. These are reasons to check the cited text, rather than treating the presence of a link as the end of verification."
+        },
+        {
+          "type": "heading",
+          "text": "Freshness and access are part of answer quality"
+        },
+        {
+          "type": "paragraph",
+          "text": "A connected assistant depends on the material it can retrieve. For systems built around an index, someone needs to maintain that index as documents are added, changed or retired. Some retrieval designs query remote sources directly; the question to ask remains the same: how does this system obtain the current version?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Access should be just as explicit. Microsoft notes that users and agents must retrieve only content they are authorised to see. A search layer should respect the requesting user's permissions. A polished answer is not a reason to expose a confidential file to someone who could not otherwise open it."
+        },
+        {
+          "type": "paragraph",
+          "text": "Retrieved material can also contain malicious instructions. OWASP warns that RAG does not fully resolve prompt-injection vulnerabilities. A document should supply evidence for the answer, without being allowed to redefine the assistant's task or its permissions."
+        },
+        {
+          "type": "heading",
+          "text": "Put a document assistant through useful trials"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Ask a question with a clear answer in a current document and inspect the cited passage.",
+            "Ask about an exception, an outdated policy and a topic the collection does not cover.",
+            "Use an account without access to a restricted file and check that the file stays restricted.",
+            "Look for a clear acknowledgement when the available evidence is insufficient."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "These are suggested evaluation tasks, not results from a test of a particular product. They help reveal whether the assistant can handle uncertainty as well as an easy question. A good document answer gives you a shorter route to the relevant evidence and makes that evidence easy to check."
+        },
+        {
+          "type": "paragraph",
+          "text": "Editorial note: AI-assisted explainer, checked against the linked primary sources on 4 October 2026. AI-generated editorial illustration of books and indexed documents; a conceptual scene, not a photographed office."
+        },
+        {
+          "type": "heading",
+          "text": "Sources & further reading"
+        },
+        {
+          "type": "link",
+          "text": "Google Cloud: Grounding overview",
+          "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/overview"
+        },
+        {
+          "type": "link",
+          "text": "Microsoft Learn: Retrieval-augmented generation in Azure AI Search",
+          "url": "https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview"
+        },
+        {
+          "type": "link",
+          "text": "OWASP: Prompt Injection — RAG limitations",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+        }
+      ],
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-grounded-answers.webp"
+    },
+    {
+      "id": "2026-10-04-141706-what-an-image-s-content-credentials-can-tell-you",
+      "title": "What an image's Content Credentials can tell you",
+      "summary": "A signed image history can show useful information about creation and edits. Learn what it establishes, what it leaves open and how to check the claim beside it.",
+      "author": "AI Brief editorial",
+      "category": "POLICY",
+      "publishedAt": "2026-10-04T14:17:06Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A striking picture appears in a feed. The caption says it shows a real event. A small indicator offers information about how the image was made. Before sharing it, it helps to know what that information can establish."
+        },
+        {
+          "type": "paragraph",
+          "text": "Content Credentials are designed to record provenance: information about the history of a digital asset. They can give a reader useful evidence about creation and editing. The claim in a social-media caption still needs its own check."
+        },
+        {
+          "type": "paragraph",
+          "text": "The Coalition for Content Provenance and Authenticity, or C2PA, develops an open standard for these credentials. Its documentation describes a cryptographically signed record associated with an image, video, audio recording or document. The record can contain statements about tools, edits and the use of AI."
+        },
+        {
+          "type": "heading",
+          "text": "A credential records a history"
+        },
+        {
+          "type": "paragraph",
+          "text": "Consider a photograph that passes through a camera, an editing application and a publisher. Tools that support the standard can add information about their part in that process. A credential-aware viewer can inspect the available record and check its cryptographic validity."
+        },
+        {
+          "type": "paragraph",
+          "text": "What the reader learns depends on what was recorded, what remains available and which signers the viewer trusts. A record should therefore be read in detail. An indicator on its own cannot explain every step an image has taken."
+        },
+        {
+          "type": "paragraph",
+          "text": "C2PA's explainer makes the central limit explicit: Content Credentials do not judge whether the provenance information is true. They help establish whether it is well formed, associated with the asset, free from tampering and signed within a recognised trust model."
+        },
+        {
+          "type": "paragraph",
+          "text": "That distinction matters for a news image. A correctly signed photograph can still be posted with an inaccurate caption, or used to illustrate the wrong date or place. Checking the record and checking the story are related tasks, each with its own evidence."
+        },
+        {
+          "type": "heading",
+          "text": "Missing credentials leave a question open"
+        },
+        {
+          "type": "paragraph",
+          "text": "A file may have no credentials because the tools used to create it did not add them. Metadata may also be lost or removed as a file moves between applications and publishing platforms."
+        },
+        {
+          "type": "paragraph",
+          "text": "The absence of a record therefore does not establish that an image is fake or AI-generated. It means the available file does not provide that particular evidence."
+        },
+        {
+          "type": "paragraph",
+          "text": "C2PA describes ways to help recover an associated credential after metadata is stripped, including fingerprints and invisible watermarks. Those recovery methods depend on the implementation. A reader should not assume that every copied or edited image will retain a recoverable history."
+        },
+        {
+          "type": "heading",
+          "text": "Watermarks answer a different question"
+        },
+        {
+          "type": "paragraph",
+          "text": "An invisible watermark can help a detection system identify content produced by a participating generator. In its original 2023 explanation of SynthID, Google DeepMind described embedding a watermark in the pixels of images created by Imagen and checking for that watermark later."
+        },
+        {
+          "type": "paragraph",
+          "text": "That is a specific technical approach, with a defined scope. The same explanation acknowledged limits under extreme image manipulation. It should not be read as a promise that a watermark detector can identify every AI image, or that failure to detect a mark proves an image came from a camera."
+        },
+        {
+          "type": "heading",
+          "text": "Read the record, then check the claim"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Inspect what the available credential says about creation, edits and AI use.",
+            "Pay attention to validation results, missing information and the signer's trust status.",
+            "Compare the post with the original publisher's caption, date and context.",
+            "When the claim matters, seek additional evidence before sharing it."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Credentials can make media easier to investigate. Their value comes from the information they expose and the checks they enable. A transparent image history is useful evidence; deciding whether a story is accurate still requires looking beyond the picture."
+        },
+        {
+          "type": "paragraph",
+          "text": "Editorial note: AI-assisted explainer, checked against the linked primary sources on 4 October 2026. AI-generated editorial illustration of a camera and photographic prints; the prints are generated artwork, not documentary photographs."
+        },
+        {
+          "type": "heading",
+          "text": "Sources & further reading"
+        },
+        {
+          "type": "link",
+          "text": "C2PA: Content Credentials explainer, version 2.2",
+          "url": "https://spec.c2pa.org/specifications/specifications/2.2/explainer/Explainer.html"
+        },
+        {
+          "type": "link",
+          "text": "C2PA: Frequently asked questions",
+          "url": "https://c2pa.org/faqs/"
+        },
+        {
+          "type": "link",
+          "text": "Google DeepMind: Original SynthID image-watermarking explanation (2023)",
+          "url": "https://deepmind.google/blog/identifying-ai-generated-images-with-synthid/"
+        }
+      ],
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-image-provenance.webp"
+    },
+    {
       "id": "2026-10-03-trust-ai",
       "title": "AI is useful. Knowing when to trust it is the real skill.",
       "summary": "A practical way to decide where a model helps, where it needs checking, and where a person should keep the final say.",

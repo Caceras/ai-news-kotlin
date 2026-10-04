@@ -2,6 +2,10 @@
 
 Three original explainers, with a distinct featured illustration for each:
 
+**Published:** the 4 October edition contains these three features and all six
+existing posts. The three public image URLs were downloaded and matched to the
+local image bytes before activating the edition. Refresh AI Brief to read it.
+
 | Article | Topic | Reading time |
 | --- | --- | --- |
 | Before an AI agent acts, decide what it may do | Builders | About 4 minutes |
@@ -44,8 +48,9 @@ workflow once for each file in `drafts/`. Choose one publication method. The
 draft timestamps and IDs are consistent with the prepared edition, so an exact
 repeat submission is rejected by the workflow's duplicate guard.
 
-The active `content/posts.json` is kept intact until public image hosting is
-verified. The presence of these files alone does not mean the edition is live.
+The media was published and verified before updating `content/posts.json`.
+The main edition now contains nine sourced articles. The workflow draft IDs
+match the published IDs; exact repeat submissions are rejected.
 
 ## Artwork
 

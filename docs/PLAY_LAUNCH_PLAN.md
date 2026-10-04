@@ -6,7 +6,7 @@ The immediate goal is to complete Google's inactivity actions before the account
 
 ## Delivery status
 
-The redesigned source is prepared and committed locally. GitHub currently rejects repository writes with HTTP 403 (`Resource not accessible by integration`), so the new release and publishing workflows are **not yet published** there. The refined version 2.2.1 / 114 internal-sharing APK is available in Drive. It uses the compact editorial layout, bundled Newsreader/DM Sans fonts and photographic topic artwork. The contact/privacy pages and daily editor are prepared locally; the GitHub Pages URLs below must be deployed and verified before production. Reconnecting GitHub with repository write access will let Codex finish that publication. No Play Console upload or account-warning clearance is claimed.
+As of 4 October 2026, the redesigned source and publishing workflows are published on GitHub, with a nine-article edition and verified public featured images for the three new features. The refined version 2.2.1 / 114 internal-sharing APK is available in Drive. It uses the compact editorial layout, bundled Newsreader/DM Sans fonts and photographic topic artwork. The contact/privacy pages and daily editor are committed under docs, but GitHub Pages activation still returns HTTP 403 (`Resource not accessible by integration`); the connection lacks site-settings access. The owner must enable Pages from main, /docs, and the public URLs must be verified before production. No Play Console upload or account-warning clearance is claimed.
 
 ## 1. Do these account actions today
 

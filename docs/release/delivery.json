@@ -10,7 +10,7 @@
   "url": "https://drive.google.com/file/d/1hxK1ojphsmx3oTsHuyB97-J_KtF_Tkbt/view?usp=drivesdk",
   "verification": "Both Drive APKs re-downloaded; SHA-256 matches local APKs",
   "play_upload_status": "not uploaded",
-  "github_status": "write denied HTTP 403; commits local only",
+  "github_status": "Exact validated source history and publishing workflow published through GitHub Git Data API on 2026-10-04",
   "phone_test": {
     "drive_file_id": "13fyPtv6XPSJdiF5wdOuPhIZgYExjO4D4",
     "url": "https://drive.google.com/file/d/13fyPtv6XPSJdiF5wdOuPhIZgYExjO4D4/view?usp=drivesdk",
@@ -20,5 +20,6 @@
   },
   "native_verification": "exact-candidate checks passed on Android 10/API 29, including 200 percent text scale",
   "native_check_script_sha": "0e7bedb94737f85cd059a95f572c26f64864c107",
-  "launch_plan_url": "https://drive.google.com/file/d/1xgE-QzSpQc7ALwoMAT2TwkdZPSWg-51Q/view?usp=drivesdk"
+  "launch_plan_url": "https://drive.google.com/file/d/1xgE-QzSpQc7ALwoMAT2TwkdZPSWg-51Q/view?usp=drivesdk",
+  "pages_status": "Activation denied HTTP 403; owner site-settings access required"
 }
