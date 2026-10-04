@@ -1,5 +1,13 @@
 # Before an AI agent acts, decide what it may do
 
+Useful agents need clear limits. Check the tools, account permissions and approval steps before letting software act on your behalf.
+
+**AI Brief editorial · 4 October 2026 · About 4 minutes**
+
+![A robotic gripper pauses above a brass key on an oak desk beside a green notebook.](../../../media/2026-10-04-agent-permissions.webp)
+
+*AI-generated editorial illustration of an agent and a key; a visual metaphor for permissions, not a real product or event.*
+
 A useful AI assistant might find an overdue invoice, draft a reminder and prepare an email. An agent with broader access could also send the message, change the invoice or delete the original file. Those are different jobs, even if they begin with the same request: “Help me sort this out.”
 
 That is why choosing an agent involves more than comparing the quality of its answers. It also means deciding which actions the software is allowed to take, which accounts it can reach and when it must stop for a decision.
@@ -38,3 +46,10 @@ Activity records and rate limits add another layer. They can help someone spot a
 - Find out where completed actions are recorded and who can review them.
 
 An agent becomes easier to use when its capabilities are understandable. Begin with a bounded task, observe its behaviour and expand access deliberately. The quality of the answer matters; so does the amount of authority behind it.
+
+## Sources & further reading
+
+- [OWASP: LLM06:2025 — Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
+- [OWASP: LLM01:2025 — Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
+
+*AI-assisted explainer. Claims checked against the linked primary sources on 4 October 2026.*

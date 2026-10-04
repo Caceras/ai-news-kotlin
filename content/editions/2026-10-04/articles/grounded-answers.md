@@ -1,5 +1,13 @@
 # When AI answers from your files, follow the evidence
 
+Document-connected AI can shorten the route to an answer. Its usefulness still depends on the passage, date, context and access behind each citation.
+
+**AI Brief editorial · 4 October 2026 · About 4 minutes**
+
+![An open book, indexed ivory folders, papers and a magnifying glass on a library table beside a laptop.](../../../media/2026-10-04-grounded-answers.webp)
+
+*AI-generated editorial illustration of books and indexed documents; a conceptual scene, not a photographed office.*
+
 An employee asks a workplace assistant, “How much notice do I need to give before taking leave?” The answer arrives in seconds, with a link to the company handbook. It looks reassuring. But the link opens last year's handbook, and the relevant paragraph applies only to one office.
 
 This example illustrates an important limit of AI connected to documents. Finding a source is useful. Finding the right source, using the relevant passage and explaining its scope are separate pieces of work.
@@ -38,3 +46,11 @@ Retrieved material can also contain malicious instructions. OWASP warns that RAG
 - Look for a clear acknowledgement when the available evidence is insufficient.
 
 These are suggested evaluation tasks, not results from a test of a particular product. They help reveal whether the assistant can handle uncertainty as well as an easy question. A good document answer gives you a shorter route to the relevant evidence and makes that evidence easy to check.
+
+## Sources & further reading
+
+- [Google Cloud: Grounding overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/overview)
+- [Microsoft Learn: Retrieval-augmented generation in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)
+- [OWASP: Prompt Injection — RAG limitations](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
+
+*AI-assisted explainer. Claims checked against the linked primary sources on 4 October 2026.*

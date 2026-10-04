@@ -1,5 +1,13 @@
 # What an image's Content Credentials can tell you
 
+A signed image history can show useful information about creation and edits. Learn what it establishes, what it leaves open and how to check the claim beside it.
+
+**AI Brief editorial · 4 October 2026 · About 4 minutes**
+
+![An unbranded black camera, forest photographic prints and a brass loupe on an oak table.](../../../media/2026-10-04-image-provenance.webp)
+
+*AI-generated editorial illustration of a camera and photographic prints; the prints are generated artwork, not documentary photographs.*
+
 A striking picture appears in a feed. The caption says it shows a real event. A small indicator offers information about how the image was made. Before sharing it, it helps to know what that information can establish.
 
 Content Credentials are designed to record provenance: information about the history of a digital asset. They can give a reader useful evidence about creation and editing. The claim in a social-media caption still needs its own check.
@@ -38,3 +46,11 @@ That is a specific technical approach, with a defined scope. The same explanatio
 - When the claim matters, seek additional evidence before sharing it.
 
 Credentials can make media easier to investigate. Their value comes from the information they expose and the checks they enable. A transparent image history is useful evidence; deciding whether a story is accurate still requires looking beyond the picture.
+
+## Sources & further reading
+
+- [C2PA: Content Credentials explainer, version 2.2](https://spec.c2pa.org/specifications/specifications/2.2/explainer/Explainer.html)
+- [C2PA: Frequently asked questions](https://c2pa.org/faqs/)
+- [Google DeepMind: Original SynthID image-watermarking explanation (2023)](https://deepmind.google/blog/identifying-ai-generated-images-with-synthid/)
+
+*AI-assisted explainer. Claims checked against the linked primary sources on 4 October 2026.*
