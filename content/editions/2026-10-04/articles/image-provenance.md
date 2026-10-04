@@ -1,0 +1,40 @@
+# What an image's Content Credentials can tell you
+
+A striking picture appears in a feed. The caption says it shows a real event. A small indicator offers information about how the image was made. Before sharing it, it helps to know what that information can establish.
+
+Content Credentials are designed to record provenance: information about the history of a digital asset. They can give a reader useful evidence about creation and editing. The claim in a social-media caption still needs its own check.
+
+The Coalition for Content Provenance and Authenticity, or C2PA, develops an open standard for these credentials. Its documentation describes a cryptographically signed record associated with an image, video, audio recording or document. The record can contain statements about tools, edits and the use of AI.
+
+## A credential records a history
+
+Consider a photograph that passes through a camera, an editing application and a publisher. Tools that support the standard can add information about their part in that process. A credential-aware viewer can inspect the available record and check its cryptographic validity.
+
+What the reader learns depends on what was recorded, what remains available and which signers the viewer trusts. A record should therefore be read in detail. An indicator on its own cannot explain every step an image has taken.
+
+C2PA's explainer makes the central limit explicit: Content Credentials do not judge whether the provenance information is true. They help establish whether it is well formed, associated with the asset, free from tampering and signed within a recognised trust model.
+
+That distinction matters for a news image. A correctly signed photograph can still be posted with an inaccurate caption, or used to illustrate the wrong date or place. Checking the record and checking the story are related tasks, each with its own evidence.
+
+## Missing credentials leave a question open
+
+A file may have no credentials because the tools used to create it did not add them. Metadata may also be lost or removed as a file moves between applications and publishing platforms.
+
+The absence of a record therefore does not establish that an image is fake or AI-generated. It means the available file does not provide that particular evidence.
+
+C2PA describes ways to help recover an associated credential after metadata is stripped, including fingerprints and invisible watermarks. Those recovery methods depend on the implementation. A reader should not assume that every copied or edited image will retain a recoverable history.
+
+## Watermarks answer a different question
+
+An invisible watermark can help a detection system identify content produced by a participating generator. In its original 2023 explanation of SynthID, Google DeepMind described embedding a watermark in the pixels of images created by Imagen and checking for that watermark later.
+
+That is a specific technical approach, with a defined scope. The same explanation acknowledged limits under extreme image manipulation. It should not be read as a promise that a watermark detector can identify every AI image, or that failure to detect a mark proves an image came from a camera.
+
+## Read the record, then check the claim
+
+- Inspect what the available credential says about creation, edits and AI use.
+- Pay attention to validation results, missing information and the signer's trust status.
+- Compare the post with the original publisher's caption, date and context.
+- When the claim matters, seek additional evidence before sharing it.
+
+Credentials can make media easier to investigate. Their value comes from the information they expose and the checks they enable. A transparent image history is useful evidence; deciding whether a story is accurate still requires looking beyond the picture.

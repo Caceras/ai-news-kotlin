@@ -1,0 +1,122 @@
+{
+  "edition": "2026-10-04",
+  "publication": "AI Brief",
+  "author": "AI Brief editorial",
+  "contentType": "Original educational explainers",
+  "assistance": "AI-assisted writing, checked against the linked primary sources on 2026-10-04. No claim of independent reporting or human editorial review.",
+  "articles": [
+    {
+      "slug": "agent-permissions",
+      "title": "Before an AI agent acts, decide what it may do",
+      "summary": "Useful agents need clear limits. Check the tools, account permissions and approval steps before letting software act on your behalf.",
+      "category": "BUILDERS",
+      "image": "2026-10-04-agent-permissions.webp",
+      "imageAlt": "A robotic gripper pauses above a brass key on an oak desk beside a green notebook.",
+      "imageCaption": "AI-generated editorial illustration of an agent and a key; a visual metaphor for permissions, not a real product or event.",
+      "sources": [
+        {
+          "id": "agent-owasp",
+          "text": "OWASP: LLM06:2025 — Excessive Agency"
+        },
+        {
+          "id": "injection-owasp",
+          "text": "OWASP: LLM01:2025 — Prompt Injection"
+        }
+      ],
+      "claimsChecked": [
+        {
+          "sourceId": "agent-owasp",
+          "claim": "Excessive agency can arise from excessive functionality, permissions or autonomy; least privilege, downstream authorisation and human approval are recommended controls."
+        },
+        {
+          "sourceId": "agent-owasp",
+          "claim": "Logging and rate limits can reduce damage but do not prevent excessive agency on their own."
+        },
+        {
+          "sourceId": "injection-owasp",
+          "claim": "Instructions in external files or websites can cause indirect prompt injection."
+        }
+      ],
+      "wordCount": 649,
+      "publishedAt": "2026-10-04T14:17:08Z"
+    },
+    {
+      "slug": "grounded-answers",
+      "title": "When AI answers from your files, follow the evidence",
+      "summary": "Document-connected AI can shorten the route to an answer. Its usefulness still depends on the passage, date, context and access behind each citation.",
+      "category": "RESEARCH",
+      "image": "2026-10-04-grounded-answers.webp",
+      "imageAlt": "An open book, indexed ivory folders, papers and a magnifying glass on a library table beside a laptop.",
+      "imageCaption": "AI-generated editorial illustration of books and indexed documents; a conceptual scene, not a photographed office.",
+      "sources": [
+        {
+          "id": "rag-google",
+          "text": "Google Cloud: Grounding overview"
+        },
+        {
+          "id": "rag-microsoft",
+          "text": "Microsoft Learn: Retrieval-augmented generation in Azure AI Search"
+        },
+        {
+          "id": "injection-owasp",
+          "text": "OWASP: Prompt Injection — RAG limitations"
+        }
+      ],
+      "claimsChecked": [
+        {
+          "sourceId": "rag-google",
+          "claim": "Grounding connects model output to verifiable sources, reduces hallucinations and supports auditability with links."
+        },
+        {
+          "sourceId": "rag-microsoft",
+          "claim": "RAG faces query understanding, multi-source access, token constraints, freshness and granular access-control challenges; some designs query remote sources."
+        },
+        {
+          "sourceId": "injection-owasp",
+          "claim": "RAG does not fully mitigate prompt injection vulnerabilities."
+        }
+      ],
+      "wordCount": 688,
+      "publishedAt": "2026-10-04T14:17:07Z"
+    },
+    {
+      "slug": "image-provenance",
+      "title": "What an image's Content Credentials can tell you",
+      "summary": "A signed image history can show useful information about creation and edits. Learn what it establishes, what it leaves open and how to check the claim beside it.",
+      "category": "POLICY",
+      "image": "2026-10-04-image-provenance.webp",
+      "imageAlt": "An unbranded black camera, forest photographic prints and a brass loupe on an oak table.",
+      "imageCaption": "AI-generated editorial illustration of a camera and photographic prints; the prints are generated artwork, not documentary photographs.",
+      "sources": [
+        {
+          "id": "provenance-explainer",
+          "text": "C2PA: Content Credentials explainer, version 2.2"
+        },
+        {
+          "id": "provenance-c2pa",
+          "text": "C2PA: Frequently asked questions"
+        },
+        {
+          "id": "watermark-synthid-blog",
+          "text": "Google DeepMind: Original SynthID image-watermarking explanation (2023)"
+        }
+      ],
+      "claimsChecked": [
+        {
+          "sourceId": "provenance-explainer",
+          "claim": "Content Credentials record signed provenance assertions; their validation does not judge whether the provenance information is true."
+        },
+        {
+          "sourceId": "provenance-c2pa",
+          "claim": "Metadata can be stripped; soft bindings such as fingerprinting and invisible watermarking can help rediscover associated credentials."
+        },
+        {
+          "sourceId": "watermark-synthid-blog",
+          "claim": "The original 2023 SynthID image system embedded a watermark in Imagen images; Google acknowledged limits under extreme manipulation."
+        }
+      ],
+      "wordCount": 614,
+      "publishedAt": "2026-10-04T14:17:06Z"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+[
+  {
+    "id": "agent-owasp",
+    "requested_url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+    "final_url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+    "http_status": 200,
+    "checked_at": "2026-10-04T14:10:58.129841+00:00",
+    "text_sha256": "546c6c6186fa6c2ec8919df85b7da241a36fd192f66b7f5f432190943b44ff9b"
+  },
+  {
+    "id": "injection-owasp",
+    "requested_url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+    "final_url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+    "http_status": 200,
+    "checked_at": "2026-10-04T14:10:57.945380+00:00",
+    "text_sha256": "394d5ea95ee54a65dfae3963f295c72a8ac1d8bfb0cc83cdbe0d598f4ad021c5"
+  },
+  {
+    "id": "rag-google",
+    "requested_url": "https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview",
+    "final_url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/grounding/overview",
+    "http_status": 200,
+    "checked_at": "2026-10-04T14:10:59.039033+00:00",
+    "text_sha256": "51b43c3907b85267c54f2c877c57b9310efdc1adb0afd3c4fc1971e1a623f051"
+  },
+  {
+    "id": "rag-microsoft",
+    "requested_url": "https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview",
+    "final_url": "https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview",
+    "http_status": 200,
+    "checked_at": "2026-10-04T14:10:57.826535+00:00",
+    "text_sha256": "bc8e3733b8af4fe3ac0d86f6bc1fe01bf1ca7cb311bea06660e9097eb5455eda"
+  },
+  {
+    "id": "provenance-c2pa",
+    "requested_url": "https://c2pa.org/faqs/",
+    "final_url": "https://c2pa.org/faqs/",
+    "http_status": 200,
+    "checked_at": "2026-10-04T14:10:58.232910+00:00",
+    "text_sha256": "74fce5832a5e44aa618a05bb1e3a8418b5f5602b099e8eaafb062319c74b54a4"
+  },
+  {
+    "id": "provenance-explainer",
+    "requested_url": "https://c2pa.org/specifications/specifications/2.2/explainer/Explainer.html",
+    "final_url": "https://spec.c2pa.org/specifications/specifications/2.2/explainer/Explainer.html",
+    "http_status": 200,
+    "checked_at": "2026-10-04T14:10:58.861803+00:00",
+    "text_sha256": "58e0fc70978bf715e034dd47ad7eb984ffdac31d71ad49caf6ffa4367f164a79"
+  },
+  {
+    "id": "watermark-synthid-blog",
+    "requested_url": "https://deepmind.google/blog/identifying-ai-generated-images-with-synthid/",
+    "final_url": "https://deepmind.google/blog/identifying-ai-generated-images-with-synthid/",
+    "http_status": 200,
+    "title": "Identifying AI-generated images with SynthID — Google DeepMind",
+    "checked_at": "2026-10-04T14:13:25.483764+00:00",
+    "text_sha256": "9f9382a4010f22801d700a24642e6a4d4d7c82480d50b784afb409021d44a76d"
+  }
+]
