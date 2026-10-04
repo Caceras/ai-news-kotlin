@@ -1,0 +1,32 @@
+{
+  "feed_url": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/posts.json",
+  "http_status": 200,
+  "bytes": 36518,
+  "sha256": "c9153ad1f9506629fa517960f3100df7cae839f0c1330349a16a765d9f102aef",
+  "post_count": 9,
+  "new_articles": [
+    {
+      "id": "2026-10-04-141708-before-an-ai-agent-acts-decide-what-it-may-do",
+      "title": "Before an AI agent acts, decide what it may do",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-agent-permissions.webp",
+      "publishedAt": "2026-10-04T14:17:08Z"
+    },
+    {
+      "id": "2026-10-04-141707-when-ai-answers-from-your-files-follow-the-evidence",
+      "title": "When AI answers from your files, follow the evidence",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-grounded-answers.webp",
+      "publishedAt": "2026-10-04T14:17:07Z"
+    },
+    {
+      "id": "2026-10-04-141706-what-an-image-s-content-credentials-can-tell-you",
+      "title": "What an image's Content Credentials can tell you",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-image-provenance.webp",
+      "publishedAt": "2026-10-04T14:17:06Z"
+    }
+  ],
+  "checked_at": "2026-10-04T14:48:54.791125+00:00",
+  "github_main": "da4f7034b033e27339668c67f64a7275a2f56c5f",
+  "content_ci_url": "https://github.com/Caceras/ai-news-kotlin/actions/runs/37210588646",
+  "content_ci_conclusion": "success",
+  "images_checked_file": "image-hosting-checks.json"
+}

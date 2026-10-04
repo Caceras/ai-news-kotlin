@@ -1,0 +1,41 @@
+{
+  "edition": "2026-10-04",
+  "articles": 3,
+  "total_active_articles": 9,
+  "pdf_pages": 6,
+  "files": [
+    {
+      "name": "AI-Brief-articles-2026-10-04.zip",
+      "bytes": 8358415,
+      "sha256": "62172c34f98e76aee11fb6f5682296831965c083909f67eac5a9adcde5319307"
+    },
+    {
+      "name": "AI-Brief-articles-2026-10-04.pdf",
+      "bytes": 1415478,
+      "sha256": "41d8c2bc2ed857e82f968c0129214f6443e13a4f36ccb8a8d595d6366d2f1b24"
+    }
+  ],
+  "drive_files": [
+    {
+      "name": "AI-Brief-articles-2026-10-04.pdf",
+      "id": "1rY3QVAZMtElc64EtjLavZ86PmYZciNKF",
+      "url": "https://drive.google.com/file/d/1rY3QVAZMtElc64EtjLavZ86PmYZciNKF/view?usp=drivesdk",
+      "downloaded_bytes_match": true
+    },
+    {
+      "name": "AI-Brief-articles-2026-10-04.zip",
+      "id": "1xVHlowKBvceTgAAyXrkr9k0kfsq4lzcu",
+      "url": "https://drive.google.com/file/d/1xVHlowKBvceTgAAyXrkr9k0kfsq4lzcu/view?usp=drivesdk",
+      "downloaded_bytes_match": true
+    }
+  ],
+  "archive_files_verified": true,
+  "public_feed_check": "live-edition-check.json",
+  "public_images_check": "image-hosting-checks.json",
+  "content_ci_url": "https://github.com/Caceras/ai-news-kotlin/actions/runs/37210588646",
+  "content_ci_conclusion": "success",
+  "source_android_ci_url": "https://github.com/Caceras/ai-news-kotlin/actions/runs/37210312269",
+  "source_android_ci_conclusion": "success",
+  "pages_status": "Activation denied HTTP 403; hosted editor not deployed",
+  "play_status": "No Play Console submission or account-warning clearance claimed"
+}
