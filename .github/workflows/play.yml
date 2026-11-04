@@ -63,6 +63,7 @@ jobs:
           python3 scripts/publish-post.py --validate
           scripts/ci-gradle.sh testReleaseUnitTest lintRelease bundleRelease -PbuildNumber=0 -Paibrief.versionCodeBase="$PLAY_VERSION_CODE"
           jarsigner -verify app/build/outputs/bundle/release/app-release.aab
+          python3 scripts/check-play-artifact.py app/build/outputs/bundle/release/app-release.aab
           sha256sum app/build/outputs/bundle/release/app-release.aab > app/build/outputs/bundle/release/SHA256SUMS.txt
       - name: Upload private Play bundle artifact
         uses: actions/upload-artifact@v4

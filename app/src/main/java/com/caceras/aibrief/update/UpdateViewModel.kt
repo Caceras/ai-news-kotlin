@@ -39,7 +39,10 @@ sealed interface UpdateState {
  *
  * On builds distributed through Google Play the whole feature is compiled out
  * by [BuildConfig.SELF_UPDATE_ENABLED], and this view model stays [UpdateState.Idle]
- * for the life of the process.
+ * for the life of the process. Every public entry point checks the flag, not
+ * only [checkForUpdate]: the flag is a compile-time constant, so R8 can then
+ * prove [UpdateInstaller] unreachable and drop the APK-install code from the
+ * Play artifact entirely rather than merely never calling it.
  */
 class UpdateViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -68,6 +71,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
 
     /** Downloads [manifest] and opens the system installer once it lands. */
     fun downloadAndInstall(manifest: UpdateManifest) {
+        if (!BuildConfig.SELF_UPDATE_ENABLED) return
         if (_state.value is UpdateState.Downloading) return
 
         _state.value = UpdateState.Downloading(progress = 0f)
@@ -86,6 +90,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
      * so returning from settings finishes the update without a fresh download.
      */
     fun retryInstall(apk: File) {
+        if (!BuildConfig.SELF_UPDATE_ENABLED) return
         if (!apk.exists()) {
             _state.value = UpdateState.Idle
             return
@@ -97,6 +102,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
 
     /** Sends the person to the settings screen that allows installing this update. */
     fun requestInstallPermission() {
+        if (!BuildConfig.SELF_UPDATE_ENABLED) return
         UpdateInstaller.openInstallPermissionSettings(getApplication<Application>())
     }
 
