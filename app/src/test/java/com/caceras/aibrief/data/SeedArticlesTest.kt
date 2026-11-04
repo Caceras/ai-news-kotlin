@@ -20,6 +20,16 @@ class SeedArticlesTest {
     }
 
     @Test
+    fun offlineEditionLinksAvoidRetiredDomains() {
+        // aisi.gov stopped resolving when the institute moved under NIST; a
+        // source button that opens a dead site is a broken feature for reviewers.
+        val retired = listOf("aisi.gov")
+        SeedArticles.create().forEach { article ->
+            assertTrue(article.url, retired.none { article.url.contains(it) })
+        }
+    }
+
+    @Test
     fun readingTimeCalculationHandlesVariousLengths() {
         val shortArticle = NewsArticle(
             id = "test-1",
