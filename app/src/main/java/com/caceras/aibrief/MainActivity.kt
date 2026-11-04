@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -85,8 +86,8 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 
 private const val SUPPORT_EMAIL = "rikicaceras@gmail.com"
-private const val PRIVACY_URL = "https://caceras.github.io/ai-news-kotlin/privacy.html"
-private const val CONTACT_URL = "https://caceras.github.io/ai-news-kotlin/contact.html"
+private const val PRIVACY_URL = "https://github.com/Caceras/ai-news-kotlin/blob/main/PRIVACY.md"
+private const val CONTACT_URL = "https://github.com/Caceras/ai-news-kotlin/blob/main/CONTACT.md"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -130,13 +131,19 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         query = ""
         if (tab == NavTab.HOME && currentTab == NavTab.HOME) {
             scope.launch { homeListState.animateScrollToItem(0) }
-            viewModel.refresh()
+            viewModel.refresh(userRequested = true)
             updateViewModel.checkForUpdate()
         }
         currentTab = tab
         scope.launch { pagerState.animateScrollToPage(tab.ordinal) }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.notices.collect { message ->
+            snackbar.currentSnackbarData?.dismiss()
+            snackbar.showSnackbar(message, duration = SnackbarDuration.Short)
+        }
+    }
     LaunchedEffect(pagerState.settledPage) { currentTab = NavTab.entries[pagerState.settledPage] }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         (updateState as? UpdateState.NeedsPermission)?.let { updateViewModel.retryInstall(it.apk) }
@@ -179,7 +186,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                 scope.launch { homeListState.scrollToItem(0) }
                             }) else null,
                             onRefresh = if (currentTab == NavTab.HOME) ({
-                                viewModel.refresh(); updateViewModel.checkForUpdate()
+                                viewModel.refresh(userRequested = true); updateViewModel.checkForUpdate()
                             }) else null,
                         )
                         HorizontalPager(state = pagerState, modifier = Modifier.weight(1f),
@@ -712,14 +719,17 @@ private val ARTICLE_DATE_FORMAT: DateTimeFormatter =
 private fun formatArticleDate(instant: Instant): String =
     ARTICLE_DATE_FORMAT.withZone(ZoneId.systemDefault()).format(instant)
 
-private fun Context.openExternalUrl(url: String) {
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+/** Starts [intent], telling the reader when no installed app can handle it instead of failing silently. */
+private fun Context.startOrExplain(intent: Intent, unavailable: String) {
     try {
         startActivity(intent)
     } catch (_: ActivityNotFoundException) {
-        // Safe fallback
+        Toast.makeText(this, unavailable, Toast.LENGTH_LONG).show()
     }
 }
+
+private fun Context.openExternalUrl(url: String) =
+    startOrExplain(Intent(Intent.ACTION_VIEW, Uri.parse(url)), "No browser is available to open this link.")
 
 private fun Context.shareArticle(article: NewsArticle) {
     val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -737,21 +747,12 @@ private fun Context.shareArticle(article: NewsArticle) {
             }
         })
     }
-    val chooser = Intent.createChooser(shareIntent, "Share article")
-    try {
-        startActivity(chooser)
-    } catch (_: ActivityNotFoundException) {
-        // Safe fallback
-    }
+    startOrExplain(Intent.createChooser(shareIntent, "Share article"), "No app is available for sharing.")
 }
 
 private fun Context.sendEmail(address: String) {
     val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$address")).apply {
         putExtra(Intent.EXTRA_SUBJECT, "AI Brief feedback")
     }
-    try {
-        startActivity(intent)
-    } catch (_: ActivityNotFoundException) {
-        // Safe fallback
-    }
+    startOrExplain(intent, "No email app is set up. Write to $address.")
 }

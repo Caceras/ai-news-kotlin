@@ -12,7 +12,7 @@ A native Kotlin/Jetpack Compose publication about artificial intelligence. The e
 - Native article reading, topic filters, on-device text search, local saving and Android sharing.
 - A useful first offline installation, cached editions and explicit cached/offline labels.
 - No reader account, advertising SDKs or analytics trackers. Normal hosting requests are disclosed in the [privacy policy](PRIVACY.md).
-- [Publisher/contact page](https://caceras.github.io/ai-news-kotlin/contact.html) and [privacy page](https://caceras.github.io/ai-news-kotlin/privacy.html).
+- [Publisher/contact page](https://github.com/Caceras/ai-news-kotlin/blob/main/CONTACT.md) and [privacy page](https://github.com/Caceras/ai-news-kotlin/blob/main/PRIVACY.md).
 
 Publish through [the mobile editor](https://caceras.github.io/ai-news-kotlin/editor.html), or ask Codex to publish your writing with source links. The authenticated publisher workflow validates and updates content/posts.json; the app reads it at runtime. Content-only changes do not trigger Android builds. See [the daily publishing guide](docs/CONTENT.md).
 

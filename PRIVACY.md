@@ -36,4 +36,4 @@ The app disallows cleartext HTTP traffic and uses private Android app storage. N
 
 ## Changes and contact
 
-If the app’s data practices change, this policy and the Play Console declarations must be updated. Questions or correction requests: rikicaceras@gmail.com. Publisher and contact details: https://caceras.github.io/ai-news-kotlin/contact.html
+If the app’s data practices change, this policy and the Play Console declarations must be updated. Questions or correction requests: rikicaceras@gmail.com. Publisher and contact details: https://github.com/Caceras/ai-news-kotlin/blob/main/CONTACT.md

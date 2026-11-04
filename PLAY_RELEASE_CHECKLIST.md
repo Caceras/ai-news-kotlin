@@ -27,9 +27,9 @@ For the researched plan and official sources, read [docs/PLAY_LAUNCH_PLAN.md](do
 - [ ] Every article shows its publisher, date and author when available; original posts include working primary-source links.
 - [ ] Launch content is useful and current; a real routine exists for new original writing. Offline explainers are visibly labeled.
 - [ ] Text, photographs, logos and graphics are owned or licensed. RSS availability alone is not permission.
-- [ ] In-app contact link and news declaration both use **https://caceras.github.io/ai-news-kotlin/contact.html**.
+- [ ] In-app contact link and news declaration both use **https://github.com/Caceras/ai-news-kotlin/blob/main/CONTACT.md**.
 - [ ] Support email **rikicaceras@gmail.com** is correct and monitored.
-- [ ] Privacy policy loads publicly at **https://caceras.github.io/ai-news-kotlin/privacy.html**, and the app links it.
+- [ ] Privacy policy loads publicly at **https://github.com/Caceras/ai-news-kotlin/blob/main/PRIVACY.md**, and the app links it.
 - [ ] Data safety is completed from actual app and hosting data practices. Do not blindly select “No”: audit IP/request handling by GitHub and any image host.
 - [ ] Ads, app access, actual target audience, IARC questionnaire and every applicable Console “Needs attention” declaration completed accurately.
 - [ ] No reviewer login is needed. Use [docs/STORE_LISTING.md](docs/STORE_LISTING.md) for access instructions and listing copy.
