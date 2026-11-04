@@ -19,7 +19,7 @@ For the researched plan and official sources, read [docs/PLAY_LAUNCH_PLAN.md](do
 - [ ] Choose a versionCode greater than prior Play uploads and verify the package is **com.caceras.aibrief**.
 - [ ] Build the signed **release AAB**; the internal-sharing APK and sideload APK are different delivery artifacts.
 - [ ] Check signature, certificate, version, target SDK, native-library compatibility and SHA-256.
-- [ ] Verify **REQUEST_INSTALL_PACKAGES** and the sideload updater/provider are absent from the Play artifact.
+- [ ] Verify **REQUEST_INSTALL_PACKAGES** and the sideload updater/provider are absent from the Play artifact (`scripts/check-play-artifact.py`, run automatically by both build workflows).
 
 ## Publication and policy
 

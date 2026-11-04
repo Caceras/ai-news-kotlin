@@ -99,6 +99,11 @@ jobs:
       - name: Build direct-install APK
         run: scripts/ci-gradle.sh assembleSideload assembleInternalSharing -PbuildNumber=${{ steps.identity.outputs.build_number }}
 
+      # The Internal App Sharing APK goes to Play Console, so it must carry no
+      # self-update code, exactly like the signed Play bundle.
+      - name: Check Play-bound APK for self-update code
+        run: python3 scripts/check-play-artifact.py app/build/outputs/apk/internalSharing/app-internalSharing.apk
+
       - name: Stage release assets
         id: stage
         run: |
