@@ -10,6 +10,8 @@ import com.caceras.aibrief.data.NewsRepository
 import com.caceras.aibrief.data.SeedArticles
 import java.time.Instant
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,11 +40,16 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
     )
     val uiState = _uiState.asStateFlow()
 
+    /** One-off notices, such as a reader-requested refresh that could not reach the edition. */
+    private val _notices = Channel<String>(Channel.CONFLATED)
+    val notices = _notices.receiveAsFlow()
+
     init {
         refresh()
     }
 
-    fun refresh() {
+    /** [userRequested] refreshes report a failure; the silent launch refresh relies on the edition label. */
+    fun refresh(userRequested: Boolean = false) {
         if (_uiState.value.isRefreshing) return
         _uiState.value = _uiState.value.copy(isRefreshing = true)
         viewModelScope.launch {
@@ -53,8 +60,10 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
                     freshness = load.freshness,
                     lastUpdated = load.updatedAt,
                 )
+                if (userRequested && load.freshness != FeedFreshness.LIVE) _notices.trySend(OFFLINE_NOTICE)
             } catch (error: Exception) {
                 if (error is CancellationException) throw error
+                if (userRequested) _notices.trySend(OFFLINE_NOTICE)
             } finally {
                 _uiState.value = _uiState.value.copy(isRefreshing = false)
             }
@@ -67,5 +76,9 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleSaved(article: NewsArticle) {
         _uiState.value = _uiState.value.copy(savedArticles = repository.toggleSaved(article))
+    }
+
+    private companion object {
+        const val OFFLINE_NOTICE = "Couldn't reach the latest edition. Showing the copy on this device."
     }
 }

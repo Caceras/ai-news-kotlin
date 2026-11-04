@@ -93,9 +93,9 @@ Use [STORE_LISTING.md](STORE_LISTING.md) for ready-to-copy listing and reviewer 
 | App name | **AI Brief** |
 | Package | **com.caceras.aibrief**; preserve it |
 | App category | **News & Magazines**; complete the news self-declaration truthfully [11,12] |
-| Publisher/contact URL | **https://caceras.github.io/ai-news-kotlin/contact.html**; use the same URL in the news declaration and in-app contact link |
+| Publisher/contact URL | **https://github.com/Caceras/ai-news-kotlin/blob/main/CONTACT.md**; use the same URL in the news declaration and in-app contact link |
 | Support email | **rikicaceras@gmail.com**, already used in the repository; owner must confirm it is monitored |
-| Privacy URL | **https://caceras.github.io/ai-news-kotlin/privacy.html**; active, public, non-geofenced HTML with no login |
+| Privacy URL | **https://github.com/Caceras/ai-news-kotlin/blob/main/PRIVACY.md**; active, public, non-geofenced HTML with no login |
 | Ads | **No** for the current code; there are no ad SDKs |
 | App access | All reader functionality is available without login or special credentials. The editorial management account is outside the reader app. |
 | Target audience | Recommend adults interested in AI research, tools and policy. Choose actual intended ages honestly; selecting adults does not override the app's content or presentation. |

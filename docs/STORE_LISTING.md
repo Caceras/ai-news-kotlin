@@ -32,11 +32,11 @@ AI Brief needs no reader account. It includes no advertising SDKs or analytics t
 The launch edition includes AI-assisted editorial explainers. Illustrative artwork is labeled and is not presented as a photograph of a news event. The app does not generate answers or images from reader prompts.
 
 Publisher, support, corrections and source suggestions:
-https://caceras.github.io/ai-news-kotlin/contact.html
+https://github.com/Caceras/ai-news-kotlin/blob/main/CONTACT.md
 rikicaceras@gmail.com
 
 Privacy policy:
-https://caceras.github.io/ai-news-kotlin/privacy.html
+https://github.com/Caceras/ai-news-kotlin/blob/main/PRIVACY.md
 
 ## App access / reviewer notes
 
@@ -56,9 +56,9 @@ Access restrictions: None for the reader.
 
 News & Magazines: Yes; complete the publication's self-declaration accurately.
 
-Contact URL: https://caceras.github.io/ai-news-kotlin/contact.html
+Contact URL: https://github.com/Caceras/ai-news-kotlin/blob/main/CONTACT.md
 
-Privacy URL: https://caceras.github.io/ai-news-kotlin/privacy.html
+Privacy URL: https://github.com/Caceras/ai-news-kotlin/blob/main/PRIVACY.md
 
 Data safety: Complete after the hosting/IP metadata review described in the launch plan. This draft does not automatically answer “No data collected.”
 
