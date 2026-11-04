@@ -521,7 +521,7 @@ object SeedArticles {
         article(
             title = "Open weights are expanding the set of people who can build with modern AI.",
             source = "AI Brief",
-            url = "https://www.aisi.gov/",
+            url = "https://huggingface.co/docs/hub/model-cards",
             publishedAt = now.minusSeconds(60 * 60 * 13),
             summary = "The opportunity is broader experimentation. The responsibility is making provenance, evaluation, and deployment discipline easier to practice.",
             category = NewsCategory.BUILDERS,
