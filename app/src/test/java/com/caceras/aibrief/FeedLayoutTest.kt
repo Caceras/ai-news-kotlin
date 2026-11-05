@@ -113,4 +113,29 @@ class FeedLayoutTest {
         val slots = FeedLayout.compose(listOf(story("n1", 1), story("ad", 2, StoryFormat.SPONSORED)), now)
         assertFalse(slots[1] is FeedSlot.Designed)
     }
+
+    @Test
+    fun `breaking news reads as news a day after it broke`() {
+        val stale = story("old", 30, StoryFormat.BREAKING)
+        assertFalse(stale.isBreakingAt(now))
+        assertEquals(StoryFormat.NEWS, stale.asOf(now).format)
+        val fresh = story("new", 3, StoryFormat.BREAKING)
+        assertTrue(fresh.isBreakingAt(now))
+        assertEquals(fresh, fresh.asOf(now))
+    }
+
+    @Test
+    fun `an update keeps a story breaking and lets it lead`() {
+        val updated = story("updated", 30, StoryFormat.BREAKING).copy(updatedAt = now.minus(Duration.ofHours(2)))
+        assertTrue(updated.isBreakingAt(now))
+        val lead = FeedLayout.compose(listOf(story("n1", 1), updated), now).first() as FeedSlot.Lead
+        assertEquals("updated", lead.article.id)
+    }
+
+    @Test
+    fun `other formats are never breaking`() {
+        val opinion = story("op", 1, StoryFormat.OPINION)
+        assertFalse(opinion.isBreakingAt(now))
+        assertEquals(opinion, opinion.asOf(now))
+    }
 }

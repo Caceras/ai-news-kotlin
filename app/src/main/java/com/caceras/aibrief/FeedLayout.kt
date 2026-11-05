@@ -2,7 +2,6 @@ package com.caceras.aibrief
 
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.StoryFormat
-import java.time.Duration
 import java.time.Instant
 
 /**
@@ -74,7 +73,7 @@ data class FeedModules(val rankings: Boolean = false, val radar: Boolean = false
  * Lays out the front page like a newspaper. The rules are fixed so every
  * edition looks deliberate whatever was published:
  *
- * 1. The lead is the newest breaking story from the last [BREAKING_WINDOW], or
+ * 1. The lead is the newest breaking story from the last [com.caceras.aibrief.data.BREAKING_WINDOW], or
  *    else the newest news story. A guide, sponsored post or column never leads
  *    while there is news to lead with.
  * 2. Two stories sit side by side under the lead.
@@ -90,15 +89,12 @@ data class FeedModules(val rankings: Boolean = false, val radar: Boolean = false
  * leads the page.
  */
 object FeedLayout {
-    val BREAKING_WINDOW: Duration = Duration.ofHours(24)
     const val LATEST_COUNT = 4
 
     fun compose(articles: List<NewsArticle>, now: Instant, modules: FeedModules = FeedModules.NONE): List<FeedSlot> {
         if (articles.isEmpty()) return emptyList()
         val newest = articles.sortedByDescending { it.publishedAt }
-        val lead = newest.firstOrNull {
-            it.format == StoryFormat.BREAKING && Duration.between(it.publishedAt, now) <= BREAKING_WINDOW
-        } ?: newest.firstOrNull { it.isNews } ?: newest.first()
+        val lead = newest.firstOrNull { it.isBreakingAt(now) } ?: newest.firstOrNull { it.isNews } ?: newest.first()
 
         val rest = newest - lead
         val series = newest.filter { it.series != null }

@@ -165,11 +165,36 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * The current time, ticking once a minute while the app is in front and
+ * stopping in the background.
+ */
+@Composable
+private fun rememberNow(): Instant {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val now by produceState(Instant.now(), lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while (true) {
+                value = Instant.now()
+                delay(60_000)
+            }
+        }
+    }
+    return now
+}
+
 private enum class NavTab(val label: String) { HOME("Latest"), EXPLORE("Explore"), ABOUT("About") }
 
 @Composable
 private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewModel) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val edition by viewModel.uiState.collectAsStateWithLifecycle()
+    // Breaking news loses its flag a day after it broke, on every screen.
+    val now = rememberNow()
+    val hour = now.epochSecond / 3600
+    val state = remember(edition, hour) {
+        edition.copy(articles = edition.articles.map { it.asOf(now) },
+            savedArticles = edition.savedArticles.map { it.asOf(now) })
+    }
     val updateState by updateViewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(NavTab.HOME) }
     var selectedArticleId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -436,17 +461,8 @@ private fun FeedScreen(
     LaunchedEffect(state.isRefreshing, pulled) { if (!state.isRefreshing) pulled = false }
     val pullState = rememberPullToRefreshState()
     val keyboard = LocalSoftwareKeyboardController.current
-    // Ticks once a minute while the app is in front, so "Updated 5 min ago"
-    // never goes stale on screen, and stops in the background.
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val now by produceState(Instant.now(), lifecycleOwner) {
-        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            while (true) {
-                value = Instant.now()
-                delay(60_000)
-            }
-        }
-    }
+    // "Updated 5 min ago" never goes stale on screen.
+    val now = rememberNow()
     // Refiltered only when the edition, topic or query changes, not on every
     // recomposition such as the refresh indicator toggling.
     val articles = remember(state.articles, state.selectedCategory, query) {
