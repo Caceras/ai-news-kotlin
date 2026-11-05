@@ -198,6 +198,9 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     val updateState by updateViewModel.state.collectAsStateWithLifecycle()
     var currentTab by rememberSaveable { mutableStateOf(NavTab.HOME) }
     var selectedArticleId by rememberSaveable { mutableStateOf<String?>(null) }
+    // Stories opened from inside a story (series parts), so Back returns to
+    // the part the reader came from before it returns to the front page.
+    var readerTrail by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var searchShown by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
     // The open story stays on screen when it leaves both lists, such as
@@ -241,16 +244,28 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     // A story restored after the app was reclaimed, or dropped by a newer
     // edition, must not reopen later out of nowhere once the device copy loads.
     LaunchedEffect(state.isLoading, selectedArticle) {
-        if (!state.isLoading && selectedArticle == null) selectedArticleId = null
+        if (!state.isLoading && selectedArticle == null) {
+            selectedArticleId = null
+            readerTrail = emptyList()
+        }
     }
     LaunchedEffect(pagerState.settledPage) { currentTab = NavTab.entries[pagerState.settledPage] }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.refreshIfStale()
         (updateState as? UpdateState.NeedsPermission)?.let { updateViewModel.retryInstall(it.apk) }
     }
+    fun openFromFeed(article: NewsArticle) {
+        readerTrail = emptyList()
+        selectedArticleId = article.id
+    }
+    fun closeReader() {
+        selectedArticleId = readerTrail.lastOrNull()
+        readerTrail = readerTrail.dropLast(1)
+    }
+
     BackHandler(enabled = selectedArticle != null || searchShown || currentTab != NavTab.HOME) {
         when {
-            selectedArticle != null -> selectedArticleId = null
+            selectedArticle != null -> closeReader()
             searchShown -> { searchShown = false; query = ""; keyboard?.hide() }
             else -> selectTab(NavTab.HOME)
         }
@@ -285,12 +300,17 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                         },
                         onShare = { context.shareArticle(article) },
                         onOpenSource = { context.openExternalUrl(article.url) },
-                        onBack = { selectedArticleId = null },
+                        onBack = ::closeReader,
                         seriesParts = article.series?.let { series ->
                             (state.articles + state.savedArticles).filter { it.series?.id == series.id }
                                 .distinctBy { it.id }.sortedBy { it.series?.part }
                         }.orEmpty(),
-                        onOpenArticle = { selectedArticleId = it.id })
+                        onOpenArticle = { next ->
+                            if (next.id != article.id) {
+                                readerTrail = readerTrail + article.id
+                                selectedArticleId = next.id
+                            }
+                        })
                 } else {
                     Column(Modifier.fillMaxSize()) {
                         Masthead(
@@ -319,7 +339,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                 NavTab.HOME -> FeedScreen(state, updateState, homeListState,
                                     searchShown, query, onQueryChange = { query = it },
                                     onCloseSearch = { query = ""; searchShown = false; keyboard?.hide() },
-                                    onOpenArticle = { keyboard?.hide(); selectedArticleId = it.id },
+                                    onOpenArticle = { keyboard?.hide(); openFromFeed(it) },
                                     onInstallUpdate = updateViewModel::downloadAndInstall,
                                     onGrantInstallPermission = updateViewModel::requestInstallPermission,
                                     onDismissUpdate = updateViewModel::dismiss,
@@ -330,7 +350,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                         viewModel.refresh(userRequested = true); updateViewModel.checkForUpdate()
                                     })
                                 NavTab.EXPLORE -> ExploreScreen(state, exploreListState,
-                                    onOpenArticle = { selectedArticleId = it.id },
+                                    onOpenArticle = ::openFromFeed,
                                     onOpenUrl = { context.openExternalUrl(it) },
                                     onBrowse = { selectTab(NavTab.HOME) })
                                 NavTab.ABOUT -> AboutScreen(aboutListState)
