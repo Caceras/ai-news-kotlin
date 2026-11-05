@@ -23,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.caceras.aibrief.data.PostBlock
@@ -49,7 +51,8 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier) {
             text = block.text,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = modifier,
+            // TalkBack readers move between a post's sections by heading.
+            modifier = modifier.semantics { heading() },
         )
 
         // Set behind a hairline rather than in quotation marks: the same
