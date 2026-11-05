@@ -56,7 +56,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
@@ -75,6 +77,7 @@ import com.caceras.aibrief.ui.components.FeatureStory
 import com.caceras.aibrief.ui.components.PostBlockContent
 import com.caceras.aibrief.ui.components.StoryRow
 import com.caceras.aibrief.ui.components.TopicsStrip
+import com.caceras.aibrief.ui.components.spokenAs
 import com.caceras.aibrief.ui.theme.AiBriefTheme
 import com.caceras.aibrief.update.UpdateBanner
 import com.caceras.aibrief.update.UpdateManifest
@@ -244,7 +247,7 @@ private fun JournalMasthead(
                 Text("AI Brief", style = MaterialTheme.typography.headlineMedium.copy(
                     fontSize = 29.sp, lineHeight = 34.sp, letterSpacing = (-0.8).sp),
                     modifier = Modifier.weight(1f).minimumInteractiveComponentSize()
-                        .clickable(role = Role.Button, onClick = onHome))
+                        .clickable(role = Role.Button, onClickLabel = "Go to latest stories", onClick = onHome))
                 if (onSearch != null) IconButton(onClick = onSearch) {
                     Icon(Icons.Outlined.Search, "Search articles", Modifier.size(22.dp))
                 }
@@ -376,7 +379,9 @@ private fun FeedScreen(
                     if (query.isBlank()) " in the journal" else " found",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+                    // TalkBack announces the new count as the reader types.
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                        .semantics { liveRegion = LiveRegionMode.Polite })
             }
             if (lead != null) {
                 if (!searchShown) {
@@ -423,7 +428,7 @@ private fun FeedScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text("Meet AI Brief  →", style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.minimumInteractiveComponentSize()
+                        modifier = Modifier.minimumInteractiveComponentSize().spokenAs("Meet AI Brief")
                             .clickable(role = Role.Button, onClick = onAbout))
                 }
             }
@@ -616,7 +621,8 @@ private fun ArticleDetailScreen(
                 Spacer(Modifier.height(16.dp))
                 Text("Back to stories  ←", style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.minimumInteractiveComponentSize().clickable(role = Role.Button, onClick = onBack))
+                    modifier = Modifier.minimumInteractiveComponentSize().spokenAs("Back to stories")
+                        .clickable(role = Role.Button, onClick = onBack))
             }
         }
     }
@@ -686,8 +692,8 @@ private fun AboutScreen(listState: LazyListState) {
             Spacer(Modifier.height(12.dp))
             Text("Read the privacy policy ↗", style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.minimumInteractiveComponentSize()
-                    .clickable(role = Role.Button) { context.openExternalUrl(PRIVACY_URL) })
+                modifier = Modifier.minimumInteractiveComponentSize().spokenAs("Read the privacy policy")
+                    .clickable(role = Role.Button, onClickLabel = "Open in browser") { context.openExternalUrl(PRIVACY_URL) })
             Spacer(Modifier.height(32.dp))
         }
 
@@ -707,8 +713,8 @@ private fun AboutScreen(listState: LazyListState) {
             Spacer(Modifier.height(12.dp))
             Text("Publisher and contact details ↗", style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.minimumInteractiveComponentSize()
-                    .clickable(role = Role.Button) { context.openExternalUrl(CONTACT_URL) })
+                modifier = Modifier.minimumInteractiveComponentSize().spokenAs("Publisher and contact details")
+                    .clickable(role = Role.Button, onClickLabel = "Open in browser") { context.openExternalUrl(CONTACT_URL) })
             Spacer(Modifier.height(20.dp))
             Surface(
                 modifier = Modifier
