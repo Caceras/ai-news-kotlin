@@ -91,8 +91,10 @@ class NewsRepository(context: Context) {
         Context.MODE_PRIVATE,
     )
 
-    private val bundledPosts = context.applicationContext.assets.open("posts.json")
-        .bufferedReader().use { it.readText() }
+    // Read on first use, which is always off the main thread (see NewsViewModel).
+    private val bundledPosts by lazy {
+        context.applicationContext.assets.open("posts.json").bufferedReader().use { it.readText() }
+    }
 
     private fun localPostsRaw(): String =
         preferences.getString(OWNER_POSTS_KEY, null) ?: bundledPosts
@@ -100,6 +102,7 @@ class NewsRepository(context: Context) {
     private fun visiblePosts(raw: String): List<NewsArticle> =
         OwnerPosts.published(raw).map { it.toArticle() }
 
+    /** Reads assets and preferences from disk, so callers run it off the main thread. */
     fun initialLoad(): NewsLoad {
         val posts = visiblePosts(localPostsRaw())
         val feedCache = if (BuildConfig.EXTERNAL_FEEDS_ENABLED) {
