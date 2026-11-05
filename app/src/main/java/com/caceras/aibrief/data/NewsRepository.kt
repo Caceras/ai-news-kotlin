@@ -47,8 +47,14 @@ data class NewsArticle(
     /** True for an original post, which has no external article to link out to. */
     val isOriginalPost: Boolean get() = blocks.isNotEmpty()
 
-    val searchableText: String
-        get() = listOf(title, summary, source, author.orEmpty()).joinToString(" ") +
+    /**
+     * Computed once per article. Story rows read [readingTimeMinutes] on every
+     * recomposition and search scans every article on each keystroke, so
+     * rebuilding a long post's full text each time made scrolling and typing
+     * do needless work on the main thread.
+     */
+    val searchableText: String by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        listOf(title, summary, source, author.orEmpty()).joinToString(" ") +
             " " + blocks.joinToString(" ") { block ->
                 when (block) {
                     is PostBlock.Paragraph -> block.text
@@ -59,10 +65,14 @@ data class NewsArticle(
                     is PostBlock.Link -> block.text
                 }
             }
+    }
 
-    val readingTimeMinutes: Int
-        get() = ((searchableText.trim().split(Regex("\\s+")).size + 199) / 200).coerceIn(1, 30)
+    val readingTimeMinutes: Int by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        ((searchableText.trim().split(WORD_BREAK).size + 199) / 200).coerceIn(1, 30)
+    }
 }
+
+private val WORD_BREAK = Regex("\\s+")
 
 enum class FeedFreshness {
     LIVE,

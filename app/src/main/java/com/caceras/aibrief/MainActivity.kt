@@ -298,9 +298,14 @@ private fun FeedScreen(
 ) {
     val scope = rememberCoroutineScope()
     val focus = remember { FocusRequester() }
-    val articles = state.articles.filter {
-        (state.selectedCategory == NewsCategory.ALL || it.category == state.selectedCategory) &&
-            (query.isBlank() || it.searchableText.contains(query.trim(), ignoreCase = true))
+    // Refiltered only when the edition, topic or query changes, not on every
+    // recomposition such as the refresh indicator toggling.
+    val articles = remember(state.articles, state.selectedCategory, query) {
+        val needle = query.trim()
+        state.articles.filter {
+            (state.selectedCategory == NewsCategory.ALL || it.category == state.selectedCategory) &&
+                (needle.isEmpty() || it.searchableText.contains(needle, ignoreCase = true))
+        }
     }
     val lead = articles.firstOrNull()
     LaunchedEffect(searchShown) { if (searchShown) focus.requestFocus() }
