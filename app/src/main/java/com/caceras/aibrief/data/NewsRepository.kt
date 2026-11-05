@@ -109,6 +109,17 @@ private data class FeedSource(
     val category: NewsCategory,
 )
 
+/** Decides when a refresh may ask the server for changes only. */
+internal object OwnerPostsValidator {
+    /**
+     * The `If-None-Match` value to send, or null to fetch in full. A stored
+     * ETag is only usable while the document it describes is still cached;
+     * otherwise a 304 would leave nothing to show.
+     */
+    fun ifNoneMatch(etag: String?, cachedDocument: String?): String? =
+        etag?.trim()?.takeIf { it.isNotEmpty() && !cachedDocument.isNullOrBlank() }
+}
+
 /** Fetches public editorial feeds and keeps saved reads available without an account. */
 class NewsRepository(context: Context) {
     private val preferences = context.applicationContext.getSharedPreferences(
@@ -144,7 +155,7 @@ class NewsRepository(context: Context) {
     }
 
     suspend fun loadLatest(): NewsLoad = withContext(Dispatchers.IO) {
-        val (liveArticles, postDocument) = coroutineScope {
+        val (liveArticles, fetched) = coroutineScope {
             val feedJob = async {
                 if (BuildConfig.EXTERNAL_FEEDS_ENABLED) {
                     feeds.map { feed ->
@@ -170,10 +181,15 @@ class NewsRepository(context: Context) {
             feedJob.await() to postJob.await()
         }
 
-        if (postDocument != null) {
+        val postDocument = fetched?.body
+        if (fetched != null) {
             // Cache the document, not only today's visible posts. Scheduled
             // writing becomes visible on a later refresh even when offline.
-            preferences.edit().putString(OWNER_POSTS_KEY, postDocument).apply()
+            // The ETag is stored with it, or cleared, so the two never disagree.
+            val editor = preferences.edit().putString(OWNER_POSTS_KEY, fetched.body)
+            if (fetched.etag != null) editor.putString(OWNER_POSTS_ETAG_KEY, fetched.etag)
+            else editor.remove(OWNER_POSTS_ETAG_KEY)
+            editor.apply()
         }
         val posts = visiblePosts(postDocument ?: localPostsRaw())
         val feedArticles = if (BuildConfig.EXTERNAL_FEEDS_ENABLED) {
@@ -196,8 +212,16 @@ class NewsRepository(context: Context) {
         )
     }
 
-    /** A malformed update keeps the last good document and bundled edition. */
-    private fun fetchOwnerPostDocument(): String? {
+    /**
+     * A malformed update keeps the last good document and bundled edition.
+     *
+     * Sends the stored ETag so an unchanged edition costs a 304 with no body
+     * instead of the whole document. Returns the fetched document (and its
+     * ETag), or the cached one when the server confirms it is still current.
+     */
+    private fun fetchOwnerPostDocument(): FetchedDocument? {
+        val cached = preferences.getString(OWNER_POSTS_KEY, null)
+        val validator = OwnerPostsValidator.ifNoneMatch(preferences.getString(OWNER_POSTS_ETAG_KEY, null), cached)
         val connection = URL(OWNER_POSTS_URL).openConnection() as HttpURLConnection
         return try {
             connection.connectTimeout = NETWORK_TIMEOUT_MILLIS
@@ -205,16 +229,23 @@ class NewsRepository(context: Context) {
             connection.instanceFollowRedirects = true
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("User-Agent", "AI-Brief-Android/${BuildConfig.VERSION_NAME}")
-            if (connection.responseCode !in 200..299) return null
+            if (validator != null) connection.setRequestProperty("If-None-Match", validator)
+            val code = connection.responseCode
+            if (code == HttpURLConnection.HTTP_NOT_MODIFIED) {
+                return if (validator != null && cached != null) FetchedDocument(cached, validator) else null
+            }
+            if (code !in 200..299) return null
             if (connection.contentLengthLong > MAX_EDITION_BYTES) return null
             // An oversized body is refused, keeping the last good document.
             val body = connection.inputStream.use { readBoundedText(it) } ?: return null
             if (!OwnerPosts.isEditorialDocument(body)) return null
-            body
+            FetchedDocument(body, connection.getHeaderField("ETag"))
         } finally {
             connection.disconnect()
         }
     }
+
+    private class FetchedDocument(val body: String, val etag: String?)
 
     private fun OwnerPost.toArticle(): NewsArticle = NewsArticle(
         id = "post-$id",
@@ -254,7 +285,7 @@ class NewsRepository(context: Context) {
                 "Accept",
                 "application/rss+xml, application/atom+xml, application/xml, text/xml",
             )
-            connection.setRequestProperty("User-Agent", "AI-Brief-Android/2.0")
+            connection.setRequestProperty("User-Agent", "AI-Brief-Android/${BuildConfig.VERSION_NAME}")
 
             if (connection.responseCode !in 200..299) return emptyList()
             connection.inputStream.use { stream -> parseFeed(stream, feed) }
@@ -420,6 +451,7 @@ class NewsRepository(context: Context) {
 
     private companion object {
         const val OWNER_POSTS_KEY = "owner_posts_document"
+        const val OWNER_POSTS_ETAG_KEY = "owner_posts_etag"
         const val SAVED_ARTICLES_KEY = "saved_articles"
         const val CACHED_ARTICLES_KEY = "cached_articles"
         const val CACHED_AT_KEY = "cached_at"
