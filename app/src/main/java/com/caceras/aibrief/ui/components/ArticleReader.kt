@@ -157,6 +157,10 @@ private fun NewsHeader(article: NewsArticle) {
                 Text("BREAKING · ${(article.updatedAt ?: article.publishedAt).readerTime()}",
                     style = Brief.type.tag, color = c.onBreaking)
             }
+            article.imageCredit?.let {
+                Text(it, style = Brief.type.meta, color = c.inkMuted,
+                    modifier = Modifier.padding(start = Space.l, end = Space.l, top = Space.s))
+            }
         } else if (article.isOriginalPost || !article.imageUrl.isNullOrBlank()) {
             ArticleArtwork(article)
             val credit = if (article.imageUrl.isNullOrBlank()) "AI-generated editorial illustration"

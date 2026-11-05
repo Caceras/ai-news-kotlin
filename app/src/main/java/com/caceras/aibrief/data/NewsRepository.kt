@@ -8,6 +8,7 @@ import com.caceras.aibrief.BuildConfig
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.Duration
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZonedDateTime
@@ -27,6 +28,9 @@ enum class NewsCategory(val label: String) {
     POLICY("Policy"),
     BUILDERS("Builders"),
 }
+
+/** How long a story keeps its Breaking flag, and may lead the front page as breaking news. */
+val BREAKING_WINDOW: Duration = Duration.ofHours(24)
 
 data class NewsArticle(
     val id: String,
@@ -58,6 +62,17 @@ data class NewsArticle(
 ) {
     /** True for an original post, which has no external article to link out to. */
     val isOriginalPost: Boolean get() = blocks.isNotEmpty()
+
+    /**
+     * Breaking news is breaking for [BREAKING_WINDOW] after it was published or
+     * last updated. After that it reads as an ordinary news story everywhere.
+     */
+    fun isBreakingAt(now: Instant): Boolean =
+        format == StoryFormat.BREAKING && Duration.between(updatedAt ?: publishedAt, now) <= BREAKING_WINDOW
+
+    /** This story as a reader should see it at [now]: stale breaking news loses its flag. */
+    fun asOf(now: Instant): NewsArticle =
+        if (format == StoryFormat.BREAKING && !isBreakingAt(now)) copy(format = StoryFormat.NEWS) else this
 
     /** Guides and sponsored posts share the designed card. */
     val isDesigned: Boolean get() = format == StoryFormat.GUIDE || format == StoryFormat.SPONSORED

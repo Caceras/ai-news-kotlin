@@ -73,6 +73,7 @@ A cold build of the gates takes about 3 minutes.
 - The owner publishes from the **Publish a story** issue form (`.github/ISSUE_TEMPLATE/publish-story.yml` → `publish-from-issue.yml` → `scripts/issue_post.py` → `scripts/publish-post.py`). Editing the issue revises the story; Action = Unpublish removes it. Owner-only.
 - See screens without a device: `SNAPSHOT_PYTHON=<venv>/bin/python scripts/render-snapshots.sh <out>` (Paparazzi in a throwaway copy, about 3 minutes; covers load from `content/media`). Read PNGs with a venv Pillow; the system Pillow is broken.
 - Play screenshots come from `StoreSnaps` in the same script (`store-*.png`, 1080 × 1920 RGB, real edition only, never invented headlines). Copy them to `docs/play/screenshots` after a visible design change. Paparazzi shrinks to 1000 px unless `useDeviceResolution = true`.
+- Breaking lasts `BREAKING_WINDOW` (24 h from `updatedAt ?: publishedAt`). `AiBriefApp` maps stale breaking stories to NEWS (`NewsArticle.asOf`) for every screen; check `isBreakingAt`, never `format == BREAKING` with a clock of your own.
 - Sponsored posts must name a sponsor (parser drops them otherwise) and never lead. Opinion must be signed by a person.
 
 ## Code rules learned
