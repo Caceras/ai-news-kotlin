@@ -72,7 +72,7 @@ fun categoryArtwork(category: NewsCategory): Int = when (category) {
 object Ratio {
     const val HERO = 16f / 10f
     /** The lead is taller than a headline photo, so the page opens on a picture. */
-    const val LEAD = 5f / 4f
+    const val LEAD = 4f / 3f
     const val PAIR = 4f / 3f
     const val THUMB = 4f / 3f
     const val VIDEO = 16f / 9f
@@ -212,37 +212,23 @@ fun LeadStory(article: NewsArticle, onClick: () -> Unit) = when {
 }
 
 /**
- * The picture runs edge to edge and the headline is set on it, over a fade,
- * so the lead reads as one unit with no gap between picture and words. The
- * box keeps its shape at normal text size and grows when large text needs it.
+ * The picture runs edge to edge with nothing on it, and the big headline sits
+ * directly under it, so picture and headline read as one unit.
  */
 @Composable
 private fun BleedLead(article: NewsArticle, onClick: () -> Unit) {
     val c = Brief.colors
     Column(Modifier.fillMaxWidth().background(c.card).story(onClick)) {
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            Box(Modifier.fillMaxWidth().heightIn(min = maxWidth / Ratio.LEAD)) {
-                if (article.format == StoryFormat.BREAKING) {
-                    Collage(article, Modifier.matchParentSize(), ratio = null)
-                } else {
-                    ArticleArtwork(article, Modifier.matchParentSize(), ratio = null)
-                }
-                Box(Modifier.matchParentSize().background(
-                    Brush.verticalGradient(0.3f to Color.Transparent, 1f to c.imageScrim)))
-                if (article.format == StoryFormat.BREAKING) {
-                    BreakingFlag(Modifier.align(Alignment.TopStart).padding(Space.m))
-                }
-                Column(Modifier.align(Alignment.BottomStart)
-                    .padding(start = Space.gutter, end = Space.gutter, top = Space.section, bottom = Space.l)) {
-                    Text(article.series?.label?.uppercase(Locale.US) ?: article.tagText(), style = Brief.type.tag,
-                        color = c.onImage)
-                    Spacer(Modifier.height(Space.s))
-                    Headline(article, Brief.type.display, maxLines = 5, color = c.onImage)
-                }
+        Box {
+            if (article.format == StoryFormat.BREAKING) {
+                Collage(article, ratio = Ratio.LEAD)
+                BreakingFlag(Modifier.align(Alignment.TopStart).padding(Space.m))
+            } else {
+                ArticleArtwork(article, ratio = Ratio.LEAD)
             }
         }
-        Column(Modifier.padding(start = Space.gutter, end = Space.gutter, top = Space.m, bottom = Space.l)) {
-            Deck(article.summary)
+        Column(Modifier.padding(start = Space.gutter, end = Space.gutter, top = Space.s, bottom = Space.l)) {
+            Headline(article, Brief.type.display, maxLines = 4)
             Spacer(Modifier.height(Space.s))
             Meta(article)
         }
@@ -256,8 +242,6 @@ fun HeadlineCard(article: NewsArticle, onClick: () -> Unit) {
         if (article.format == StoryFormat.BREAKING) Collage(article) else ArticleArtwork(article)
         Column(Modifier.padding(start = Space.gutter, end = Space.gutter, top = Space.m, bottom = Space.l)) {
             Headline(article, Brief.type.headline)
-            Spacer(Modifier.height(Space.s))
-            Deck(article.summary, maxLines = 1)
         }
     }
 }
@@ -273,8 +257,6 @@ fun PairCards(left: NewsArticle, right: NewsArticle, onOpen: (NewsArticle) -> Un
                 ArticleArtwork(article, ratio = Ratio.PAIR)
                 Spacer(Modifier.height(Space.s))
                 Headline(article, Brief.type.headlineSmall, maxLines = 4)
-                Spacer(Modifier.height(Space.xs))
-                Deck(article.summary, maxLines = 1)
             }
         }
     }
@@ -287,8 +269,10 @@ fun RowCard(article: NewsArticle, onClick: () -> Unit) {
         Row(Modifier.padding(horizontal = Space.gutter, vertical = Space.gutter),
             verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Tag(article)
-                Spacer(Modifier.height(Space.xs))
+                if (article.format == StoryFormat.REVIEW || article.format == StoryFormat.BREAKING) {
+                    Tag(article)
+                    Spacer(Modifier.height(Space.xs))
+                }
                 Headline(article, Brief.type.rowTitle, maxLines = 3)
                 Spacer(Modifier.height(Space.xs))
                 Meta(article)

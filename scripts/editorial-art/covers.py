@@ -599,7 +599,46 @@ def her_review(out):
     c.save(out)
 
 
+def turing_test(out):
+    """Can a machine think? Two hidden players, one question."""
+    c = Cover(NAVY)
+    c.slant(90, 110, 380, 64, ORANGE)
+    for x, label in [(260, "A"), (900, "B")]:
+        c.rect(x, 280, x + 440, 620, WHITE, r=24)
+        c.rect(x + 30, 310, x + 410, 560, SKY, r=12, shadow=False)
+        c.text(x + 220, 435, label, 150, NAVY)
+        c.rect(x + 160, 620, x + 280, 700, WHITE, shadow=False)
+    c.text(800, 830, "?", 170, ORANGE)
+    c.save(out)
+
+
+def chinese_room(out):
+    """A closed room with a slot: symbols in, symbols out."""
+    c = Cover(WARM, halftone=shade(ORANGE, 0.55))
+    c.slant(100, 110, 380, 64, NAVY)
+    c.rect(520, 230, 1080, 860, NAVY)
+    c.rect(690, 520, 910, 560, ORANGE, r=8, shadow=False)
+    for x, y, col in [(300, 420, WHITE), (330, 660, WHITE), (1290, 400, ORANGE), (1310, 640, ORANGE)]:
+        c.rect(x - 75, y - 75, x + 75, y + 75, col, r=12)
+        c.ring(x, y, 34, 12, NAVY, shadow=False)
+    c.text(800, 400, "?", 170, WHITE)
+    c.save(out)
+
+
+def astra(out):
+    """Breaking: a model release. A rocket-bright star over the grid."""
+    c = Cover(DEEP)
+    for i in range(5):
+        c.ring(800, 500, 120 + i * 90, 6, (40, 70, 140), shadow=False)
+    c.star(800, 500, 230, WHITE, shadow=True)
+    c.star(800, 500, 120, BLUE)
+    c.save(out)
+
+
 COVERS = {
+    "turing-test": turing_test,
+    "chinese-room": chinese_room,
+    "astra": astra,
     "her-review": her_review,
     "eu-ai-act": eu_ai_act,
     "why-chatbots-guess": hallucination,

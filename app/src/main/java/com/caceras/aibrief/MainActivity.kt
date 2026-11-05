@@ -495,17 +495,6 @@ private fun FeedScreen(
                         UpdateBanner(updateState, onInstallUpdate, onGrantInstallPermission, onDismissUpdate)
                     }
                 }
-                if (!searchShown) item("edition") {
-                    val date = state.articles.maxOfOrNull { it.publishedAt }
-                    Row(Modifier.fillMaxWidth().padding(horizontal = Space.gutter, vertical = Space.s),
-                        verticalAlignment = Alignment.CenterVertically) {
-                        Text(date?.let { DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.US)
-                            .withZone(ZoneId.systemDefault()).format(it).uppercase(Locale.US) } ?: "AI BRIEF",
-                            style = Brief.type.tag, color = c.inkMuted, modifier = Modifier.weight(1f))
-                        Text(editionLabel(state.freshness, state.lastUpdated, now), style = Brief.type.meta,
-                            color = c.inkMuted)
-                    }
-                }
                 if (searchShown) {
                     item("results-label") {
                         Text("${articles.size} ${if (articles.size == 1) "story" else "stories"}" +
@@ -521,7 +510,11 @@ private fun FeedScreen(
                 } else {
                     items(slots, key = { it.key }, contentType = { it::class }) { slot ->
                         when (slot) {
-                            is FeedSlot.Lead -> LeadStory(slot.article) { onOpenArticle(slot.article) }
+                            // The lead's picture starts right under the masthead; the date follows the story.
+                            is FeedSlot.Lead -> Column {
+                                LeadStory(slot.article) { onOpenArticle(slot.article) }
+                                EditionLine(state, now)
+                            }
                             is FeedSlot.Ribbon -> SectionRibbon(slot.title, breaking = slot.breaking)
                             is FeedSlot.Headline -> Box(Modifier.padding(top = Space.s)) {
                                 HeadlineCard(slot.article) { onOpenArticle(slot.article) }
@@ -576,6 +569,19 @@ private fun FeedScreen(
             PullToRefreshDefaults.Indicator(state = pullState, isRefreshing = pullRefreshing,
                 modifier = Modifier.align(Alignment.TopCenter), containerColor = c.card, color = c.accent)
         }
+    }
+}
+
+@Composable
+private fun EditionLine(state: NewsUiState, now: Instant) {
+    val c = Brief.colors
+    val date = state.articles.maxOfOrNull { it.publishedAt }
+    Row(Modifier.fillMaxWidth().padding(horizontal = Space.gutter, vertical = Space.s),
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(date?.let { DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.US)
+            .withZone(ZoneId.systemDefault()).format(it).uppercase(Locale.US) } ?: "AI BRIEF",
+            style = Brief.type.tag, color = c.inkMuted, modifier = Modifier.weight(1f))
+        Text(editionLabel(state.freshness, state.lastUpdated, now), style = Brief.type.meta, color = c.inkMuted)
     }
 }
 

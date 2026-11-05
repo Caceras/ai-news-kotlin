@@ -2,8 +2,266 @@
   "version": 1,
   "posts": [
     {
+      "id": "2026-11-05-demo-astra",
+      "title": "6.2 Astra RELEASED",
+      "summary": "Demo story to preview the breaking-news design. Not real news.",
+      "author": "AI Brief editorial",
+      "category": "PRODUCTS",
+      "publishedAt": "2026-11-05T21:00:00Z",
+      "format": "BREAKING",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-astra.webp",
+      "imageCredit": "Illustration: AI Brief",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "This is a placeholder story so the breaking-news layout can be seen on a phone. There is no GPT-6.2 Astra release; the newest Astra model listed on OpenRouter is GPT-6 Astra, from 4 September 2026."
+        },
+        {
+          "type": "heading",
+          "text": "Sources"
+        },
+        {
+          "type": "link",
+          "text": "OpenRouter: models",
+          "url": "https://openrouter.ai/models"
+        }
+      ]
+    },
+    {
+      "id": "2026-11-05-pick-up-the-phone",
+      "title": "Pick up the phone",
+      "summary": "On the cat, the obstacle and the phone call that is never made.",
+      "author": "Riki Caceras",
+      "authorRole": "Publisher",
+      "category": "POLICY",
+      "publishedAt": "2026-11-05T20:55:00Z",
+      "format": "OPINION",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-pick-up-the-phone.webp",
+      "imageCredit": "Illustration: The cat, the obstacle and the phone.",
+      "blocks": [
+        {
+          "type": "image",
+          "url": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-pick-up-the-phone.webp",
+          "caption": "The cat, the obstacle and the phone."
+        },
+        {
+          "type": "paragraph",
+          "text": "There is a well-known video on the internet in which a cat stands in front of a small obstacle, a barrier that barely reaches its chest. The cat looks at the obstacle, leans forward, and gives up. Not because it cannot get past it, but because it cannot see how. A human watching the scene immediately sees what the cat is missing: go around."
+        },
+        {
+          "type": "paragraph",
+          "text": "It is hard not to draw parallels with the global debate on artificial intelligence."
+        },
+        {
+          "type": "heading",
+          "text": "The obstacle that does not exist"
+        },
+        {
+          "type": "paragraph",
+          "text": "In recent years, a growing movement has emerged calling for AI development to slow down. The arguments are not unreasonable: existential risks, upheaval in the labour market, the future of democracy. But what is rarely discussed is the fundamental absurdity of believing that slowing down is even possible."
+        },
+        {
+          "type": "paragraph",
+          "text": "Here is the reality: the United States and China are locked in a technological arms race with AI at its core. The two poles of this dynamic are literally a phone call away from each other. Yet the debate proceeds as though one side can unilaterally set the pace, as though you can pause a game of chess simply by no longer moving your own pieces."
+        },
+        {
+          "type": "paragraph",
+          "text": "What makes the situation even more bizarre is that the people building the technology cannot even agree on whether it is dangerous. Yann LeCun, one of the pioneers of deep learning who recently left Meta, calls existential threat scenarios “complete B.S.”, in other words total nonsense. His argument is that AI is neither smarter than a house cat nor capable of wanting anything at all, let alone the downfall of humanity. Dario Amodei, CEO of Anthropic and the man behind Claude, for his part, estimates that there is a 25 per cent chance that things will go “really, really badly”. One in four. The same odds as Russian roulette with a revolver loaded with two bullets instead of one."
+        },
+        {
+          "type": "paragraph",
+          "text": "Damn."
+        },
+        {
+          "type": "heading",
+          "text": "The prisoner’s dilemma in real time"
+        },
+        {
+          "type": "paragraph",
+          "text": "Anyone who has encountered game theory will recognise the pattern. The prisoner’s dilemma describes a situation in which two parties would benefit most from cooperating, but where a lack of trust leads both to act in their own self-interest, to the detriment of both."
+        },
+        {
+          "type": "paragraph",
+          "text": "That is exactly what is playing out on the geopolitical AI stage. The United States and China would both benefit from shared safety frameworks. But neither dares to slow down first, because whoever does risks falling behind. The result? Both accelerate. Neither cooperates. And those calling for a pause stand on the sidelines and watch as the game continues without them."
+        },
+        {
+          "type": "paragraph",
+          "text": "The difference from the classic prisoner’s dilemma is that this is not a thought experiment. It is geopolitics in real time, involving technology that doubles its capabilities every quarter. And unlike the academic example, there is actually a phone in the room."
+        },
+        {
+          "type": "heading",
+          "text": "Go around the obstacle"
+        },
+        {
+          "type": "paragraph",
+          "text": "The debate on AI risks has become stuck in a binary trap: accelerate or slow down. But just as with the cat in front of the barrier, there is a way around that no one seems to see, or rather, that no one seems willing to take."
+        },
+        {
+          "type": "paragraph",
+          "text": "The solution has never been to stop development. It has never been to pretend that the risks do not exist. The solution is to do what intelligent beings do when faced with an obstacle they cannot jump over: they look to the side, see the opening, and make contact."
+        },
+        {
+          "type": "paragraph",
+          "text": "Nuclear disarmament during the Cold War showed that even rival superpowers can agree that certain technologies require joint management. The difference is that it took decades of brinkmanship before the phone was picked up. The question is whether we have that luxury this time, with a technology that moves in months rather than decades."
+        },
+        {
+          "type": "paragraph",
+          "text": "The cat is still sitting by its obstacle. It has not moved. Not because it cannot, but because it cannot see the alternative."
+        },
+        {
+          "type": "paragraph",
+          "text": "The phone is ringing. All we have to do is answer. Or else… catastrophe. I’m sorry…"
+        },
+        {
+          "type": "paragraph",
+          "text": "…just like we all should be!"
+        },
+        {
+          "type": "heading",
+          "text": "Further reading"
+        },
+        {
+          "type": "link",
+          "text": "Stanford Encyclopedia of Philosophy: Prisoner’s Dilemma",
+          "url": "https://plato.stanford.edu/entries/prisoner-dilemma/"
+        }
+      ]
+    },
+    {
+      "id": "2026-11-05-ai-and-art-3-salvador-da-lee",
+      "title": "Salvador Da..lee?",
+      "summary": "The most famous image generator borrowed its name from a surrealist. He would have had opinions.",
+      "author": "AI Brief editorial",
+      "category": "PRODUCTS",
+      "publishedAt": "2026-11-05T20:52:00Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "OpenAI’s image generator DALL·E takes its name from two sources: the surrealist painter Salvador Dalí and WALL·E, the Pixar robot. A painter of melting clocks lent his name to a machine that paints anything you type."
+        },
+        {
+          "type": "paragraph",
+          "text": "Surrealism tried to reach past conscious control, letting the unconscious make the picture. Generative models do something that looks similar from the outside: images appear that no one exactly planned. The difference is that the surrealists were exploring a mind. A model is predicting pixels."
+        },
+        {
+          "type": "quote",
+          "text": "Dalí signed his work. Who signs this?"
+        },
+        {
+          "type": "paragraph",
+          "text": "That is the thread running through this series: what counts as art, who made it, and whose name belongs on it."
+        },
+        {
+          "type": "heading",
+          "text": "Sources"
+        },
+        {
+          "type": "link",
+          "text": "US Copyright Office: Copyright and Artificial Intelligence",
+          "url": "https://www.copyright.gov/ai/"
+        }
+      ],
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-ai-and-art-3.webp",
+      "imageCredit": "Image: AI Brief",
+      "series": {
+        "id": "ai-and-art",
+        "title": "AI & Art",
+        "of": 3,
+        "part": 3
+      }
+    },
+    {
+      "id": "2026-11-05-ai-and-art-2-artists-generate",
+      "title": "Artists c̶r̶e̶a̶t̶e̶ generate",
+      "summary": "Image models learned from artists’ work. Who should be paid for that is still being argued.",
+      "author": "AI Brief editorial",
+      "category": "PRODUCTS",
+      "publishedAt": "2026-11-05T20:51:00Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Image generators are trained on huge collections of pictures, many made by working artists who were never asked. Some artists now use the tools every day. Others see them as built on their unpaid work."
+        },
+        {
+          "type": "paragraph",
+          "text": "The US Copyright Office has examined the question in a report on training AI on copyrighted works, released in pre-publication form in May 2025, covering licensing and who is liable. Courts are hearing similar arguments."
+        },
+        {
+          "type": "quote",
+          "text": "Generate is not the same verb as create."
+        },
+        {
+          "type": "paragraph",
+          "text": "What is settled is narrower: in the US, a picture made only by prompting is not protected by copyright, while the human choices around it can be. The craft has moved from the hand to the selection."
+        },
+        {
+          "type": "heading",
+          "text": "Sources"
+        },
+        {
+          "type": "link",
+          "text": "US Copyright Office: Copyright and Artificial Intelligence",
+          "url": "https://www.copyright.gov/ai/"
+        }
+      ],
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-ai-and-art-2.webp",
+      "imageCredit": "Image: AI Brief",
+      "series": {
+        "id": "ai-and-art",
+        "title": "AI & Art",
+        "of": 3,
+        "part": 2
+      }
+    },
+    {
+      "id": "2026-11-05-ai-and-art-1-what-is-art",
+      "title": "What is art?",
+      "summary": "An AI picture won a fine-art prize. Then the US refused to protect it.",
+      "author": "AI Brief editorial",
+      "category": "PRODUCTS",
+      "publishedAt": "2026-11-05T20:50:00Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "In 2022 Jason M. Allen won the Colorado State Fair’s fine art competition with “Théâtre D’opéra Spatial”. It was the first AI-generated image to win it. Allen made it with Midjourney, by his own account after at least 624 prompts and revisions, then finished it in Photoshop."
+        },
+        {
+          "type": "paragraph",
+          "text": "The US Copyright Office refused to register it. In September 2023 its Review Board ruled that the work contained more than a small amount of AI-generated content, which had to be disclaimed. Allen would not disclaim it, so the work could not be registered as submitted."
+        },
+        {
+          "type": "quote",
+          "text": "Is a prompt a brushstroke?"
+        },
+        {
+          "type": "paragraph",
+          "text": "That is the question underneath. If art is the idea, Allen made it. If art is the making, the machine did most of it. The law, for now, sides with the making."
+        },
+        {
+          "type": "heading",
+          "text": "Sources"
+        },
+        {
+          "type": "link",
+          "text": "US Copyright Office Review Board: Théâtre D’opéra Spatial (5 Sep 2023)",
+          "url": "https://www.copyright.gov/rulings-filings/review-board/docs/Theatre-Dopera-Spatial.pdf"
+        }
+      ],
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-ai-and-art-1.webp",
+      "imageCredit": "Image: AI Brief",
+      "series": {
+        "id": "ai-and-art",
+        "title": "AI & Art",
+        "of": 3,
+        "part": 1
+      }
+    },
+    {
       "id": "2026-11-05-review-the-thinking-game",
-      "title": "The Thinking Game: a fluent, free look inside DeepMind, with the lab holding the camera",
+      "title": "The best free AI documentary",
       "summary": "Greg Kohs’s documentary follows Demis Hassabis and the AlphaFold team for five years. It is gripping science television, and it is also Google’s own release.",
       "category": "RESEARCH",
       "publishedAt": "2026-11-05T20:40:00Z",
@@ -81,7 +339,7 @@
     },
     {
       "id": "2026-11-05-review-her",
-      "title": "Her, twelve years on: the AI love story that saw the chatbot era coming",
+      "title": "Her saw it coming",
       "summary": "Spike Jonze’s 2013 film about a man who falls for his operating system looked like science fiction. Rewatched today, it looks like a product roadmap, and a warning about loneliness.",
       "category": "PRODUCTS",
       "publishedAt": "2026-11-05T20:39:00Z",
@@ -153,8 +411,8 @@
     },
     {
       "id": "2026-11-05-philosophy-3-existence-precedes-essence",
-      "title": "Sartre, Beauvoir and the algorithm that thinks it knows you",
-      "summary": "“Existence precedes essence.” Two existentialists insisted that people make themselves through their choices. That idea pushes back against software built to predict us.",
+      "title": "AI and Philosophy",
+      "summary": "Sartre and Beauvoir said we make ourselves through our choices. Software built to predict us says otherwise.",
       "author": "AI Brief editorial",
       "category": "POLICY",
       "publishedAt": "2026-11-05T20:02:00Z",
@@ -164,8 +422,9 @@
           "text": "Recommendation systems are built on a simple bet: what you did before predicts what you will want next. Jean-Paul Sartre and Simone de Beauvoir, the best-known French existentialists, built their philosophy on a challenge to that kind of thinking about people."
         },
         {
-          "type": "paragraph",
-          "text": "This is the final part of AI Brief’s series on AI and philosophy. Neither writer lived to see modern AI; Sartre died in 1980 and Beauvoir in 1986. What follows asks what their ideas can help us notice, not what they would have said."
+          "type": "image",
+          "url": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-ai-and-philosophy.webp",
+          "caption": "Simone de Beauvoir and Jean-Paul Sartre."
         },
         {
           "type": "heading",
@@ -217,7 +476,7 @@
         },
         {
           "type": "paragraph",
-          "text": "This series has moved from Turing’s test, through Searle’s room, to the existentialists’ insistence on choice. The machines have changed a great deal since 1950. The questions have aged remarkably well."
+          "text": "Turing asked whether machines can think; Searle asked whether they understand. Sartre and Beauvoir ask a question about us: whether we stay free when software claims to know who we are."
         },
         {
           "type": "heading",
@@ -235,18 +494,12 @@
         }
       ],
       "format": "EXPLAINER",
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-part-3.webp",
-      "imageCredit": "Image: AI Brief",
-      "series": {
-        "id": "ai-and-philosophy",
-        "title": "AI and philosophy",
-        "of": 3,
-        "part": 3
-      }
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-ai-and-philosophy.webp",
+      "imageCredit": "Image: AI Brief"
     },
     {
       "id": "2026-11-05-philosophy-2-the-chinese-room",
-      "title": "The Chinese Room: does a fluent answer mean the machine understands?",
+      "title": "The Chinese Room",
       "summary": "John Searle’s 1980 thought experiment argues that following rules for symbols is not the same as knowing what they mean. It matters more in the age of chatbots.",
       "author": "AI Brief editorial",
       "category": "RESEARCH",
@@ -255,10 +508,6 @@
         {
           "type": "paragraph",
           "text": "Imagine a person alone in a room. Notes written in Chinese are pushed in through a slot. The person does not read Chinese, but they have a rulebook that says, in effect: when you see these symbols, send back those symbols. From outside, the answers look like those of a fluent speaker."
-        },
-        {
-          "type": "paragraph",
-          "text": "This is the Chinese Room, a thought experiment first published in 1980 by the American philosopher John Searle (1932–2025). It is the second part of AI Brief’s series on AI and philosophy."
         },
         {
           "type": "heading",
@@ -301,10 +550,6 @@
           ]
         },
         {
-          "type": "paragraph",
-          "text": "Part 3 turns from machines to people: what Jean-Paul Sartre and Simone de Beauvoir might help us ask about living with systems that predict who we are."
-        },
-        {
           "type": "heading",
           "text": "Sources & further reading"
         },
@@ -315,18 +560,12 @@
         }
       ],
       "format": "EXPLAINER",
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-part-2.webp",
-      "imageCredit": "Image: AI Brief",
-      "series": {
-        "id": "ai-and-philosophy",
-        "title": "AI and philosophy",
-        "of": 3,
-        "part": 2
-      }
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-chinese-room.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-philosophy-1-can-a-machine-think",
-      "title": "Can a machine think? Turing’s question, 75 years on",
+      "title": "Can a machine think?",
       "summary": "In 1950 Alan Turing swapped an unanswerable question for a test. Chatbots now pass versions of it, and the argument he started is still open.",
       "author": "AI Brief editorial",
       "category": "RESEARCH",
@@ -335,10 +574,6 @@
         {
           "type": "paragraph",
           "text": "In 1950 the mathematician Alan Turing opened a paper in the journal Mind with a question that still sounds modern: “Can machines think?” He then set it aside as too vague to answer, and proposed something more practical."
-        },
-        {
-          "type": "paragraph",
-          "text": "This is the first part of AI Brief’s short series on what philosophy has to say about artificial intelligence."
         },
         {
           "type": "heading",
@@ -385,10 +620,6 @@
           ]
         },
         {
-          "type": "paragraph",
-          "text": "Part 2 looks at the most famous objection to Turing’s approach: a man alone in a room, answering questions in a language he does not speak."
-        },
-        {
           "type": "heading",
           "text": "Sources & further reading"
         },
@@ -404,18 +635,12 @@
         }
       ],
       "format": "EXPLAINER",
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-part-1.webp",
-      "imageCredit": "Image: AI Brief",
-      "series": {
-        "id": "ai-and-philosophy",
-        "title": "AI and philosophy",
-        "of": 3,
-        "part": 1
-      }
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-turing-test.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-why-chatbots-guess",
-      "title": "Why chatbots guess instead of saying “I don’t know”",
+      "title": "Why chatbots guess",
       "summary": "A 2025 research paper argues that the way models are trained and scored rewards a confident guess over an honest admission of uncertainty.",
       "author": "AI Brief editorial",
       "category": "RESEARCH",
@@ -486,7 +711,7 @@
     },
     {
       "id": "2026-11-05-prompt-injection-explained",
-      "title": "Prompt injection: when the page you share starts giving orders",
+      "title": "When a web page gives orders",
       "summary": "Text hidden in an email, web page or file can steer an AI assistant. OWASP ranks prompt injection first among risks for language-model applications.",
       "author": "AI Brief editorial",
       "category": "BUILDERS",
@@ -562,7 +787,7 @@
     },
     {
       "id": "2026-11-05-what-a-context-window-holds",
-      "title": "What fits in a chatbot’s memory, and what quietly falls out",
+      "title": "What AI forgets",
       "summary": "A model’s context window is everything it can consider at once: your instructions, the conversation, attached files and its own reply.",
       "author": "AI Brief editorial",
       "category": "PRODUCTS",
@@ -629,7 +854,7 @@
     },
     {
       "id": "2026-11-05-read-the-model-card",
-      "title": "Before you rely on an AI model, read its model card",
+      "title": "Read the label first",
       "summary": "Model cards describe what a model is for, how it was tested and where it falls short. Here is what to look for.",
       "author": "AI Brief editorial",
       "category": "RESEARCH",
@@ -698,7 +923,7 @@
     },
     {
       "id": "2026-11-05-cloned-voice-calls",
-      "title": "A loved one calls in a panic. Check before you send money.",
+      "title": "Don’t trust the voice",
       "summary": "A short clip is enough for voice-cloning software to imitate someone. The US Federal Trade Commission’s advice: don’t trust the voice, call back on a number you know.",
       "author": "AI Brief editorial",
       "category": "POLICY",
@@ -766,7 +991,7 @@
     },
     {
       "id": "2026-11-05-what-happens-to-your-chats",
-      "title": "What happens to your chats with an AI assistant",
+      "title": "Who reads your chats?",
       "summary": "Chats may be kept, reviewed by people or used to improve the service. Settings can change that, but not everything. Here is what to check.",
       "author": "AI Brief editorial",
       "category": "PRODUCTS",
@@ -835,7 +1060,7 @@
     },
     {
       "id": "2026-11-05-eu-ai-act-risk-levels",
-      "title": "The EU AI Act in four risk levels, with the dates that now apply",
+      "title": "EU AI Act: the clock is ticking",
       "summary": "Europe’s AI law sorts systems by risk. The rules for high-risk systems now start in December 2027, later than first planned.",
       "author": "AI Brief editorial",
       "category": "POLICY",
@@ -902,7 +1127,7 @@
     },
     {
       "id": "2026-11-05-retrieval-or-fine-tuning",
-      "title": "Retrieval or fine-tuning? Two ways to teach a model about your work",
+      "title": "Teach it or tell it?",
       "summary": "Fine-tuning changes what a model knows. Retrieval hands it the right documents at the moment it answers. They solve different problems.",
       "author": "AI Brief editorial",
       "category": "BUILDERS",
@@ -973,7 +1198,7 @@
     },
     {
       "id": "2026-11-05-ai-text-detectors",
-      "title": "Why “AI detectors” are a poor judge of who wrote an essay",
+      "title": "AI detectors get it wrong",
       "summary": "Research shows that tools claiming to spot machine-written text can wrongly flag non-native English writers and can be fooled by simple rewording.",
       "author": "AI Brief editorial",
       "category": "RESEARCH",
@@ -1045,7 +1270,7 @@
     },
     {
       "id": "2026-11-05-who-owns-ai-made-work",
-      "title": "Who owns a picture made with AI? The US Copyright Office’s answer",
+      "title": "Who owns AI art?",
       "summary": "Prompts alone are not enough for copyright, the Office concluded. Human creative choices in the final work still count.",
       "author": "AI Brief editorial",
       "category": "POLICY",
@@ -1124,7 +1349,7 @@
     },
     {
       "id": "2026-10-04-141708-before-an-ai-agent-acts-decide-what-it-may-do",
-      "title": "Before an AI agent acts, decide what it may do",
+      "title": "Leash your AI agent",
       "summary": "Useful agents need clear limits. Check the tools, account permissions and approval steps before letting software act on your behalf.",
       "author": "AI Brief editorial",
       "category": "BUILDERS",
@@ -1232,7 +1457,7 @@
     },
     {
       "id": "2026-10-04-141707-when-ai-answers-from-your-files-follow-the-evidence",
-      "title": "When AI answers from your files, follow the evidence",
+      "title": "Follow the evidence",
       "summary": "Document-connected AI can shorten the route to an answer. Its usefulness still depends on the passage, date, context and access behind each citation.",
       "author": "AI Brief editorial",
       "category": "RESEARCH",
@@ -1345,7 +1570,7 @@
     },
     {
       "id": "2026-10-04-141706-what-an-image-s-content-credentials-can-tell-you",
-      "title": "What an image's Content Credentials can tell you",
+      "title": "Is this photo real?",
       "summary": "A signed image history can show useful information about creation and edits. Learn what it establishes, what it leaves open and how to check the claim beside it.",
       "author": "AI Brief editorial",
       "category": "POLICY",
@@ -1458,7 +1683,7 @@
     },
     {
       "id": "2026-10-03-trust-ai",
-      "title": "AI is useful. Knowing when to trust it is the real skill.",
+      "title": "When to trust AI",
       "summary": "A practical way to decide where a model helps, where it needs checking, and where a person should keep the final say.",
       "author": "AI Brief editorial",
       "category": "PRODUCTS",
@@ -1510,7 +1735,7 @@
     },
     {
       "id": "2026-10-03-model-scores",
-      "title": "A model score is a starting point, not a verdict.",
+      "title": "Scores lie",
       "summary": "Benchmarks are useful evidence. The question is whether they measure the work you actually need a model to do.",
       "author": "AI Brief editorial",
       "category": "RESEARCH",
@@ -1566,7 +1791,7 @@
     },
     {
       "id": "2026-10-03-open-weights",
-      "title": "What “open weights” actually gives you",
+      "title": "Open weights, explained",
       "summary": "A downloadable model is a useful starting point. Its license and the rest of the system still deserve a careful read.",
       "author": "AI Brief editorial",
       "category": "BUILDERS",
@@ -1622,7 +1847,7 @@
     },
     {
       "id": "2026-10-03-human-oversight",
-      "title": "Keep a human decision in the loop",
+      "title": "Keep a human in charge",
       "summary": "Oversight works best when someone has the context, authority, and time to challenge the system.",
       "author": "AI Brief editorial",
       "category": "POLICY",
@@ -1673,7 +1898,7 @@
     },
     {
       "id": "2026-10-03-small-models",
-      "title": "When a smaller model is the better choice",
+      "title": "Small is fast",
       "summary": "Choose the smallest system that does the job reliably. Measure the tradeoffs before assuming that bigger is better.",
       "author": "AI Brief editorial",
       "category": "PRODUCTS",
@@ -1724,7 +1949,7 @@
     },
     {
       "id": "2026-10-03-check-the-source",
-      "title": "Read the source before you share the story",
+      "title": "Check the source",
       "summary": "A short checklist for separating a research finding, a product announcement, and somebody’s interpretation of them.",
       "author": "AI Brief editorial",
       "category": "RESEARCH",
