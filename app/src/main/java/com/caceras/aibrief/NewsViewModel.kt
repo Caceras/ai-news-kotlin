@@ -2,7 +2,12 @@ package com.caceras.aibrief
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.caceras.aibrief.data.FeedFreshness
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
@@ -33,13 +38,23 @@ data class NewsUiState(
     val lastUpdated: Instant? = null,
 )
 
-class NewsViewModel(application: Application) : AndroidViewModel(application) {
+/** Reads a topic saved by [NewsViewModel.selectCategory], falling back to all topics. */
+internal fun restoredCategory(saved: String?): NewsCategory =
+    NewsCategory.entries.firstOrNull { it.name == saved } ?: NewsCategory.ALL
+
+class NewsViewModel(
+    application: Application,
+    private val savedState: SavedStateHandle,
+) : AndroidViewModel(application) {
     private val repository = NewsRepository(application)
     private val saveLock = Mutex()
     // Starts empty and refreshing. The device's copy is read from disk off the
     // main thread so a cold start never blocks the first frame on storage.
+    // The chosen topic is restored after the system reclaims the app in the
+    // background, so returning to it does not silently reset the filter.
     private val _uiState = MutableStateFlow(
-        NewsUiState(articles = emptyList(), savedArticles = emptyList(), isLoading = true, isRefreshing = true),
+        NewsUiState(articles = emptyList(), savedArticles = emptyList(), isLoading = true, isRefreshing = true,
+            selectedCategory = restoredCategory(savedState[TOPIC_KEY])),
     )
     val uiState = _uiState.asStateFlow()
 
@@ -94,6 +109,7 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun selectCategory(category: NewsCategory) {
+        savedState[TOPIC_KEY] = category.name
         _uiState.value = _uiState.value.copy(selectedCategory = category)
     }
 
@@ -112,7 +128,15 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private companion object {
-        const val OFFLINE_NOTICE = "Couldn't reach the latest edition. Showing the copy on this device."
+    companion object {
+        /** Builds the view model without reflection, so R8 needs no keep rule for its constructor. */
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                NewsViewModel(this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!,
+                    createSavedStateHandle())
+            }
+        }
+        private const val TOPIC_KEY = "topic"
+        private const val OFFLINE_NOTICE = "Couldn't reach the latest edition. Showing the copy on this device."
     }
 }

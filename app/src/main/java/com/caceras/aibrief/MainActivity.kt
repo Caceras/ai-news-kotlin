@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AiBriefTheme {
-                val newsViewModel: NewsViewModel = viewModel()
+                val newsViewModel: NewsViewModel = viewModel(factory = NewsViewModel.Factory)
                 val updateViewModel: UpdateViewModel = viewModel()
                 AiBriefApp(newsViewModel, updateViewModel)
             }
@@ -114,8 +114,14 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     var selectedArticleId by rememberSaveable { mutableStateOf<String?>(null) }
     var searchShown by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
-    val selectedArticle = (state.articles + state.savedArticles)
+    // The open story stays on screen when it leaves both lists, such as
+    // removing a saved story the current edition no longer carries, so the
+    // reader can save it again instead of being thrown back to the feed.
+    var lastShownArticle by remember { mutableStateOf<NewsArticle?>(null) }
+    val listedArticle = (state.articles + state.savedArticles)
         .firstOrNull { it.id == selectedArticleId }
+    val selectedArticle = listedArticle ?: lastShownArticle?.takeIf { it.id == selectedArticleId }
+    SideEffect { if (listedArticle != null) lastShownArticle = listedArticle }
     val pagerState = rememberPagerState(initialPage = currentTab.ordinal,
         pageCount = { NavTab.entries.size })
     val scope = rememberCoroutineScope()
@@ -144,6 +150,11 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
             snackbar.currentSnackbarData?.dismiss()
             snackbar.showSnackbar(message, duration = SnackbarDuration.Short)
         }
+    }
+    // A story restored after the app was reclaimed, or dropped by a newer
+    // edition, must not reopen later out of nowhere once the device copy loads.
+    LaunchedEffect(state.isLoading, selectedArticle) {
+        if (!state.isLoading && selectedArticle == null) selectedArticleId = null
     }
     LaunchedEffect(pagerState.settledPage) { currentTab = NavTab.entries[pagerState.settledPage] }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
