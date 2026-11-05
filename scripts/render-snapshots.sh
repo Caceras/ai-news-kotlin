@@ -15,7 +15,7 @@ sed -i '0,/id("org.jetbrains.kotlin.plugin.compose")$/s//id("org.jetbrains.kotli
 sed -i 's/^private fun \(Masthead\|BottomNavigation\|FeedScreen\|SavedScreen\|AboutScreen\)/internal fun \1/; s/^private enum class NavTab/internal enum class NavTab/' \
   app/src/main/java/com/caceras/aibrief/MainActivity.kt
 mkdir -p app/src/test/java/com/caceras/aibrief/snap
-cp "$repo/scripts/snapshots/Snaps.kt.txt" app/src/test/java/com/caceras/aibrief/snap/Snaps.kt
+for f in "$repo"/scripts/snapshots/*.kt.txt; do cp "$f" "app/src/test/java/com/caceras/aibrief/snap/$(basename "$f" .txt)"; done
 ./gradlew -q recordPaparazziRelease --tests '*Snaps*'
 mkdir -p "$out"
 cp app/src/test/snapshots/images/*.png "$out/"

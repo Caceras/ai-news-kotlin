@@ -1,0 +1,127 @@
+package com.caceras.aibrief.snap
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.Modifier
+import app.cash.paparazzi.DeviceConfig
+import app.cash.paparazzi.Paparazzi
+import app.cash.paparazzi.Snapshot
+import app.cash.paparazzi.SnapshotHandler
+import com.android.resources.Density
+import com.android.resources.NightMode
+import com.caceras.aibrief.BottomNavigation
+import com.caceras.aibrief.FeedScreen
+import com.caceras.aibrief.Masthead
+import com.caceras.aibrief.NavTab
+import com.caceras.aibrief.NewsUiState
+import com.caceras.aibrief.SavedScreen
+import com.caceras.aibrief.data.FeedFreshness
+import com.caceras.aibrief.data.NewsArticle
+import com.caceras.aibrief.data.NewsCategory
+import com.caceras.aibrief.data.OwnerPosts
+import com.caceras.aibrief.data.StoryFormat
+import com.caceras.aibrief.ui.components.ArticleReader
+import com.caceras.aibrief.ui.theme.AiBriefTheme
+import com.caceras.aibrief.update.UpdateState
+import java.io.File
+import java.lang.reflect.Method
+import java.lang.reflect.Proxy
+import org.junit.Rule
+import org.junit.Test
+
+/**
+ * Google Play listing screenshots: 1080 × 1920 portrait, drawn from the real
+ * published edition in `content/posts.json`, never invented headlines.
+ */
+class StoreSnaps {
+    private val phone = DeviceConfig.PIXEL_6.copy(
+        screenWidth = 1080, screenHeight = 1920, density = Density.XXHIGH, softButtons = false,
+    )
+
+    /**
+     * Paparazzi's own writer saves RGBA; Play wants the
+     * full 1080 × 1920 as 24-bit PNG without alpha, so frames are saved here.
+     * Unit tests compile against android.jar, which hides java.awt, so the
+     * handler is a reflective proxy.
+     */
+    private val fullSize: SnapshotHandler = proxy(SnapshotHandler::class.java) { method, args ->
+        if (method.name != "newFrameHandler") return@proxy null
+        val name = (args!![0] as Snapshot).name
+        proxy(SnapshotHandler.FrameHandler::class.java) { m, a ->
+            if (m.name == "handle") saveRgb(a!![0], File("src/test/snapshots/images/store-$name.png"))
+            null
+        }
+    }
+
+    private fun <T> proxy(type: Class<T>, body: (Method, Array<Any?>?) -> Any?): T =
+        type.cast(Proxy.newProxyInstance(type.classLoader, arrayOf(type)) { _, m, a -> body(m, a) })
+
+    private fun saveRgb(image: Any?, out: File) {
+        val cls = Class.forName("java.awt.image.BufferedImage")
+        val w = cls.getMethod("getWidth").invoke(image) as Int
+        val h = cls.getMethod("getHeight").invoke(image) as Int
+        val rgb = cls.getConstructor(Int::class.java, Int::class.java, Int::class.java).newInstance(w, h, 1) // TYPE_INT_RGB
+        val g = cls.getMethod("createGraphics").invoke(rgb)
+        val graphics = Class.forName("java.awt.Graphics")
+        graphics.getMethod("drawImage", Class.forName("java.awt.Image"), Int::class.java, Int::class.java,
+            Class.forName("java.awt.image.ImageObserver")).invoke(g, image, 0, 0, null)
+        graphics.getMethod("dispose").invoke(g)
+        out.parentFile.mkdirs()
+        Class.forName("javax.imageio.ImageIO").getMethod("write",
+            Class.forName("java.awt.image.RenderedImage"), String::class.java, File::class.java).invoke(null, rgb, "png", out)
+    }
+
+    @get:Rule
+    val paparazzi = Paparazzi(deviceConfig = phone, maxPercentDifference = 100.0,
+        useDeviceResolution = true, snapshotHandler = fullSize)
+
+    private val edition: List<NewsArticle> = run {
+        val file = listOf(File("../content/posts.json"), File("content/posts.json")).first { it.exists() }
+        OwnerPosts.parse(file.readText()).sortedByDescending { it.publishedAt }.map { p ->
+            NewsArticle(
+                id = "post-${p.id}", title = p.title, source = "AI Brief", author = p.author, url = "",
+                imageUrl = p.imageUrl, publishedAt = p.publishedAt, summary = p.summary, category = p.category,
+                blocks = p.blocks, format = p.format, kicker = p.kicker, gallery = p.gallery,
+                authorImageUrl = p.authorImageUrl, authorRole = p.authorRole, theme = p.theme,
+                sponsor = p.sponsor, updatedAt = p.updatedAt,
+            )
+        }
+    }
+
+    private fun feed(name: String, scrolledTo: Int = 0) = paparazzi.snapshot(name) {
+        AiBriefTheme {
+            Column(Modifier.fillMaxSize()) {
+                Masthead(false, true, NewsCategory.ALL, {}, {}, {}, {})
+                Box(Modifier.weight(1f)) {
+                    FeedScreen(NewsUiState(edition, emptyList(), freshness = FeedFreshness.LIVE),
+                        UpdateState.Idle, rememberLazyListState(scrolledTo), false, "", {}, {}, {}, {}, {}, {}, {})
+                }
+                BottomNavigation(NavTab.HOME) {}
+            }
+        }
+    }
+
+    @Test fun store01Feed() = feed("01-feed")
+
+    @Test fun store02Reader() = paparazzi.snapshot("02-reader") {
+        AiBriefTheme { ArticleReader(edition.first(), true, {}, {}, {}, {}) }
+    }
+
+    @Test fun store03MoreStories() = feed("03-more-stories", scrolledTo = 3)
+
+    @Test fun store04Saved() = paparazzi.snapshot("04-saved") {
+        AiBriefTheme { Column(Modifier.fillMaxSize()) {
+            Masthead(false, false, NewsCategory.ALL, {}, {}, null, null)
+            Box(Modifier.weight(1f)) { SavedScreen(edition.take(3), false, rememberLazyListState(), {}, {}) }
+            BottomNavigation(NavTab.SAVED) {} } }
+    }
+
+    @Test fun store05Dark() {
+        paparazzi.unsafeUpdateConfig(phone.copy(nightMode = NightMode.NIGHT))
+        paparazzi.snapshot("05-guide-dark") {
+            AiBriefTheme { ArticleReader(edition.first { it.format == StoryFormat.GUIDE }, false, {}, {}, {}, {}) }
+        }
+    }
+}
