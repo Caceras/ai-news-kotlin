@@ -59,14 +59,19 @@ import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -235,12 +240,18 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                 if (article != null) {
                     ArticleReader(article, state.savedArticles.any { it.id == article.id },
                         onToggleSaved = {
-                            val wasSaved = state.savedArticles.any { it.id == article.id }
+                            val shelfIndex = state.savedArticles.indexOfFirst { it.id == article.id }
                             viewModel.toggleSaved(article)
                             scope.launch {
                                 snackbar.currentSnackbarData?.dismiss()
-                                snackbar.showSnackbar(if (wasSaved) "Removed from your reading list"
-                                    else "Saved for offline reading", duration = SnackbarDuration.Short)
+                                if (shelfIndex < 0) {
+                                    snackbar.showSnackbar("Saved for offline reading",
+                                        duration = SnackbarDuration.Short)
+                                } else if (snackbar.showSnackbar("Removed from your reading list",
+                                        actionLabel = "Undo", duration = SnackbarDuration.Short) ==
+                                    SnackbarResult.ActionPerformed) {
+                                    viewModel.restoreSaved(article, shelfIndex)
+                                }
                             }
                         },
                         onShare = { context.shareArticle(article) },
@@ -278,7 +289,10 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                     onInstallUpdate = updateViewModel::downloadAndInstall,
                                     onGrantInstallPermission = updateViewModel::requestInstallPermission,
                                     onDismissUpdate = updateViewModel::dismiss,
-                                    onAbout = { selectTab(NavTab.ABOUT) })
+                                    onAbout = { selectTab(NavTab.ABOUT) },
+                                    onRefresh = {
+                                        viewModel.refresh(userRequested = true); updateViewModel.checkForUpdate()
+                                    })
                                 NavTab.SAVED -> SavedScreen(state.savedArticles, state.isLoading, savedListState,
                                     onOpenArticle = { selectedArticleId = it.id },
                                     onBrowse = { selectTab(NavTab.HOME) })
@@ -382,6 +396,8 @@ private fun BottomNavigation(activeTab: NavTab, onSelect: (NavTab) -> Unit) {
     }
 }
 
+// Pull-to-refresh is still marked experimental in Material 3 1.3.
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FeedScreen(
     state: NewsUiState,
@@ -396,9 +412,15 @@ private fun FeedScreen(
     onGrantInstallPermission: () -> Unit,
     onDismissUpdate: () -> Unit,
     onAbout: () -> Unit,
+    onRefresh: () -> Unit,
 ) {
     val c = Brief.colors
     val focus = remember { FocusRequester() }
+    // The spinner under the finger shows only for a refresh the reader pulled
+    // for; the silent launch and resume refreshes use the masthead button.
+    var pulled by remember { mutableStateOf(false) }
+    LaunchedEffect(state.isRefreshing, pulled) { if (!state.isRefreshing) pulled = false }
+    val pullState = rememberPullToRefreshState()
     val keyboard = LocalSoftwareKeyboardController.current
     // Ticks once a minute while the app is in front, so "Updated 5 min ago"
     // never goes stale on screen, and stops in the background.
@@ -444,78 +466,87 @@ private fun FeedScreen(
                     .focusRequester(focus),
             )
         }
-        LazyColumn(state = listState, modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(bottom = Space.xl)) {
-            item("update") {
-                Box(Modifier.padding(horizontal = Space.gutter)) {
-                    UpdateBanner(updateState, onInstallUpdate, onGrantInstallPermission, onDismissUpdate)
+        val pullRefreshing = pulled && state.isRefreshing
+        // Search filters the stories already on screen, so there is nothing to pull for.
+        Box(Modifier.weight(1f).pullToRefresh(pullRefreshing, pullState, enabled = !searchShown) {
+            pulled = true
+            onRefresh()
+        }) {
+            LazyColumn(state = listState, modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = Space.xl)) {
+                item("update") {
+                    Box(Modifier.padding(horizontal = Space.gutter)) {
+                        UpdateBanner(updateState, onInstallUpdate, onGrantInstallPermission, onDismissUpdate)
+                    }
                 }
-            }
-            if (!searchShown) item("edition") {
-                val date = state.articles.maxOfOrNull { it.publishedAt }
-                Row(Modifier.fillMaxWidth().padding(horizontal = Space.gutter, vertical = Space.s),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Text(date?.let { DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.US)
-                        .withZone(ZoneId.systemDefault()).format(it).uppercase(Locale.US) } ?: "AI BRIEF",
-                        style = Brief.type.tag, color = c.inkMuted, modifier = Modifier.weight(1f))
-                    Text(editionLabel(state.freshness, state.lastUpdated, now), style = Brief.type.meta,
-                        color = c.inkMuted)
+                if (!searchShown) item("edition") {
+                    val date = state.articles.maxOfOrNull { it.publishedAt }
+                    Row(Modifier.fillMaxWidth().padding(horizontal = Space.gutter, vertical = Space.s),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Text(date?.let { DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.US)
+                            .withZone(ZoneId.systemDefault()).format(it).uppercase(Locale.US) } ?: "AI BRIEF",
+                            style = Brief.type.tag, color = c.inkMuted, modifier = Modifier.weight(1f))
+                        Text(editionLabel(state.freshness, state.lastUpdated, now), style = Brief.type.meta,
+                            color = c.inkMuted)
+                    }
                 }
-            }
-            if (searchShown) {
-                item("results-label") {
-                    Text("${articles.size} ${if (articles.size == 1) "story" else "stories"}" +
-                        if (query.isBlank()) " in AI Brief" else " found",
-                        style = Brief.type.meta, color = c.inkMuted,
-                        // TalkBack announces the new count as the reader types.
-                        modifier = Modifier.padding(horizontal = Space.gutter, vertical = Space.s)
-                            .semantics { liveRegion = LiveRegionMode.Polite })
-                }
-                items(articles, key = { "result-${it.id}" }) { article ->
-                    RowCard(article) { onOpenArticle(article) }
-                }
-            } else {
-                items(slots, key = { it.key }, contentType = { it::class }) { slot ->
-                    when (slot) {
-                        is FeedSlot.Lead -> LeadStory(slot.article) { onOpenArticle(slot.article) }
-                        is FeedSlot.Ribbon -> SectionRibbon(slot.title, breaking = slot.breaking)
-                        is FeedSlot.Headline -> Box(Modifier.padding(top = Space.s)) {
-                            HeadlineCard(slot.article) { onOpenArticle(slot.article) }
-                        }
-                        is FeedSlot.Pair -> Box(Modifier.padding(top = Space.s)) {
-                            PairCards(slot.left, slot.right, onOpenArticle)
-                        }
-                        is FeedSlot.Row -> RowCard(slot.article) { onOpenArticle(slot.article) }
-                        is FeedSlot.OpinionRail -> OpinionRail(slot.articles, onOpenArticle)
-                        is FeedSlot.Designed -> DesignedCard(slot.article, Modifier.padding(Space.gutter)) {
-                            onOpenArticle(slot.article)
+                if (searchShown) {
+                    item("results-label") {
+                        Text("${articles.size} ${if (articles.size == 1) "story" else "stories"}" +
+                            if (query.isBlank()) " in AI Brief" else " found",
+                            style = Brief.type.meta, color = c.inkMuted,
+                            // TalkBack announces the new count as the reader types.
+                            modifier = Modifier.padding(horizontal = Space.gutter, vertical = Space.s)
+                                .semantics { liveRegion = LiveRegionMode.Polite })
+                    }
+                    items(articles, key = { "result-${it.id}" }) { article ->
+                        RowCard(article) { onOpenArticle(article) }
+                    }
+                } else {
+                    items(slots, key = { it.key }, contentType = { it::class }) { slot ->
+                        when (slot) {
+                            is FeedSlot.Lead -> LeadStory(slot.article) { onOpenArticle(slot.article) }
+                            is FeedSlot.Ribbon -> SectionRibbon(slot.title, breaking = slot.breaking)
+                            is FeedSlot.Headline -> Box(Modifier.padding(top = Space.s)) {
+                                HeadlineCard(slot.article) { onOpenArticle(slot.article) }
+                            }
+                            is FeedSlot.Pair -> Box(Modifier.padding(top = Space.s)) {
+                                PairCards(slot.left, slot.right, onOpenArticle)
+                            }
+                            is FeedSlot.Row -> RowCard(slot.article) { onOpenArticle(slot.article) }
+                            is FeedSlot.OpinionRail -> OpinionRail(slot.articles, onOpenArticle)
+                            is FeedSlot.Designed -> DesignedCard(slot.article, Modifier.padding(Space.gutter)) {
+                                onOpenArticle(slot.article)
+                            }
                         }
                     }
                 }
-            }
-            if (articles.isEmpty()) {
-                if (state.isLoading) item("loading") { LoadingIndicator() }
-                else item("empty") {
-                    Column(Modifier.fillMaxWidth().padding(horizontal = Space.xl, vertical = Space.section)) {
-                        Text(if (query.isBlank()) "More stories are on their way." else "No stories found.",
-                            style = Brief.type.headline, color = c.ink)
+                if (articles.isEmpty()) {
+                    if (state.isLoading) item("loading") { LoadingIndicator() }
+                    else item("empty") {
+                        Column(Modifier.fillMaxWidth().padding(horizontal = Space.xl, vertical = Space.section)) {
+                            Text(if (query.isBlank()) "More stories are on their way." else "No stories found.",
+                                style = Brief.type.headline, color = c.ink)
+                            Spacer(Modifier.height(Space.m))
+                            Text("Try a different topic or search term.", style = Brief.type.deck, color = c.inkMuted)
+                        }
+                    }
+                }
+                if (!searchShown) item("editorial-note") {
+                    Column(Modifier.fillMaxWidth().padding(top = Space.xl).background(c.masthead)
+                        .padding(horizontal = Space.gutter, vertical = Space.xl)) {
+                        BrandMark(c.onMasthead)
                         Spacer(Modifier.height(Space.m))
-                        Text("Try a different topic or search term.", style = Brief.type.deck, color = c.inkMuted)
+                        Text("Original writing. Primary sources. No noise.", style = Brief.type.headlineSmall,
+                            color = c.onMasthead)
+                        Text("Meet AI Brief  →", style = Brief.type.button, color = c.onMasthead,
+                            modifier = Modifier.minimumInteractiveComponentSize().spokenAs("Meet AI Brief")
+                                .clickable(role = Role.Button, onClick = onAbout))
                     }
                 }
             }
-            if (!searchShown) item("editorial-note") {
-                Column(Modifier.fillMaxWidth().padding(top = Space.xl).background(c.masthead)
-                    .padding(horizontal = Space.gutter, vertical = Space.xl)) {
-                    BrandMark(c.onMasthead)
-                    Spacer(Modifier.height(Space.m))
-                    Text("Original writing. Primary sources. No noise.", style = Brief.type.headlineSmall,
-                        color = c.onMasthead)
-                    Text("Meet AI Brief  →", style = Brief.type.button, color = c.onMasthead,
-                        modifier = Modifier.minimumInteractiveComponentSize().spokenAs("Meet AI Brief")
-                            .clickable(role = Role.Button, onClick = onAbout))
-                }
-            }
+            PullToRefreshDefaults.Indicator(state = pullState, isRefreshing = pullRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter), containerColor = c.card, color = c.accent)
         }
     }
 }

@@ -35,4 +35,22 @@ class SavedShelfTest {
         assertEquals("new", shelf.first().id)
         assertEquals("${MAX_SAVED_ARTICLES - 1}", shelf.last().id)
     }
+
+    @Test
+    fun undoingARemovalPutsThePostBackWhereItWas() {
+        val shelf = restoredSaved(listOf(article("a"), article("c")), article("b"), index = 1)
+        assertEquals(listOf("a", "b", "c"), shelf.map { it.id })
+    }
+
+    @Test
+    fun undoingAtAnIndexPastTheEndAppends() {
+        val shelf = restoredSaved(listOf(article("a")), article("b"), index = 5)
+        assertEquals(listOf("a", "b"), shelf.map { it.id })
+    }
+
+    @Test
+    fun undoingTwiceDoesNotDuplicateThePost() {
+        val shelf = restoredSaved(listOf(article("a"), article("b")), article("b"), index = 0)
+        assertEquals(listOf("a", "b"), shelf.map { it.id })
+    }
 }
