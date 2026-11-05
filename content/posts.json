@@ -105,7 +105,8 @@
           "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-agent-permissions.webp"
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-agent-permissions.webp",
+      "format": "EXPLAINER"
     },
     {
       "id": "2026-10-04-141707-when-ai-answers-from-your-files-follow-the-evidence",
@@ -216,7 +217,8 @@
           "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-grounded-answers.webp"
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-grounded-answers.webp",
+      "format": "EXPLAINER"
     },
     {
       "id": "2026-10-04-141706-what-an-image-s-content-credentials-can-tell-you",
@@ -327,7 +329,8 @@
           "url": "https://deepmind.google/blog/identifying-ai-generated-images-with-synthid/"
         }
       ],
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-image-provenance.webp"
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-image-provenance.webp",
+      "format": "EXPLAINER"
     },
     {
       "id": "2026-10-03-trust-ai",
@@ -375,7 +378,9 @@
           "text": "Primary source: NIST AI Risk Management Framework",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
-      ]
+      ],
+      "format": "GUIDE",
+      "theme": "SKY"
     },
     {
       "id": "2026-10-03-model-scores",
@@ -428,7 +433,8 @@
           "text": "Primary source: Google classification metrics",
           "url": "https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall"
         }
-      ]
+      ],
+      "format": "EXPLAINER"
     },
     {
       "id": "2026-10-03-open-weights",
@@ -481,7 +487,8 @@
           "text": "Further reading: Hugging Face model cards",
           "url": "https://huggingface.co/docs/hub/model-cards"
         }
-      ]
+      ],
+      "format": "EXPLAINER"
     },
     {
       "id": "2026-10-03-human-oversight",
@@ -529,7 +536,8 @@
           "text": "Primary source: NIST AI Risk Management Framework",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
-      ]
+      ],
+      "format": "EXPLAINER"
     },
     {
       "id": "2026-10-03-small-models",
@@ -577,7 +585,8 @@
           "text": "Technical reference: Transformers quantization",
           "url": "https://huggingface.co/docs/transformers/quantization/overview"
         }
-      ]
+      ],
+      "format": "EXPLAINER"
     },
     {
       "id": "2026-10-03-check-the-source",
@@ -625,7 +634,9 @@
           "text": "Technical reference: Hugging Face model cards",
           "url": "https://huggingface.co/docs/hub/model-cards"
         }
-      ]
+      ],
+      "format": "GUIDE",
+      "theme": "MINT"
     }
   ]
 }

@@ -10,15 +10,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import com.caceras.aibrief.ui.theme.Brief
+import com.caceras.aibrief.ui.theme.Space
 
 /**
  * A single quiet line offering the newest direct-install build.
@@ -68,7 +67,7 @@ fun UpdateBanner(
 
             UpdateState.Idle -> Unit
         }
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(Space.xl))
     }
 }
 
@@ -88,19 +87,19 @@ private fun ActionRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onBackground,
+                style = Brief.type.button,
+                color = Brief.colors.ink,
             )
             detail?.let {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Space.xs))
                 Text(
                     text = it,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = Brief.type.meta,
+                    color = Brief.colors.inkMuted,
                 )
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Space.l)) {
             BannerAction(text = actionText, emphasised = true, onClick = onAction)
             BannerAction(text = "later", emphasised = false, onClick = onDismiss)
         }
@@ -113,15 +112,15 @@ private fun ProgressRow(progress: Float) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "downloading update",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onBackground,
+            style = Brief.type.button,
+            color = Brief.colors.ink,
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(Space.s))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(1.dp)
-                .background(MaterialTheme.colorScheme.outlineVariant),
+                .height(Space.hairline)
+                .background(Brief.colors.rule),
         ) {
             // A zero-width fill is skipped rather than laid out at fraction 0.
             val completed = progress.coerceIn(0f, 1f)
@@ -129,8 +128,8 @@ private fun ProgressRow(progress: Float) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(fraction = completed)
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.onBackground),
+                        .height(Space.hairline)
+                        .background(Brief.colors.ink),
                 )
             }
         }
@@ -145,16 +144,15 @@ private fun BannerAction(
 ) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = if (emphasised) FontWeight.Medium else FontWeight.Normal,
+        style = if (emphasised) Brief.type.button else Brief.type.deck,
         color = if (emphasised) {
-            MaterialTheme.colorScheme.onBackground
+            Brief.colors.ink
         } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+            Brief.colors.inkMuted
         },
         modifier = Modifier
             .minimumInteractiveComponentSize()
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(vertical = 4.dp),
+            .padding(vertical = Space.xs),
     )
 }

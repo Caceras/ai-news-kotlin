@@ -11,6 +11,14 @@ from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 POSTS = ROOT / "content/posts.json"
 CATEGORIES = {"RESEARCH", "PRODUCTS", "POLICY", "BUILDERS", "ALL"}
+# Story formats and card themes the app knows. Each has one fixed look in the
+# app (docs/DESIGN_SYSTEM.md); a post chooses one and never carries styling.
+FORMATS = {"NEWS", "BREAKING", "EXPLAINER", "OPINION", "GUIDE", "SPONSORED"}
+THEMES = {"SKY", "LILAC", "MINT", "PEACH", "OCEAN", "INDIGO", "BLUSH", "NAVY"}
+# Headline-style limits: short enough to read at a glance on a phone.
+TITLE_LIMIT = 120
+DECK_LIMIT = 220
+KICKER_LIMIT = 24
 
 
 def require(condition, message):
@@ -51,13 +59,14 @@ def validate(document):
         require(re.fullmatch(r"[a-z0-9][a-z0-9-]+", identifier), "Post ID is invalid")
         require(identifier not in ids, f"Duplicate post ID: {identifier}")
         ids.add(identifier)
-        text(post.get("title"), "Title", 180)
-        text(post.get("summary"), "Summary", 500)
-        text(post.get("author"), "Author", 120)
+        text(post.get("title"), "Headline", TITLE_LIMIT)
+        text(post.get("summary"), "Deck", DECK_LIMIT)
+        author = text(post.get("author"), "Author", 80)
         require(post.get("category") in CATEGORIES, "Unknown category")
-        instant(post.get("publishedAt"))
+        published = instant(post.get("publishedAt"))
         if post.get("imageUrl"):
             https_url(post["imageUrl"])
+        validate_presentation(post, author, published)
         blocks = post.get("blocks")
         require(isinstance(blocks, list) and blocks, "A post needs a readable body")
         sources = 0
@@ -83,12 +92,50 @@ def validate(document):
     return document
 
 
+def validate_presentation(post, author, published):
+    """The rules each story format must meet before it can be published."""
+    kind = post.get("format", "NEWS")
+    require(kind in FORMATS, f"Unknown story type: {kind}")
+    if post.get("kicker") is not None:
+        text(post["kicker"], "Kicker", KICKER_LIMIT)
+    gallery = post.get("gallery", [])
+    require(isinstance(gallery, list) and len(gallery) <= 2, "Add at most two extra collage pictures")
+    for url in gallery:
+        https_url(url)
+    if gallery:
+        require(kind == "BREAKING", "Only breaking news uses a picture collage")
+        require(post.get("imageUrl"), "A collage needs a cover picture first")
+    if post.get("authorImageUrl"):
+        https_url(post["authorImageUrl"])
+    if post.get("authorRole") is not None:
+        text(post["authorRole"], "Author role", 80)
+    if post.get("theme") is not None:
+        require(post["theme"] in THEMES, f"Unknown card theme: {post['theme']}")
+    if kind == "OPINION":
+        require("editorial" not in author.lower(), "A column is signed by a named person, not the desk")
+    if kind == "SPONSORED":
+        # Google Play and readers both need paid content labelled with who paid.
+        text(post.get("sponsor"), "Sponsor", 80)
+    else:
+        require(not post.get("sponsor"), "Only sponsored posts name a sponsor")
+    if post.get("updatedAt"):
+        require(instant(post["updatedAt"]) > published, "An update must come after publication")
+
+
 def body_blocks(body):
     blocks = []
     # The public editor sends real newlines in JSON, including on a phone.
     for paragraph in re.split(r"\n\s*\n", text(body, "Article body")):
         paragraph = paragraph.strip()
-        if paragraph.startswith("## "):
+        picture = re.fullmatch(r"!\[([^\]]*)\]\((https://[^)\s]+)\)", paragraph)
+        if picture:
+            caption = picture.group(1).strip()
+            block = {"type": "image", "url": https_url(picture.group(2))}
+            # GitHub names a pasted picture "image" or "Screenshot …"; that is not a caption.
+            if caption and caption.lower() != "image" and not caption.lower().startswith("screenshot"):
+                block["caption"] = caption
+            blocks.append(block)
+        elif paragraph.startswith("## "):
             blocks.append({"type": "heading", "text": paragraph[3:].strip()})
         elif paragraph.startswith("> "):
             blocks.append({"type": "quote", "text": paragraph[2:].strip()})
@@ -99,12 +146,11 @@ def body_blocks(body):
     return blocks
 
 
-def publish(draft):
-    require(isinstance(draft, dict), "The copied briefing is invalid")
-    title = text(draft.get("title"), "Title", 180)
-    date = instant(draft["publishedAt"]) if draft.get("publishedAt") else datetime.now(timezone.utc)
-    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:72] or "briefing"
-    identifier = date.strftime("%Y-%m-%d-%H%M%S-") + slug
+def iso(date):
+    return date.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def build_post(draft, identifier, date):
     sources = draft.get("sources")
     require(isinstance(sources, list) and sources, "Add at least one source")
     blocks = body_blocks(draft.get("body"))
@@ -115,25 +161,78 @@ def publish(draft):
         label = source.get("text") or urlsplit(url).hostname
         blocks.append({"type": "link", "text": text(label, "Source label", 200), "url": url})
     post = {
-        "id": identifier, "title": title,
-        "summary": text(draft.get("summary"), "Summary", 500),
-        "author": text(draft.get("author") or "AI Brief editorial", "Author", 120),
+        "id": identifier, "title": text(draft.get("title"), "Headline", TITLE_LIMIT),
+        "summary": text(draft.get("summary"), "Deck", DECK_LIMIT),
+        "author": text(draft.get("author") or "AI Brief editorial", "Author", 80),
         "category": draft.get("category", "ALL"),
-        "publishedAt": date.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "format": draft.get("format", "NEWS"),
+        "publishedAt": iso(date),
         "blocks": blocks,
     }
-    if draft.get("imageUrl"):
-        post["imageUrl"] = https_url(draft["imageUrl"])
-    document = json.loads(POSTS.read_text())
-    require(all(p["id"] != identifier for p in document["posts"]),
-            "This briefing is already published; edit it rather than creating a duplicate")
-    document["posts"].insert(0, post)
+    for key in ("imageUrl", "kicker", "gallery", "authorImageUrl", "authorRole", "theme", "sponsor",
+                "sourceIssue"):
+        if draft.get(key):
+            post[key] = draft[key]
+    return post
+
+
+def write(document):
     validate(document)
     # Replacement is atomic; a failed validation never touches the live file.
     temporary = POSTS.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n")
     temporary.replace(POSTS)
-    print(f"Validated and added {identifier}")
+
+
+def find(document, draft):
+    """The published post this draft revises: by its ID, or by the issue it came from."""
+    for index, post in enumerate(document["posts"]):
+        if draft.get("id") and post["id"] == draft["id"]:
+            return index
+        if draft.get("sourceIssue") and post.get("sourceIssue") == draft["sourceIssue"]:
+            return index
+    return None
+
+
+def publish(draft, now=None):
+    """Adds a new post, or revises the one it names. Returns (post ID, "published" or "updated")."""
+    require(isinstance(draft, dict), "The copied briefing is invalid")
+    now = now or datetime.now(timezone.utc)
+    document = json.loads(POSTS.read_text())
+    existing = find(document, draft)
+    if existing is None:
+        date = instant(draft["publishedAt"]) if draft.get("publishedAt") else now
+        title = text(draft.get("title"), "Headline", TITLE_LIMIT)
+        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:72] or "briefing"
+        identifier = date.strftime("%Y-%m-%d-%H%M%S-") + slug
+        require(all(p["id"] != identifier for p in document["posts"]),
+                "This briefing is already published; edit it rather than creating a duplicate")
+        document["posts"].insert(0, build_post(draft, identifier, date))
+        write(document)
+        print(f"Validated and added {identifier}")
+        return identifier, "published"
+    old = document["posts"][existing]
+    published = instant(draft["publishedAt"]) if draft.get("publishedAt") else instant(old["publishedAt"])
+    post = build_post(draft, old["id"], published)
+    # A revision of something readers have already seen is dated; a scheduled
+    # post that has not appeared yet is simply replaced.
+    if published < now:
+        post["updatedAt"] = iso(now)
+    document["posts"][existing] = post
+    document["posts"].sort(key=lambda p: p["publishedAt"], reverse=True)
+    write(document)
+    print(f"Validated and updated {old['id']}")
+    return old["id"], "updated"
+
+
+def unpublish(identifier=None, source_issue=None):
+    document = json.loads(POSTS.read_text())
+    index = find(document, {"id": identifier, "sourceIssue": source_issue})
+    require(index is not None, "There is no published story to remove")
+    removed = document["posts"].pop(index)
+    write(document)
+    print(f"Removed {removed['id']}")
+    return removed["id"]
 
 
 if __name__ == "__main__":

@@ -26,7 +26,9 @@ For the researched plan and official sources, read [docs/PLAY_LAUNCH_PLAN.md](do
 - [ ] News & Magazines category and self-declaration completed truthfully.
 - [ ] Every article shows its publisher, date and author when available; original posts include working primary-source links.
 - [ ] Launch content is useful and current; a real routine exists for new original writing. Offline explainers are visibly labeled.
-- [ ] Text, photographs, logos and graphics are owned or licensed. RSS availability alone is not permission.
+- [ ] Text, photographs, logos and graphics are owned or licensed. RSS availability alone is not permission. This includes pictures pasted into the issue form and breaking-news collages.
+- [ ] Paid content is published only as **Sponsored** (the app labels it with the sponsor on the card and in the story, and never leads with it). If you ever sell sponsorships, answer the Play Console **Ads** declaration accordingly.
+- [ ] Opinion columns are signed by a named person; the app labels them Opinion with an "author's own views" note.
 - [ ] In-app contact link and news declaration both use **https://github.com/Caceras/ai-news-kotlin/blob/main/CONTACT.md**.
 - [ ] Support email **rikicaceras@gmail.com** is correct and monitored.
 - [ ] Privacy policy loads publicly at **https://github.com/Caceras/ai-news-kotlin/blob/main/PRIVACY.md**, and the app links it.
@@ -40,6 +42,7 @@ For the researched plan and official sources, read [docs/PLAY_LAUNCH_PLAN.md](do
 - [ ] App icon: **512 × 512**, 32-bit PNG, at most 1,024 KB; follow Play icon rules.
 - [ ] Feature graphic: **1024 × 500**, JPEG or 24-bit PNG without alpha.
 - [ ] **At least two actual app screenshots** are required. Four 1080 × 1920 portrait screenshots are recommended for promotional eligibility, not the minimum listing requirement.
+- [ ] Screenshots retaken after the November 2026 redesign (headline-style feed, story types). Earlier screenshots in `docs/play` show the old design.
 - [ ] Screenshots show the real release candidate, no invented UI/reviews/awards. Dimensions are 320–3840 px and maximum side is at most twice the minimum side.
 
 ## Final quality gate

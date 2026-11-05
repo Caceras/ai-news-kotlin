@@ -5,19 +5,34 @@ feeds are disabled until their reuse permissions are checked.
 
 **Delivery status (4 October 2026):** the [publishing workflow](https://github.com/Caceras/ai-news-kotlin/actions/workflows/publish-post.yml), nine-article edition and featured image files are live on GitHub. The mobile editor is committed under `docs/editor.html`; GitHub Pages activation is still denied with HTTP 403 because the connection lacks the required site-settings access. Use the workflow directly while Pages is unavailable.
 
-## Publish without editing code
+## Publish from your phone: the issue form
 
-Tell Codex **“Publish this AI Brief article”** with your text, byline, topic and
-checked source links. Codex validates and commits the edition; no Android update
-is needed. You can also use [the mobile editor](https://caceras.github.io/ai-news-kotlin/editor.html):
-copy the completed briefing, open publishing, choose Run workflow on main, paste
-into Briefing and run it. A green check confirms publication.
+This is the newsroom while the app is on Google Play. No app update is needed.
 
-The workflow validates before writing and rejects duplicate submissions and
-invalid source links. The web editor prepares clipboard data only; publication
-requires the owner's GitHub access. Readers need no account.
+1. Open **[New issue → Publish a story](https://github.com/Caceras/ai-news-kotlin/issues/new?template=publish-story.yml)**
+   in the GitHub app or a browser.
+2. Pick the story type (News, Breaking, Explainer, Opinion, Guide, Sponsored), the topic, and fill in the
+   headline, deck, story and sources. Paste pictures straight into the Pictures, Author photo or Story fields.
+3. Submit. The **Publish from issue** workflow checks the story, saves the pictures (resized, as WebP, with
+   location and camera data removed) into `content/media/`, commits `content/posts.json`, comments
+   ✅ or ❌ with the reason, and closes the issue.
+4. Readers see it on their next refresh, usually within five minutes.
 
-Keep no more than 200 posts in the active edition. Ask Codex to archive older writing when needed; Git history and previously saved device copies can retain it.
+**To correct a story,** edit that issue and save; the same story is updated and dated "Updated …".
+**To take it down,** edit the issue and set **Action** to **Unpublish**.
+**To schedule,** fill in **Publish at** with a UTC time.
+
+Only issues opened and edited by the repository owner are acted on. Anyone else's are ignored.
+
+Each story type has one fixed look, described in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md). The checks that stop a
+story are: headline up to 120 characters, deck up to 220, kicker up to 24, at least one source link, a named
+person on every Opinion column, a named sponsor on every Sponsored post (and only there), a collage only on
+Breaking news (up to three pictures).
+
+The older **Publish a briefing** workflow (paste JSON from `docs/editor.html` into Run workflow) still works.
+
+Keep no more than 200 posts in the active edition. Ask Claude to archive older writing when needed; Git
+history and previously saved device copies keep it.
 
 The sections below describe the content format for developers.
 
@@ -84,7 +99,15 @@ Dates are UTC, in the form `2026-08-30T16:00:00Z`.
 | `summary` | ✅ | Standfirst under the headline. |
 | `author` | ✅ | Byline or publication name. |
 | `category` | | `RESEARCH`, `PRODUCTS`, `POLICY`, `BUILDERS`, or `ALL`. Anything unrecognised falls back to `ALL`. |
-| `imageUrl` | | Must be `https://`. |
+| `imageUrl` | | Must be `https://`. The cover. |
+| `format` | | `NEWS` (default), `BREAKING`, `EXPLAINER`, `OPINION`, `GUIDE`, `SPONSORED`. Unknown values read as `NEWS`. |
+| `kicker` | | Red lead-in before the headline, at most 24 characters. |
+| `gallery` | | Breaking only: up to two more `https://` pictures for the collage. |
+| `author`, `authorRole`, `authorImageUrl` | | Columns show the portrait and role. |
+| `theme` | | Guide and Sponsored card colour: `SKY`, `LILAC`, `MINT`, `PEACH`, `BLUSH`, `OCEAN`, `INDIGO`, `NAVY`. |
+| `sponsor` | Sponsored only | Who paid. A sponsored post without it is never shown. |
+| `updatedAt` | | Set automatically when a story is revised. |
+| `sourceIssue` | | The issue a story was published from; editing that issue revises it. |
 | `blocks` | ✅ | A readable body and at least one HTTPS source link. |
 
 A post missing `id`, `title`, or a valid `publishedAt` is skipped rather than
@@ -114,6 +137,12 @@ post looking like it belongs.
 
 { "type": "image",     "url": "https://example.com/picture.jpg",
                        "caption": "Optional caption" }
+```
+
+In the issue form and the editor, a picture on its own line in the story
+(`![caption](https://…)`) becomes an image block.
+
+```
 ```
 
 Rules the parser enforces:

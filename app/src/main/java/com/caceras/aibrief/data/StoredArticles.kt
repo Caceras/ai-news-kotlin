@@ -40,6 +40,14 @@ object StoredArticles {
         put("category", category.name)
         put("isOfflineBrief", isOfflineBrief)
         put("blocks", OwnerPosts.encodeBlocks(blocks))
+        put("format", format.name)
+        put("kicker", kicker)
+        put("gallery", JSONArray(gallery))
+        put("authorImageUrl", authorImageUrl)
+        put("authorRole", authorRole)
+        put("theme", theme?.name)
+        put("sponsor", sponsor)
+        updatedAt?.let { put("updatedAt", it.toEpochMilli()) }
     }
 
     private fun decodeArticle(json: JSONObject): NewsArticle? = runCatching {
@@ -59,6 +67,14 @@ object StoredArticles {
                 ?: NewsCategory.ALL,
             isOfflineBrief = json.optBoolean("isOfflineBrief", false),
             blocks = OwnerPosts.decodeBlocks(json.optJSONArray("blocks")),
+            format = StoryFormat.parse(json.optString("format")),
+            kicker = json.optString("kicker").takeIf { it.isNotBlank() },
+            gallery = OwnerPosts.httpsList(json.optJSONArray("gallery")),
+            authorImageUrl = json.optString("authorImageUrl").takeIf { it.startsWith("https://") },
+            authorRole = json.optString("authorRole").takeIf { it.isNotBlank() },
+            theme = CardTheme.parse(json.optString("theme")),
+            sponsor = json.optString("sponsor").takeIf { it.isNotBlank() },
+            updatedAt = if (json.has("updatedAt")) Instant.ofEpochMilli(json.getLong("updatedAt")) else null,
         )
     }.getOrNull()
 }

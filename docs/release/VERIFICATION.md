@@ -19,7 +19,7 @@ Prepared and checked on 3 October 2026. App source: **cab39cfa54ddf9e282506f4290
 
 The minified, non-debuggable internal-sharing APK was installed on an Android 10/API 29 x86_64 emulator with a 4 KB page size. The installed APK was read back and its SHA-256 matched the exact final candidate, which passed fresh offline launch, native article reading, source display, saving/removing-control state, saved persistence after process recreation, About/privacy text, body search, and rendering at 200% text scale. No AI Brief crash was present in the captured AndroidRuntime log. See android-device.json for the individual assertions.
 
-The previous iteration’s visual inspection found text scrolling under system bars; version 113 fixes the scrolling viewport using safe drawing insets. Screenshots were recaptured on version 114. Version 114 introduces the compact masthead, Newsreader/DM Sans typography, photographic topic artwork, persistent bottom navigation and focused search list. See [the design refinement](../DESIGN_REFINEMENT.md).
+The previous iteration’s visual inspection found text scrolling under system bars; version 113 fixes the scrolling viewport using safe drawing insets. Screenshots were recaptured on version 114. Version 114 introduces the compact masthead, Newsreader/DM Sans typography, photographic topic artwork, persistent bottom navigation and focused search list. That design has since been replaced; see [the design system](../DESIGN_SYSTEM.md).
 
 The local software emulator initially stalled during installation and showed a System UI ANR dialog. After a clean device restart and clearing that system dialog, the exact installed APK completed the final checks. These environment failures are not counted as app passes or app crashes.
 

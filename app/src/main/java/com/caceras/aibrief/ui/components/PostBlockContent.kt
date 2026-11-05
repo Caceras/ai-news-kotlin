@@ -6,6 +6,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -15,8 +16,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,8 +27,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
 import com.caceras.aibrief.data.PostBlock
+import com.caceras.aibrief.ui.theme.Brief
+import com.caceras.aibrief.ui.theme.BriefShapes
+import com.caceras.aibrief.ui.theme.Space
 
 /**
  * Renders one block of an original post.
@@ -38,86 +41,45 @@ import com.caceras.aibrief.data.PostBlock
  * rhythm consistent no matter which blocks it happens to use.
  */
 @Composable
-fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier) {
+fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier, opinion: Boolean = false) {
+    val c = Brief.colors
+    val bodyStyle = if (opinion) Brief.type.opinionBody else Brief.type.body
     when (block) {
-        is PostBlock.Paragraph -> Text(
-            text = block.text,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = modifier,
-        )
+        is PostBlock.Paragraph -> Text(block.text, style = bodyStyle, color = c.ink, modifier = modifier)
 
-        is PostBlock.Heading -> Text(
-            text = block.text,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            // TalkBack readers move between a post's sections by heading.
-            modifier = modifier.semantics { heading() },
-        )
+        // TalkBack readers move between a post's sections by heading.
+        is PostBlock.Heading -> Text(block.text, style = Brief.type.bodyHeading, color = c.ink,
+            modifier = modifier.semantics { heading() })
 
-        // Set behind a hairline rather than in quotation marks: the same
-        // restraint the rest of the app uses to show hierarchy. IntrinsicSize.Min
-        // lets the rule match the height of the text beside it.
-        is PostBlock.Quote -> Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min),
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.outlineVariant),
-            )
-            Column(modifier = Modifier.padding(start = 16.dp)) {
-                Text(
-                    text = block.text,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+        // A pull quote: a heavy accent bar and serif italic, the same in every post.
+        is PostBlock.Quote -> Row(modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            Box(Modifier.width(Space.xs).fillMaxHeight()
+                .background(if (opinion) c.opinionAccent else c.accent))
+            Column(Modifier.padding(start = Space.gutter)) {
+                Text(block.text, style = Brief.type.quote, color = c.ink)
                 block.attribution?.let { attribution ->
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = attribution,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Spacer(Modifier.height(Space.s))
+                    Text(attribution.uppercase(java.util.Locale.US), style = Brief.type.tag, color = c.inkMuted)
                 }
             }
         }
 
-        is PostBlock.Bullets -> Column(modifier = modifier.fillMaxWidth()) {
-            block.items.forEachIndexed { index, item ->
-                if (index > 0) Spacer(Modifier.height(10.dp))
+        is PostBlock.Bullets -> Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.m)) {
+            block.items.forEach { item ->
                 Row {
-                    Text(
-                        text = "·",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = item,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 14.dp),
-                    )
+                    // The dot sits on the middle of the first line, whichever body face is in use.
+                    Box(Modifier.padding(top = if (opinion) Space.m else Space.s + Space.xxs).size(Space.s)
+                        .background(if (opinion) c.opinionAccent else c.accent, BriefShapes.round))
+                    Text(item, style = bodyStyle, color = c.ink, modifier = Modifier.padding(start = Space.m))
                 }
             }
         }
 
-        is PostBlock.Image -> Column(modifier = modifier.fillMaxWidth()) {
-            AsyncArticleImage(
-                imageUrl = block.url,
-                contentDescription = block.caption,
-                modifier = Modifier.fillMaxWidth(),
-            )
+        is PostBlock.Image -> Column(modifier.fillMaxWidth()) {
+            AsyncArticleImage(block.url, block.caption, Modifier.fillMaxWidth())
             block.caption?.let { caption ->
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    text = caption,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Spacer(Modifier.height(Space.s))
+                Text(caption, style = Brief.type.meta, color = c.inkMuted)
             }
         }
 
@@ -125,8 +87,8 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier) {
             val context = LocalContext.current
             Text(
                 text = "${block.text} ↗",
-                style = MaterialTheme.typography.bodyLarge.copy(textDecoration = TextDecoration.Underline),
-                color = MaterialTheme.colorScheme.primary,
+                style = Brief.type.body.copy(textDecoration = TextDecoration.Underline),
+                color = c.accent,
                 modifier = modifier
                     .minimumInteractiveComponentSize()
                     .spokenAs(block.text)
@@ -138,7 +100,7 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier) {
                             Toast.makeText(context, "No browser is available to open this link.", Toast.LENGTH_LONG).show()
                         }
                     }
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = Space.s),
             )
         }
     }

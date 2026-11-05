@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,8 +27,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Shape
 import com.caceras.aibrief.BuildConfig
+import com.caceras.aibrief.ui.theme.Brief
+import com.caceras.aibrief.ui.theme.BriefShapes
 import java.io.File
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
@@ -217,8 +217,9 @@ fun AsyncArticleImage(
     imageUrl: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    aspectRatio: Float = 16f / 9f,
+    aspectRatio: Float? = 16f / 9f,
     fallbackResource: Int? = null,
+    shape: Shape = BriefShapes.none,
 ) {
     if (imageUrl.isNullOrBlank()) return
 
@@ -238,10 +239,9 @@ fun AsyncArticleImage(
     // The Box always reserves the exact aspect ratio to prevent ANY layout shift during loading
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(aspectRatio)
-            .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .then(if (aspectRatio != null) Modifier.fillMaxWidth().aspectRatio(aspectRatio) else Modifier)
+            .clip(shape)
+            .background(Brief.colors.placeholder),
     ) {
         if (fallbackResource != null) {
             Image(painterResource(fallbackResource), contentDescription,

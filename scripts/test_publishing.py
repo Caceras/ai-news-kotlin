@@ -52,6 +52,74 @@ class PublishingTest(unittest.TestCase):
         self.assertEqual(title, post['title'])
         self.assertEqual('A quote: "hello". A path: \\example. Unicode: åäö.', post['blocks'][1]['text'])
 
+    def test_a_revision_keeps_the_id_and_dates_the_update(self):
+        from datetime import datetime, timezone
+        self.draft['sourceIssue'] = 7
+        identifier, outcome = publisher.publish(self.draft)
+        self.assertEqual('published', outcome)
+        self.draft['title'] = 'A sharper headline'
+        later = datetime(2026, 10, 5, tzinfo=timezone.utc)
+        again, outcome = publisher.publish(self.draft, now=later)
+        self.assertEqual((identifier, 'updated'), (again, outcome))
+        posts = json.loads(publisher.POSTS.read_text())['posts']
+        post = next(p for p in posts if p['id'] == identifier)
+        self.assertEqual('A sharper headline', post['title'])
+        self.assertEqual('2026-10-05T00:00:00Z', post['updatedAt'])
+        self.assertEqual(len(json.loads(self.initial)['posts']) + 1, len(posts))
+
+    def test_unpublish_removes_only_that_story(self):
+        self.draft['sourceIssue'] = 9
+        identifier, _ = publisher.publish(self.draft)
+        self.assertEqual(identifier, publisher.unpublish(source_issue=9))
+        self.assertEqual(json.loads(self.initial), json.loads(publisher.POSTS.read_text()))
+        with self.assertRaises(ValueError):
+            publisher.unpublish(source_issue=9)
+
+    def test_format_rules_are_enforced(self):
+        for change, reason in [
+            ({'format': 'SPONSORED'}, 'sponsored without a sponsor'),
+            ({'format': 'NEWS', 'sponsor': 'Acme'}, 'a sponsor on news'),
+            ({'format': 'OPINION'}, 'an unsigned column'),
+            ({'format': 'HOLOGRAM'}, 'an unknown type'),
+            ({'kicker': 'A kicker that is far too long to read'}, 'a long kicker'),
+            ({'title': 'x' * 121}, 'a long headline'),
+            ({'theme': 'NEON'}, 'an unknown card colour'),
+        ]:
+            draft = dict(self.draft, author='AI Brief editorial', **change)
+            with self.assertRaises(ValueError, msg=reason):
+                publisher.publish(draft)
+        self.assertEqual(self.initial, publisher.POSTS.read_bytes())
+        publisher.publish(dict(self.draft, format='SPONSORED', sponsor='Acme', theme='MINT'))
+
+    def test_a_picture_alone_on_a_line_becomes_an_image_block(self):
+        blocks = publisher.body_blocks('Intro paragraph.\n\n![image](https://e.com/a.webp)\n\n![Chart of scores](https://e.com/b.webp)')
+        self.assertEqual({'type': 'image', 'url': 'https://e.com/a.webp'}, blocks[1])
+        self.assertEqual('Chart of scores', blocks[2]['caption'])
+
+
+class IssueFormTest(unittest.TestCase):
+    def setUp(self):
+        spec = importlib.util.spec_from_file_location('issue_post', Path(__file__).with_name('issue_post.py'))
+        self.issue = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.issue)
+        self.body = """### Action\n\nPublish or update\n\n### Story type\n\nOpinion (signed column with portrait)\n\n### Topic\n\nPOLICY\n\n### Headline\n\nWe grade AI on the wrong tests\n\n### Kicker\n\n_No response_\n\n### Deck\n\nBenchmarks reward the wrong things.\n\n### Pictures\n\n_No response_\n\n### Author\n\nRiki Caceras\n\n### Author role\n\nColumnist\n\n### Author photo\n\n_No response_\n\n### Story\n\nFirst paragraph.\n\n## A heading\n\nSecond.\n\n### Sources\n\nNIST | https://www.nist.gov/\nhttps://example.com/b\n\n### Card colour\n\n_No response_\n\n### Sponsor\n\n_No response_\n\n### Publish at\n\n_No response_"""
+
+    def test_the_form_becomes_a_draft(self):
+        draft = self.issue.draft_from_issue(self.body, 12, None)
+        self.assertEqual('OPINION', draft['format'])
+        self.assertEqual('POLICY', draft['category'])
+        self.assertEqual('Riki Caceras', draft['author'])
+        self.assertEqual('Columnist', draft['authorRole'])
+        self.assertIsNone(draft['kicker'])
+        self.assertEqual(12, draft['sourceIssue'])
+        self.assertEqual([{'text': 'NIST', 'url': 'https://www.nist.gov/'},
+                          {'text': None, 'url': 'https://example.com/b'}], draft['sources'])
+
+    def test_pasted_pictures_are_found_in_every_form(self):
+        value = '![image](https://github.com/user-attachments/assets/a)\n<img width="300" src="https://github.com/user-attachments/assets/b" />\nhttps://e.com/c.jpg'
+        self.assertEqual(['https://github.com/user-attachments/assets/a', 'https://github.com/user-attachments/assets/b',
+                          'https://e.com/c.jpg'], self.issue.picture_urls(value))
+
 
 if __name__ == '__main__':
     unittest.main()

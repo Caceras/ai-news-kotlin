@@ -1,0 +1,104 @@
+package com.caceras.aibrief.snap
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.Modifier
+import app.cash.paparazzi.DeviceConfig
+import app.cash.paparazzi.Paparazzi
+import com.android.resources.NightMode
+import com.caceras.aibrief.BottomNavigation
+import com.caceras.aibrief.FeedScreen
+import com.caceras.aibrief.Masthead
+import com.caceras.aibrief.SavedScreen
+import com.caceras.aibrief.AboutScreen
+import com.caceras.aibrief.NavTab
+import com.caceras.aibrief.NewsUiState
+import com.caceras.aibrief.data.CardTheme
+import com.caceras.aibrief.data.FeedFreshness
+import com.caceras.aibrief.data.NewsArticle
+import com.caceras.aibrief.data.NewsCategory
+import com.caceras.aibrief.data.PostBlock
+import com.caceras.aibrief.data.StoryFormat
+import com.caceras.aibrief.ui.components.ArticleReader
+import com.caceras.aibrief.ui.theme.AiBriefTheme
+import com.caceras.aibrief.update.UpdateState
+import java.time.Duration
+import java.time.Instant
+import org.junit.Rule
+import org.junit.Test
+
+class Snaps {
+    @get:Rule
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_6.copy(screenHeight = 2400, softButtons = false),
+        maxPercentDifference = 100.0)
+
+    private val now = Instant.now()
+    private val body = listOf(PostBlock.Paragraph("Body text that explains what happened in plain language and why it matters to a reader today."),
+        PostBlock.Heading("What changes next"), PostBlock.Quote("A pulled quote that carries the point.", "Someone, somewhere"),
+        PostBlock.Bullets(listOf("First point", "Second point")), PostBlock.Link("Primary source", "https://example.com"))
+    private fun a(id: String, h: Long, f: StoryFormat, title: String, cat: NewsCategory = NewsCategory.RESEARCH,
+                  kicker: String? = null, author: String = "AI Brief editorial", role: String? = null,
+                  theme: CardTheme? = null, sponsor: String? = null) = NewsArticle(
+        id = id, title = title, source = "AI Brief", author = author, url = "", publishedAt = now.minus(Duration.ofHours(h)),
+        summary = "One line that says what this means for you, set under the headline.", category = cat,
+        blocks = body, format = f, kicker = kicker, authorRole = role, theme = theme, sponsor = sponsor,
+        gallery = if (f == StoryFormat.BREAKING) listOf("https://x.invalid/1.jpg", "https://x.invalid/2.jpg") else emptyList(),
+        imageUrl = if (f == StoryFormat.BREAKING) "https://x.invalid/0.jpg" else null)
+
+    private val edition = listOf(
+        a("b", 1, StoryFormat.BREAKING, "EU regulators open formal probe into frontier model training data", NewsCategory.POLICY, kicker = "Revealed"),
+        a("n1", 2, StoryFormat.NEWS, "Open-weights model matches closed rivals on coding tests", NewsCategory.BUILDERS),
+        a("n2", 3, StoryFormat.NEWS, "Chip shortage eases as new fabs come online", NewsCategory.PRODUCTS),
+        a("n3", 4, StoryFormat.EXPLAINER, "What an image's content credentials can tell you", NewsCategory.POLICY),
+        a("n4", 5, StoryFormat.NEWS, "Small models get good enough for the phone in your pocket"),
+        a("n5", 6, StoryFormat.NEWS, "Before an AI agent acts, decide what it may do", NewsCategory.BUILDERS),
+        a("o1", 7, StoryFormat.OPINION, "We are grading AI on the wrong tests", author = "Riki Caceras", role = "Columnist"),
+        a("o2", 8, StoryFormat.OPINION, "Agents need seatbelts, not speed limits", author = "Ada Lind", role = "Contributor"),
+        a("g1", 9, StoryFormat.GUIDE, "AI for Business", NewsCategory.PRODUCTS, theme = CardTheme.SKY),
+        a("n6", 10, StoryFormat.NEWS, "Labs publish new evaluation suite"),
+        a("n7", 11, StoryFormat.NEWS, "Why grounding matters for answers from your files"),
+        a("s1", 12, StoryFormat.SPONSORED, "Build with AI", NewsCategory.BUILDERS, theme = CardTheme.MINT, sponsor = "Acme Cloud"),
+    )
+
+    private fun feed(at: Int = 0, name: String? = null) = paparazzi.snapshot(name) {
+        AiBriefTheme {
+            Column(Modifier.fillMaxSize()) {
+                Masthead(false, true, NewsCategory.ALL, {}, {}, {}, {})
+                androidx.compose.foundation.layout.Box(Modifier.weight(1f)) {
+                    FeedScreen(NewsUiState(edition, emptyList(), freshness = FeedFreshness.LIVE), UpdateState.Idle,
+                        rememberLazyListState(at), false, "", {}, {}, {}, {}, {}, {}, {})
+                }
+                BottomNavigation(NavTab.HOME) {}
+            }
+        }
+    }
+
+    @Test fun feedLight() { feed(0, "a"); feed(3, "b"); feed(6, "c"); feed(10, "d"); feed(14, "e") }
+
+    @Test fun feedDark() {
+        paparazzi.unsafeUpdateConfig(DeviceConfig.PIXEL_6.copy(screenHeight = 2400, softButtons = false, nightMode = NightMode.NIGHT))
+        feed()
+    }
+
+    private fun reader(article: NewsArticle) = paparazzi.snapshot {
+        AiBriefTheme { ArticleReader(article, false, {}, {}, {}, {}) }
+    }
+
+    @Test fun saved() = paparazzi.snapshot {
+        AiBriefTheme { Column(Modifier.fillMaxSize()) {
+            Masthead(false, false, NewsCategory.ALL, {}, {}, null, null)
+            androidx.compose.foundation.layout.Box(Modifier.weight(1f)) {
+                SavedScreen(edition.take(4), false, rememberLazyListState(), {}, {}) }
+            BottomNavigation(NavTab.SAVED) {} } }
+    }
+    @Test fun about() = paparazzi.snapshot {
+        AiBriefTheme { Column(Modifier.fillMaxSize()) {
+            Masthead(false, false, NewsCategory.ALL, {}, {}, null, null)
+            androidx.compose.foundation.layout.Box(Modifier.weight(1f)) { AboutScreen(rememberLazyListState()) }
+            BottomNavigation(NavTab.ABOUT) {} } }
+    }
+    @Test fun readerBreaking() = reader(edition[0])
+    @Test fun readerOpinion() = reader(edition[6])
+    @Test fun readerSponsored() = reader(edition[11])
+}
