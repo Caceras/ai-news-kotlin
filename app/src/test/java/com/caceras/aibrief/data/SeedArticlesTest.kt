@@ -63,6 +63,28 @@ class SeedArticlesTest {
     }
 
     @Test
+    fun cachedTextDoesNotAffectEqualityAndFollowsCopies() {
+        val article = NewsArticle(
+            id = "test-3",
+            title = "Cached",
+            source = "Test",
+            url = "",
+            publishedAt = Instant.parse("2026-11-01T00:00:00Z"),
+            summary = "One two three.",
+            category = NewsCategory.ALL,
+        )
+        val twin = article.copy()
+        article.searchableText
+        article.readingTimeMinutes
+        assertEquals(twin, article)
+        assertEquals(twin.hashCode(), article.hashCode())
+
+        val edited = article.copy(summary = "Rewritten summary")
+        assertTrue(edited.searchableText.contains("Rewritten"))
+        assertTrue(!edited.searchableText.contains("One two three"))
+    }
+
+    @Test
     fun allCategoriesHaveEnumLabels() {
         NewsCategory.entries.forEach { category ->
             assertTrue(category.label.isNotBlank())
