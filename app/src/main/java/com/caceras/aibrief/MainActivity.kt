@@ -161,6 +161,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     }
     LaunchedEffect(pagerState.settledPage) { currentTab = NavTab.entries[pagerState.settledPage] }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refreshIfStale()
         (updateState as? UpdateState.NeedsPermission)?.let { updateViewModel.retryInstall(it.apk) }
     }
     BackHandler(enabled = selectedArticle != null || searchShown || currentTab != NavTab.HOME) {
