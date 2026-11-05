@@ -71,6 +71,8 @@ fun categoryArtwork(category: NewsCategory): Int = when (category) {
 /** Photo ratios. Every picture in the app uses one of these. */
 object Ratio {
     const val HERO = 16f / 10f
+    /** The lead is taller than a headline photo, so the page opens on a picture. */
+    const val LEAD = 5f / 4f
     const val PAIR = 4f / 3f
     const val THUMB = 4f / 3f
 }
@@ -101,9 +103,10 @@ fun ArticleArtwork(
  * stacked. Pictures are separated by a thin paper-coloured seam.
  */
 @Composable
-fun Collage(article: NewsArticle, modifier: Modifier = Modifier) {
+fun Collage(article: NewsArticle, modifier: Modifier = Modifier, ratio: Float? = Ratio.HERO) {
     val pictures = article.pictures
-    Box(modifier.fillMaxWidth().aspectRatio(Ratio.HERO).background(Brief.colors.paper)) {
+    Box(modifier.then(if (ratio != null) Modifier.fillMaxWidth().aspectRatio(ratio) else Modifier)
+        .background(Brief.colors.paper)) {
         when (pictures.size) {
             0, 1 -> ArticleArtwork(article, Modifier.fillMaxSize(), ratio = null)
             2 -> Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
@@ -200,22 +203,42 @@ private fun BreakingFlag(modifier: Modifier = Modifier) {
 fun LeadStory(article: NewsArticle, onClick: () -> Unit) = when {
     article.format == StoryFormat.OPINION -> OpinionCard(article, Modifier.padding(Space.gutter), onClick)
     article.isDesigned -> DesignedCard(article, Modifier.padding(Space.gutter), onClick)
-    else -> Column(Modifier.fillMaxWidth().background(Brief.colors.card).story(onClick)) {
-        Box {
-            if (article.format == StoryFormat.BREAKING) {
-                Collage(article)
-                BreakingFlag(Modifier.align(Alignment.TopStart).padding(Space.m))
-            } else {
-                ArticleArtwork(article)
+    else -> BleedLead(article, onClick)
+}
+
+/**
+ * The picture runs edge to edge and the headline is set on it, over a fade,
+ * so the lead reads as one unit with no gap between picture and words. The
+ * box keeps its shape at normal text size and grows when large text needs it.
+ */
+@Composable
+private fun BleedLead(article: NewsArticle, onClick: () -> Unit) {
+    val c = Brief.colors
+    Column(Modifier.fillMaxWidth().background(c.card).story(onClick)) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            Box(Modifier.fillMaxWidth().heightIn(min = maxWidth / Ratio.LEAD)) {
+                if (article.format == StoryFormat.BREAKING) {
+                    Collage(article, Modifier.matchParentSize(), ratio = null)
+                } else {
+                    ArticleArtwork(article, Modifier.matchParentSize(), ratio = null)
+                }
+                Box(Modifier.matchParentSize().background(
+                    Brush.verticalGradient(0.3f to Color.Transparent, 1f to c.imageScrim)))
+                if (article.format == StoryFormat.BREAKING) {
+                    BreakingFlag(Modifier.align(Alignment.TopStart).padding(Space.m))
+                }
+                Column(Modifier.align(Alignment.BottomStart)
+                    .padding(start = Space.gutter, end = Space.gutter, top = Space.section, bottom = Space.l)) {
+                    Text(article.series?.label?.uppercase(Locale.US) ?: article.tagText(), style = Brief.type.tag,
+                        color = c.onImage)
+                    Spacer(Modifier.height(Space.s))
+                    Headline(article, Brief.type.display, maxLines = 5, color = c.onImage)
+                }
             }
         }
         Column(Modifier.padding(start = Space.gutter, end = Space.gutter, top = Space.m, bottom = Space.l)) {
-            Tag(article)
-            Spacer(Modifier.height(Space.s))
-            Headline(article, Brief.type.display, maxLines = 5)
-            Spacer(Modifier.height(Space.s))
             Deck(article.summary)
-            Spacer(Modifier.height(Space.m))
+            Spacer(Modifier.height(Space.s))
             Meta(article)
         }
     }

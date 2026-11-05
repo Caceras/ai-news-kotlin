@@ -51,9 +51,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.Refresh
@@ -119,6 +119,9 @@ import com.caceras.aibrief.ui.components.HeadlineCard
 import com.caceras.aibrief.ui.components.LeadStory
 import com.caceras.aibrief.ui.components.OpinionRail
 import com.caceras.aibrief.ui.components.PairCards
+import com.caceras.aibrief.ui.components.RadarModule
+import com.caceras.aibrief.ui.components.RankingsModule
+import com.caceras.aibrief.ui.components.SeriesRail
 import com.caceras.aibrief.ui.components.RowCard
 import com.caceras.aibrief.ui.components.Rule
 import com.caceras.aibrief.ui.components.SectionRibbon
@@ -162,7 +165,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class NavTab(val label: String) { HOME("Latest"), SAVED("Saved"), ABOUT("About") }
+private enum class NavTab(val label: String) { HOME("Latest"), EXPLORE("Explore"), ABOUT("About") }
 
 @Composable
 private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewModel) {
@@ -184,7 +187,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         pageCount = { NavTab.entries.size })
     val scope = rememberCoroutineScope()
     val homeListState = rememberLazyListState()
-    val savedListState = rememberLazyListState()
+    val exploreListState = rememberLazyListState()
     val aboutListState = rememberLazyListState()
     val snackbar = remember { SnackbarHostState() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -246,7 +249,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                             scope.launch {
                                 snackbar.currentSnackbarData?.dismiss()
                                 if (shelfIndex < 0) {
-                                    snackbar.showSnackbar("Saved for offline reading",
+                                    snackbar.showSnackbar("Saved for offline reading, in Explore",
                                         duration = SnackbarDuration.Short)
                                 } else if (snackbar.showSnackbar("Removed from your reading list",
                                         actionLabel = "Undo", duration = SnackbarDuration.Short) ==
@@ -257,7 +260,12 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                         },
                         onShare = { context.shareArticle(article) },
                         onOpenSource = { context.openExternalUrl(article.url) },
-                        onBack = { selectedArticleId = null })
+                        onBack = { selectedArticleId = null },
+                        seriesParts = article.series?.let { series ->
+                            (state.articles + state.savedArticles).filter { it.series?.id == series.id }
+                                .distinctBy { it.id }.sortedBy { it.series?.part }
+                        }.orEmpty(),
+                        onOpenArticle = { selectedArticleId = it.id })
                 } else {
                     Column(Modifier.fillMaxSize()) {
                         Masthead(
@@ -291,11 +299,14 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                     onGrantInstallPermission = updateViewModel::requestInstallPermission,
                                     onDismissUpdate = updateViewModel::dismiss,
                                     onAbout = { selectTab(NavTab.ABOUT) },
+                                    onExplore = { selectTab(NavTab.EXPLORE) },
+                                    onOpenUrl = { context.openExternalUrl(it) },
                                     onRefresh = {
                                         viewModel.refresh(userRequested = true); updateViewModel.checkForUpdate()
                                     })
-                                NavTab.SAVED -> SavedScreen(state.savedArticles, state.isLoading, savedListState,
+                                NavTab.EXPLORE -> ExploreScreen(state, exploreListState,
                                     onOpenArticle = { selectedArticleId = it.id },
+                                    onOpenUrl = { context.openExternalUrl(it) },
                                     onBrowse = { selectTab(NavTab.HOME) })
                                 NavTab.ABOUT -> AboutScreen(aboutListState)
                             }
@@ -386,7 +397,7 @@ private fun BottomNavigation(activeTab: NavTab, onSelect: (NavTab) -> Unit) {
                     verticalArrangement = Arrangement.Center) {
                     Icon(when (tab) {
                         NavTab.HOME -> Icons.Outlined.Newspaper
-                        NavTab.SAVED -> if (isSelected) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder
+                        NavTab.EXPLORE -> Icons.Outlined.Explore
                         NavTab.ABOUT -> Icons.Outlined.Info
                     }, null, Modifier.size(22.dp), tint = color)
                     Spacer(Modifier.height(Space.xs))
@@ -414,6 +425,8 @@ private fun FeedScreen(
     onDismissUpdate: () -> Unit,
     onAbout: () -> Unit,
     onRefresh: () -> Unit,
+    onExplore: () -> Unit,
+    onOpenUrl: (String) -> Unit,
 ) {
     val c = Brief.colors
     val focus = remember { FocusRequester() }
@@ -444,7 +457,11 @@ private fun FeedScreen(
     // The front page is recomposed into slots only when the stories change.
     // Breaking news leaves the lead after a day, so the hour is part of the key.
     val hour = now.epochSecond / 3600
-    val slots = remember(articles, hour) { FeedLayout.compose(articles, now) }
+    // Rankings and the radar belong to the whole front page, not to one topic.
+    val modules = if (state.selectedCategory == NewsCategory.ALL) {
+        FeedModules(rankings = state.extras.rankings != null, radar = state.extras.radar != null)
+    } else FeedModules.NONE
+    val slots = remember(articles, hour, modules) { FeedLayout.compose(articles, now, modules) }
     LaunchedEffect(searchShown) { if (searchShown) focus.requestFocus() }
 
     Column(Modifier.fillMaxSize().background(c.paper).wrapContentWidth().widthIn(max = 840.dp)) {
@@ -517,6 +534,18 @@ private fun FeedScreen(
                             is FeedSlot.Designed -> DesignedCard(slot.article, Modifier.padding(Space.gutter)) {
                                 onOpenArticle(slot.article)
                             }
+                            is FeedSlot.SeriesRail -> SeriesRail(slot.parts, onOpenArticle)
+                            FeedSlot.Rankings -> state.extras.rankings?.let { rankings ->
+                                Box(Modifier.padding(top = Space.s)) {
+                                    RankingsModule(rankings, limit = 5, onOpenSource = { onOpenUrl(rankings.sourceUrl) },
+                                        onSeeAll = onExplore)
+                                }
+                            }
+                            FeedSlot.Radar -> state.extras.radar?.let { radar ->
+                                Box(Modifier.padding(top = Space.s)) {
+                                    RadarModule(radar, limit = 4, onOpenUrl = onOpenUrl, onSeeAll = onExplore)
+                                }
+                            }
                         }
                     }
                 }
@@ -561,41 +590,66 @@ private fun PageHeader(title: String, subtitle: String) {
     }
 }
 
+/**
+ * Everything beyond the day's front page: the reader's saved stories, every
+ * series in order, the full model rankings and the radar.
+ */
 @Composable
-private fun SavedScreen(
-    articles: List<NewsArticle>,
-    isLoading: Boolean,
+private fun ExploreScreen(
+    state: NewsUiState,
     listState: LazyListState,
     onOpenArticle: (NewsArticle) -> Unit,
+    onOpenUrl: (String) -> Unit,
     onBrowse: () -> Unit,
 ) {
     val c = Brief.colors
+    val saved = state.savedArticles
+    val series = remember(state.articles) {
+        state.articles.filter { it.series != null }.groupBy { it.series!!.id }.values
+            .map { parts -> parts.sortedBy { it.series!!.part } }
+    }
     LazyColumn(state = listState,
         modifier = Modifier.fillMaxSize().background(c.paper).wrapContentWidth().widthIn(max = 840.dp),
         contentPadding = PaddingValues(bottom = Space.xxl)) {
         item("header") {
-            PageHeader("Saved", "Good reads, kept for later.")
-            if (articles.isNotEmpty()) SectionRibbon(
-                "${articles.size} ${if (articles.size == 1) "story" else "stories"} offline")
+            PageHeader("Explore", "Your saved stories, our series, and the models everyone is talking about.")
         }
-        items(articles, key = { it.id }) { article -> RowCard(article) { onOpenArticle(article) } }
-        if (isLoading) item("loading") {
+        item("saved-ribbon") {
+            SectionRibbon(if (saved.isEmpty()) "Saved" else "Saved · ${saved.size}")
+        }
+        items(saved, key = { "saved-${it.id}" }) { article -> RowCard(article) { onOpenArticle(article) } }
+        if (state.isLoading) item("loading") {
             LoadingIndicator()
-        } else if (articles.isEmpty()) item("empty") {
-            Column(Modifier.fillMaxWidth().padding(horizontal = Space.gutter, vertical = Space.section),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(Modifier.size(64.dp).background(c.masthead, BriefShapes.round),
-                    contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.BookmarkBorder, null, Modifier.size(28.dp), tint = c.onMasthead)
+        } else if (saved.isEmpty()) item("saved-empty") {
+            Row(Modifier.fillMaxWidth().background(c.card).padding(Space.gutter),
+                verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(48.dp).background(c.masthead, BriefShapes.round), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Outlined.BookmarkBorder, null, Modifier.size(22.dp), tint = c.onMasthead)
                 }
-                Spacer(Modifier.height(Space.l))
-                Text("Keep a good read", style = Brief.type.headline, color = c.ink)
-                Spacer(Modifier.height(Space.s))
-                Text("Save a story while you read.\nIt will be here, even when you’re offline.",
-                    style = Brief.type.deck, textAlign = TextAlign.Center, color = c.inkMuted)
-                Spacer(Modifier.height(Space.l))
-                PrimaryButton("Explore the latest", onBrowse)
+                Spacer(Modifier.width(Space.m))
+                Column(Modifier.weight(1f)) {
+                    Text("Keep a good read", style = Brief.type.rowTitle, color = c.ink)
+                    Text("Tap the bookmark while reading. Saved stories stay here, even offline.",
+                        style = Brief.type.meta, color = c.inkMuted)
+                }
             }
+            Box(Modifier.padding(Space.gutter)) { PrimaryButton("Explore the latest", onBrowse) }
+        }
+        series.forEach { parts ->
+            val title = parts.first().series!!.title
+            item("series-$title") {
+                SectionRibbon("Series: $title")
+                SeriesRail(parts, onOpenArticle)
+            }
+        }
+        state.extras.rankings?.let { rankings ->
+            item("rankings") {
+                RankingsModule(rankings, limit = rankings.entries.size,
+                    onOpenSource = { onOpenUrl(rankings.sourceUrl) }, onSeeAll = null)
+            }
+        }
+        state.extras.radar?.let { radar ->
+            item("radar") { RadarModule(radar, limit = radar.entries.size, onOpenUrl = onOpenUrl, onSeeAll = null) }
         }
     }
 }

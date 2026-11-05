@@ -89,6 +89,8 @@ def validate(document):
         # These are our editorial safeguards, not Google Play word-count rules.
         require(body_length >= 120, "Write a useful body, not only a headline")
         require(sources > 0, "Include at least one source readers can check")
+    if "extras" in document:
+        validate_extras(document["extras"])
     return document
 
 
@@ -120,6 +122,36 @@ def validate_presentation(post, author, published):
         require(not post.get("sponsor"), "Only sponsored posts name a sponsor")
     if post.get("updatedAt"):
         require(instant(post["updatedAt"]) > published, "An update must come after publication")
+    if post.get("imageCredit") is not None:
+        text(post["imageCredit"], "Image credit", 240)
+    series = post.get("series")
+    if series is not None:
+        require(isinstance(series, dict), "A series must be an object")
+        require(re.fullmatch(r"[a-z0-9][a-z0-9-]{0,59}", str(series.get("id", ""))), "Series ID is invalid")
+        text(series.get("title"), "Series title", 60)
+        count, part = series.get("of"), series.get("part")
+        require(isinstance(count, int) and 2 <= count <= 12, "A series has 2 to 12 parts")
+        require(isinstance(part, int) and 1 <= part <= count, "Series part is out of range")
+
+
+def validate_extras(extras):
+    """The front page's data modules must always say where their figures come from."""
+    require(isinstance(extras, dict), "Extras must be an object")
+    for name in ("rankings", "radar"):
+        module = extras.get(name)
+        if module is None:
+            continue
+        require(isinstance(module, dict), f"{name} must be an object")
+        text(module.get("source"), f"{name} source", 80)
+        https_url(module.get("sourceUrl"))
+        entries = module.get("entries")
+        require(isinstance(entries, list) and 1 <= len(entries) <= 20, f"{name} needs 1 to 20 entries")
+        for entry in entries:
+            text(entry.get("name"), f"{name} entry name", 200)
+            if name == "radar":
+                https_url(entry.get("url"))
+            else:
+                require(isinstance(entry.get("score"), (int, float)), "A ranked model needs a score")
 
 
 def body_blocks(body):

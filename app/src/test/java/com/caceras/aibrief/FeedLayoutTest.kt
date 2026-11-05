@@ -2,6 +2,7 @@ package com.caceras.aibrief
 
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
+import com.caceras.aibrief.data.SeriesInfo
 import com.caceras.aibrief.data.StoryFormat
 import java.time.Duration
 import java.time.Instant
@@ -26,7 +27,8 @@ class FeedLayoutTest {
             is FeedSlot.Row -> listOf(slot.article)
             is FeedSlot.OpinionRail -> slot.articles
             is FeedSlot.Designed -> listOf(slot.article)
-            is FeedSlot.Ribbon -> emptyList()
+            is FeedSlot.SeriesRail -> slot.parts
+            is FeedSlot.Ribbon, FeedSlot.Rankings, FeedSlot.Radar -> emptyList()
         }
     }
 
@@ -74,11 +76,41 @@ class FeedLayoutTest {
     }
 
     @Test
-    fun `news follows the rhythm and columns gather in one rail`() {
-        val input = (1..8).map { story("n$it", it.toLong()) } +
-            (1..2).map { story("o$it", it.toLong(), StoryFormat.OPINION) }
-        val kinds = FeedLayout.compose(input, now).map { it::class.simpleName }
-        assertEquals(listOf("Lead", "Ribbon", "Headline", "Pair", "Row", "Row", "Ribbon", "OpinionRail",
-            "Headline", "Row"), kinds)
+    fun `the front page reads lead, pair, latest four, designed card, modules, opinion, then more`() {
+        val input = (1..10).map { story("n$it", it.toLong()) } +
+            (1..2).map { story("o$it", it.toLong(), StoryFormat.OPINION) } +
+            story("g1", 3, StoryFormat.GUIDE)
+        val slots = FeedLayout.compose(input, now, FeedModules(rankings = true, radar = true))
+        assertEquals(listOf("Lead", "Pair", "Ribbon", "Row", "Row", "Row", "Row", "Designed", "Rankings", "Radar",
+            "Ribbon", "OpinionRail", "Ribbon", "Headline", "Pair"), slots.map { it::class.simpleName })
+        assertEquals("Latest", (slots[2] as FeedSlot.Ribbon).title)
+        // "Latest" is newest first.
+        val latest = slots.filterIsInstance<FeedSlot.Row>().take(4).map { it.article.publishedAt }
+        assertEquals(latest.sortedDescending(), latest)
+    }
+
+    @Test
+    fun `data modules appear only when the edition carries them`() {
+        val slots = FeedLayout.compose((1..4).map { story("n$it", it.toLong()) }, now)
+        assertFalse(slots.any { it == FeedSlot.Rankings || it == FeedSlot.Radar })
+    }
+
+    @Test
+    fun `a series is gathered in order into one rail`() {
+        fun part(n: Int, hoursAgo: Long) = story("s$n", hoursAgo, StoryFormat.EXPLAINER)
+            .copy(series = SeriesInfo("ai-and-philosophy", "AI and philosophy", n, 3))
+        val parts = listOf(part(1, 30), part(2, 20), part(3, 10))
+        val slots = FeedLayout.compose(parts + (1..6).map { story("n$it", it.toLong()) }, now)
+        val rail = slots.filterIsInstance<FeedSlot.SeriesRail>().single()
+        assertEquals(listOf("s1", "s2", "s3"), rail.parts.map { it.id })
+        assertTrue(slots.any { it is FeedSlot.Ribbon && it.title == "Series: AI and philosophy" })
+        // Parts appear only in their rail.
+        assertEquals(3, articlesOf(slots).count { it.series != null })
+    }
+
+    @Test
+    fun `nothing designed sits directly under a lead with no news after it`() {
+        val slots = FeedLayout.compose(listOf(story("n1", 1), story("ad", 2, StoryFormat.SPONSORED)), now)
+        assertFalse(slots[1] is FeedSlot.Designed)
     }
 }

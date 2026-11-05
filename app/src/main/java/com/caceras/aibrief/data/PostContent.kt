@@ -60,6 +60,16 @@ enum class StoryFormat(val label: String) {
 }
 
 /**
+ * A story's place in a numbered series, such as part 2 of 3 of "AI and
+ * philosophy". Parts of one series share a look on the front page and link to
+ * each other in the reader.
+ */
+data class SeriesInfo(val id: String, val title: String, val part: Int, val count: Int) {
+    /** "AI and philosophy · Part 2 of 3" */
+    val label: String get() = "$title · Part $part of $count"
+}
+
+/**
  * The only backgrounds a designed card (guide or sponsored) may use. A post
  * names one; it cannot supply colours of its own.
  */
@@ -110,6 +120,9 @@ data class OwnerPost(
     val sponsor: String? = null,
     /** Set when a published story is revised, and shown beside the date. */
     val updatedAt: Instant? = null,
+    /** Who made the cover, shown under it in the reader, such as "Illustration: AI Brief". */
+    val imageCredit: String? = null,
+    val series: SeriesInfo? = null,
 )
 
 /** Reads `content/posts.json`, the document that carries every original post. */
@@ -177,8 +190,24 @@ object OwnerPosts {
             theme = CardTheme.parse(json.optString("theme")),
             sponsor = sponsor,
             updatedAt = parseInstant(json.optString("updatedAt"))?.takeIf { it.isAfter(publishedAt) },
+            imageCredit = json.cleanText("imageCredit", MAX_CREDIT),
+            series = parseSeries(json.optJSONObject("series")),
         )
     }
+
+    /** A well-formed series reference, or null: a broken one never hides the story itself. */
+    fun parseSeries(json: JSONObject?): SeriesInfo? {
+        if (json == null) return null
+        val id = json.optString("id").trim().takeIf { SERIES_ID.matches(it) } ?: return null
+        val title = json.cleanText("title", MAX_SERIES_TITLE) ?: return null
+        val count = json.optInt("of", 0).takeIf { it in 2..MAX_SERIES_PARTS } ?: return null
+        val part = json.optInt("part", 0).takeIf { it in 1..count } ?: return null
+        return SeriesInfo(id, title, part, count)
+    }
+
+    /** Writes [series] in the shape [parseSeries] reads. */
+    fun encodeSeries(series: SeriesInfo): JSONObject = JSONObject()
+        .put("id", series.id).put("title", series.title).put("part", series.part).put("of", series.count)
 
     private fun JSONObject.cleanText(key: String, limit: Int): String? =
         optString(key).trim().takeIf { it.isNotEmpty() && it.length <= limit }
@@ -196,6 +225,10 @@ object OwnerPosts {
     const val MAX_GALLERY = 2
     private const val MAX_KICKER = 24
     private const val MAX_NAME = 80
+    private const val MAX_CREDIT = 240
+    private const val MAX_SERIES_TITLE = 60
+    private const val MAX_SERIES_PARTS = 12
+    private val SERIES_ID = Regex("[a-z0-9][a-z0-9-]{0,59}")
 
     private fun parseBlocks(array: JSONArray?): List<PostBlock> {
         if (array == null) return emptyList()

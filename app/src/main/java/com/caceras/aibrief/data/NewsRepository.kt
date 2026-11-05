@@ -51,6 +51,8 @@ data class NewsArticle(
     val theme: CardTheme? = null,
     val sponsor: String? = null,
     val updatedAt: Instant? = null,
+    val imageCredit: String? = null,
+    val series: SeriesInfo? = null,
 ) {
     /** True for an original post, which has no external article to link out to. */
     val isOriginalPost: Boolean get() = blocks.isNotEmpty()
@@ -108,6 +110,8 @@ data class NewsLoad(
     val articles: List<NewsArticle>,
     val freshness: FeedFreshness,
     val updatedAt: Instant? = null,
+    /** The front page's data modules carried by the same edition document. */
+    val extras: EditionExtras = EditionExtras.EMPTY,
 )
 
 private data class FeedSource(
@@ -147,7 +151,8 @@ class NewsRepository(context: Context) {
 
     /** Reads assets and preferences from disk, so callers run it off the main thread. */
     fun initialLoad(): NewsLoad {
-        val posts = visiblePosts(localPostsRaw())
+        val raw = localPostsRaw()
+        val posts = visiblePosts(raw)
         val feedCache = if (BuildConfig.EXTERNAL_FEEDS_ENABLED) {
             cachedArticles().orEmpty().filterNot { it.id.startsWith("post-") }
         } else emptyList()
@@ -158,6 +163,7 @@ class NewsRepository(context: Context) {
             articles = articles.ifEmpty { visiblePosts(bundledPosts).ifEmpty { SeedArticles.create() } },
             freshness = if (hasCache && articles.isNotEmpty()) FeedFreshness.CACHED else FeedFreshness.OFFLINE,
             updatedAt = cachedAt(),
+            extras = EditionExtras.parse(raw),
         )
     }
 
@@ -198,7 +204,8 @@ class NewsRepository(context: Context) {
             else editor.remove(OWNER_POSTS_ETAG_KEY)
             editor.apply()
         }
-        val posts = visiblePosts(postDocument ?: localPostsRaw())
+        val raw = postDocument ?: localPostsRaw()
+        val posts = visiblePosts(raw)
         val feedArticles = if (BuildConfig.EXTERNAL_FEEDS_ENABLED) {
             (liveArticles + cachedArticles().orEmpty().filterNot { it.id.startsWith("post-") })
                 .distinctBy { it.id }.sortedByDescending { it.publishedAt }.take(MAX_ARTICLES)
@@ -216,6 +223,7 @@ class NewsRepository(context: Context) {
                 else -> FeedFreshness.OFFLINE
             },
             updatedAt = cachedAt(),
+            extras = EditionExtras.parse(raw),
         )
     }
 
@@ -273,6 +281,8 @@ class NewsRepository(context: Context) {
         theme = theme,
         sponsor = sponsor,
         updatedAt = updatedAt,
+        imageCredit = imageCredit,
+        series = series,
     )
 
     fun savedArticles(): List<NewsArticle> = restoredArticles(SAVED_ARTICLES_KEY)
