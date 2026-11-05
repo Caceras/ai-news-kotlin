@@ -3,6 +3,7 @@ package com.caceras.aibrief.ui.components
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -125,11 +126,12 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.primary,
                 modifier = modifier
                     .minimumInteractiveComponentSize()
-                    .clickable(role = Role.Button) {
+                    .clickable(role = Role.Button, onClickLabel = "Open in browser") {
                         try {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(block.url)))
                         } catch (_: ActivityNotFoundException) {
-                            // Devices without a browser can still read the full post.
+                            // Say why nothing opened; the post itself stays readable.
+                            Toast.makeText(context, "No browser is available to open this link.", Toast.LENGTH_LONG).show()
                         }
                     }
                     .padding(vertical = 8.dp),
