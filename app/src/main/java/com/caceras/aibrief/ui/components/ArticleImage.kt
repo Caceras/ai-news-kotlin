@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.LruCache
+import java.util.concurrent.ConcurrentHashMap
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -25,6 +26,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Shape
@@ -40,21 +43,78 @@ import java.security.MessageDigest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** Zero-layout-shift image loader with two-tier memory & disk caching and crossfade animation. */
+/**
+ * The pixel size a picture is decoded for: the box it fills, rounded up to a
+ * [SIZE_STEP] so slightly different cards share one decoded copy.
+ */
+data class DecodeSize(val width: Int, val height: Int) {
+    /** True when a picture decoded for this size is sharp enough for [other]. */
+    fun covers(other: DecodeSize): Boolean = width >= other.width && height >= other.height
+
+    companion object {
+        /** Pictures are published at most 1600 px wide, so nothing is ever decoded larger. */
+        const val MAX = 1600
+        const val SIZE_STEP = 128
+
+        /** The size to decode for a box of [box] pixels, or null before the box has been measured. */
+        fun forBox(box: IntSize): DecodeSize? {
+            if (box.width <= 0 || box.height <= 0) return null
+            fun step(px: Int) = (((px + SIZE_STEP - 1) / SIZE_STEP) * SIZE_STEP).coerceAtMost(MAX)
+            return DecodeSize(step(box.width), step(box.height))
+        }
+
+        /**
+         * The width to decode a [sourceWidth] x [sourceHeight] picture at so it
+         * still fills [size] when cropped, never larger than the source.
+         */
+        fun targetWidth(sourceWidth: Int, sourceHeight: Int, size: DecodeSize): Int {
+            // Whole-number maths, rounding up, so the picture never ends a pixel short of the box.
+            val forHeight = (size.height.toLong() * sourceWidth + sourceHeight - 1) / sourceHeight
+            return maxOf(size.width.toLong(), forHeight).coerceAtMost(sourceWidth.toLong()).toInt()
+        }
+    }
+}
+
+/** A decoded picture and the size it was decoded for. */
+class DecodedImage(val bitmap: Bitmap, val size: DecodeSize)
+
+/**
+ * Zero-layout-shift image loader with two-tier memory & disk caching and crossfade animation.
+ *
+ * The disk keeps the downloaded file; memory keeps it decoded only as large as
+ * the box showing it. A 1600 px cover drawn as a row thumbnail takes about a
+ * fifteenth of the memory it would at full size, so many more pictures stay
+ * decoded and scrolling back never waits on the disk.
+ */
 object ArticleImageCache {
     private val maxMemoryKb = (Runtime.getRuntime().maxMemory() / 1024 / 8).toInt().coerceAtLeast(1024 * 4)
-    private val memoryCache = object : LruCache<String, Bitmap>(maxMemoryKb) {
-        override fun sizeOf(key: String, bitmap: Bitmap): Int {
-            return bitmap.byteCount / 1024
+    private val memoryCache = object : LruCache<String, DecodedImage>(maxMemoryKb) {
+        override fun sizeOf(key: String, image: DecodedImage): Int {
+            return (image.bitmap.byteCount / 1024).coerceAtLeast(1)
         }
     }
 
+    /** The size each picture was most recently decoded at, so the first frame can find it. */
+    private val latestSize = ConcurrentHashMap<String, DecodeSize>()
+
+    private fun memoryKey(url: String, size: DecodeSize) = "${size.width}x${size.height} $url"
+
     /**
-     * The bitmap already decoded in memory, if any. Read during composition so
-     * a story scrolled back into view, or opened from the feed, draws its
-     * picture in the first frame instead of flashing the placeholder.
+     * The picture most recently decoded for [url], if it is still in memory.
+     * Read during composition, before the box is measured, so a story scrolled
+     * back into view, or opened from the feed, draws its picture in the first
+     * frame instead of flashing the placeholder.
      */
-    fun cached(url: String): Bitmap? = if (url.isBlank()) null else memoryCache.get(url)
+    fun cached(url: String): DecodedImage? {
+        if (url.isBlank()) return null
+        val size = latestSize[url] ?: return null
+        return memoryCache.get(memoryKey(url, size))
+    }
+
+    private fun keep(url: String, image: DecodedImage) {
+        memoryCache.put(memoryKey(url, image.size), image)
+        latestSize[url] = image.size
+    }
 
     /**
      * Gives decoded pictures back when Android asks. Each cover can hold
@@ -64,6 +124,7 @@ object ArticleImageCache {
     fun onTrimMemory(level: Int) {
         val target = trimTarget(level, memoryCache.maxSize()) ?: return
         memoryCache.trimToSize(target)
+        if (target == 0) latestSize.clear()
     }
 
     /** The memory cache size to shrink to for a trim [level], or null to keep it. */
@@ -73,11 +134,12 @@ object ArticleImageCache {
         else -> null
     }
 
-    suspend fun load(context: Context, url: String): Bitmap? = withContext(Dispatchers.IO) {
+    /** Loads [url] decoded for a box of [size]. */
+    suspend fun load(context: Context, url: String, size: DecodeSize): DecodedImage? = withContext(Dispatchers.IO) {
         if (url.isBlank() || !url.startsWith("http")) return@withContext null
 
         // 1. Check memory cache (instant 0ms return)
-        memoryCache.get(url)?.let { return@withContext it }
+        memoryCache.get(memoryKey(url, size))?.let { return@withContext it }
 
         // 2. Check disk cache
         val diskCacheDir = File(context.cacheDir, "article_images").apply { if (!exists()) mkdirs() }
@@ -85,11 +147,12 @@ object ArticleImageCache {
         val diskFile = File(diskCacheDir, diskKey)
 
         if (diskFile.exists() && diskFile.length() in 1..MAX_IMAGE_BYTES) {
-            val decoded = runCatching { decodeFileSafely(diskFile) }.getOrNull()
+            val decoded = runCatching { decodeFileSafely(diskFile, size) }.getOrNull()
             if (decoded != null) {
                 diskFile.setLastModified(System.currentTimeMillis())
-                memoryCache.put(url, decoded)
-                return@withContext decoded
+                val image = DecodedImage(decoded, size)
+                keep(url, image)
+                return@withContext image
             } else {
                 runCatching { diskFile.delete() }
             }
@@ -98,11 +161,12 @@ object ArticleImageCache {
         // 3. Network fetch
         return@withContext runCatching {
             val bytes = download(url) ?: return@runCatching null
-            val bitmap = decodeBytesSafely(bytes) ?: return@runCatching null
+            val bitmap = decodeBytesSafely(bytes, size) ?: return@runCatching null
 
             storeOnDisk(diskCacheDir, diskFile, bytes)
-            memoryCache.put(url, bitmap)
-            bitmap
+            val image = DecodedImage(bitmap, size)
+            keep(url, image)
+            image
         }.getOrNull()
     }
 
@@ -169,38 +233,53 @@ object ArticleImageCache {
         }
     }
 
-    private fun decodeBytesSafely(bytes: ByteArray): Bitmap? {
+    private fun decodeBytesSafely(bytes: ByteArray, size: DecodeSize): Bitmap? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
-        val options = BitmapFactory.Options().apply {
-            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight)
-            inPreferredConfig = Bitmap.Config.ARGB_8888
-        }
+        val options = decodeOptions(bounds, size) ?: return null
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
     }
 
-    private fun decodeFileSafely(file: File): Bitmap? {
+    private fun decodeFileSafely(file: File, size: DecodeSize): Bitmap? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(file.absolutePath, bounds)
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
-        val options = BitmapFactory.Options().apply {
-            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight)
-            inPreferredConfig = Bitmap.Config.ARGB_8888
-        }
+        val options = decodeOptions(bounds, size) ?: return null
         return BitmapFactory.decodeFile(file.absolutePath, options)
     }
 
-    private fun sampleSize(width: Int, height: Int): Int {
-        var sample = 1
-        while (width / sample > MAX_DECODE_DIMENSION || height / sample > MAX_DECODE_DIMENSION) {
-            sample *= 2
+    /**
+     * Shrinks by whole powers of two while decoding, which is cheap, then
+     * scales the rest of the way so the bitmap is just large enough to fill
+     * the box without looking soft.
+     */
+    private fun decodeOptions(bounds: BitmapFactory.Options, size: DecodeSize): BitmapFactory.Options? {
+        val width = bounds.outWidth
+        val height = bounds.outHeight
+        if (width <= 0 || height <= 0) return null
+        // Never larger than the publishing limit on either side, even for an oversized source.
+        val longestAllowed = (width.toLong() * DecodeSize.MAX / maxOf(width, height)).toInt()
+        val target = minOf(DecodeSize.targetWidth(width, height, size), longestAllowed).coerceAtLeast(1)
+        val sample = sampleSize(width, target)
+        val sampled = width / sample
+        return BitmapFactory.Options().apply {
+            inSampleSize = sample
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+            if (sampled > target) {
+                inScaled = true
+                inDensity = sampled
+                inTargetDensity = target
+            }
         }
+    }
+
+    /** The largest power of two that keeps a [width] picture at least [target] wide. */
+    internal fun sampleSize(width: Int, target: Int): Int {
+        var sample = 1
+        while (width / (sample * 2) >= target) sample *= 2
         return sample
     }
 
     private const val MAX_IMAGE_BYTES = 12L * 1024L * 1024L
-    private const val MAX_DECODE_DIMENSION = 1600
     private const val MAX_DISK_CACHE_BYTES = 48L * 1024L * 1024L
 
     private fun hashKey(url: String): String {
@@ -224,10 +303,17 @@ fun AsyncArticleImage(
     if (imageUrl.isNullOrBlank()) return
 
     val context = LocalContext.current
-    var bitmap by remember(imageUrl) { mutableStateOf(ArticleImageCache.cached(imageUrl)) }
+    var image by remember(imageUrl) { mutableStateOf(ArticleImageCache.cached(imageUrl)) }
+    var boxSize by remember { mutableStateOf(IntSize.Zero) }
+    val decodeSize = DecodeSize.forBox(boxSize)
+    val bitmap = image?.bitmap
 
-    LaunchedEffect(imageUrl) {
-        if (bitmap == null) bitmap = ArticleImageCache.load(context, imageUrl)
+    // Waits for the box to be measured, then decodes for its size. A picture
+    // already decoded at least that large is kept as it is.
+    LaunchedEffect(imageUrl, decodeSize) {
+        val wanted = decodeSize ?: return@LaunchedEffect
+        if (image?.size?.covers(wanted) == true) return@LaunchedEffect
+        ArticleImageCache.load(context, imageUrl, wanted)?.let { image = it }
     }
 
     val alpha by animateFloatAsState(
@@ -240,6 +326,7 @@ fun AsyncArticleImage(
     Box(
         modifier = modifier
             .then(if (aspectRatio != null) Modifier.fillMaxWidth().aspectRatio(aspectRatio) else Modifier)
+            .onSizeChanged { boxSize = it }
             .clip(shape)
             .background(Brief.colors.placeholder),
     ) {
