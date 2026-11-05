@@ -29,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.caceras.aibrief.BuildConfig
 import java.io.File
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
@@ -71,21 +72,31 @@ object ArticleImageCache {
 
         // 3. Network fetch
         return@withContext runCatching {
-            val connection = URL(url).openConnection() as HttpURLConnection
+            val bytes = download(url) ?: return@runCatching null
+            val bitmap = decodeBytesSafely(bytes) ?: return@runCatching null
+
+            storeOnDisk(diskCacheDir, diskFile, bytes)
+            memoryCache.put(url, bitmap)
+            bitmap
+        }.getOrNull()
+    }
+
+    /**
+     * Reads at most [MAX_IMAGE_BYTES] from [url]. The connection is released on
+     * every path, including oversized responses and read errors, so scrolling a
+     * feed of failing images never leaks sockets.
+     */
+    private fun download(url: String): ByteArray? {
+        val connection = URL(url).openConnection() as HttpURLConnection
+        try {
             connection.connectTimeout = 7_000
             connection.readTimeout = 7_000
             connection.instanceFollowRedirects = true
-            connection.setRequestProperty("User-Agent", "AI-Brief-Android/2.0")
-            if (connection.responseCode !in 200..299) {
-                connection.disconnect()
-                return@runCatching null
-            }
-            if (connection.contentLengthLong > MAX_IMAGE_BYTES) {
-                connection.disconnect()
-                return@runCatching null
-            }
+            connection.setRequestProperty("User-Agent", "AI-Brief-Android/${BuildConfig.VERSION_NAME}")
+            if (connection.responseCode !in 200..299) return null
+            if (connection.contentLengthLong > MAX_IMAGE_BYTES) return null
 
-            val bytes = connection.inputStream.use { input ->
+            return connection.inputStream.use { input ->
                 val output = ByteArrayOutputStream()
                 val buffer = ByteArray(16 * 1024)
                 var total = 0L
@@ -93,19 +104,14 @@ object ArticleImageCache {
                     val read = input.read(buffer)
                     if (read <= 0) break
                     total += read
-                    if (total > MAX_IMAGE_BYTES) return@runCatching null
+                    if (total > MAX_IMAGE_BYTES) return null
                     output.write(buffer, 0, read)
                 }
                 output.toByteArray()
             }
+        } finally {
             connection.disconnect()
-
-            val bitmap = decodeBytesSafely(bytes) ?: return@runCatching null
-
-            storeOnDisk(diskCacheDir, diskFile, bytes)
-            memoryCache.put(url, bitmap)
-            bitmap
-        }.getOrNull()
+        }
     }
 
     /**

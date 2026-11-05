@@ -204,19 +204,9 @@ class NewsRepository(context: Context) {
 
     fun savedArticles(): List<NewsArticle> = restoredArticles(SAVED_ARTICLES_KEY)
 
-    fun toggleSaved(article: NewsArticle): List<NewsArticle> {
-        val saved = savedArticles().toMutableList()
-        val existingIndex = saved.indexOfFirst { it.id == article.id }
-        if (existingIndex >= 0) {
-            saved.removeAt(existingIndex)
-        } else {
-            saved.add(0, article)
-            if (saved.size > MAX_SAVED_ARTICLES) {
-                saved.removeAt(saved.lastIndex)
-            }
-        }
+    /** Writes the saved shelf to disk. Encodes every saved post, so callers run it off the main thread. */
+    fun persistSaved(saved: List<NewsArticle>) {
         persistArticles(SAVED_ARTICLES_KEY, saved, MAX_SAVED_ARTICLES)
-        return saved
     }
 
     private fun fetchFeed(feed: FeedSource): List<NewsArticle> {
@@ -454,7 +444,6 @@ class NewsRepository(context: Context) {
         const val OWNER_SOURCE = "AI Brief"
         const val ARTICLES_PER_SOURCE = 8
         const val MAX_ARTICLES = 24
-        const val MAX_SAVED_ARTICLES = 80
         const val MAX_SUMMARY_LENGTH = 320
         val ENTRY_TAGS = setOf("item", "entry")
         val WHITESPACE = Regex("\\s+")

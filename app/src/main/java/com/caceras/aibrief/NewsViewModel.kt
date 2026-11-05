@@ -8,6 +8,7 @@ import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
 import com.caceras.aibrief.data.NewsRepository
 import com.caceras.aibrief.data.SeedArticles
+import com.caceras.aibrief.data.toggledSaved
 import java.time.Instant
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +18,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 data class NewsUiState(
     val articles: List<NewsArticle>,
@@ -31,6 +35,7 @@ data class NewsUiState(
 
 class NewsViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = NewsRepository(application)
+    private val saveLock = Mutex()
     // Starts empty and refreshing. The device's copy is read from disk off the
     // main thread so a cold start never blocks the first frame on storage.
     private val _uiState = MutableStateFlow(
@@ -92,8 +97,19 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = _uiState.value.copy(selectedCategory = category)
     }
 
+    /**
+     * Updates the shelf in memory at once and writes it to disk on the IO
+     * dispatcher: encoding up to 80 saved posts on the main thread made the
+     * save button stutter. Each write stores the latest shelf under a lock, so
+     * quick repeated taps can never leave an older shelf on disk.
+     */
     fun toggleSaved(article: NewsArticle) {
-        _uiState.value = _uiState.value.copy(savedArticles = repository.toggleSaved(article))
+        _uiState.update { it.copy(savedArticles = toggledSaved(it.savedArticles, article)) }
+        viewModelScope.launch(Dispatchers.IO) {
+            saveLock.withLock {
+                runCatching { repository.persistSaved(_uiState.value.savedArticles) }
+            }
+        }
     }
 
     private companion object {
