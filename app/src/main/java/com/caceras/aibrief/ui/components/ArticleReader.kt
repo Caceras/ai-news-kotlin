@@ -34,6 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.StoryFormat
@@ -189,7 +191,8 @@ private fun OpinionHeader(article: NewsArticle) {
         Spacer(Modifier.height(Space.xl))
         SelectionContainer {
             Column {
-                Text(article.title, style = Brief.type.opinionHeadline, color = c.ink)
+                Text(article.title, style = Brief.type.opinionHeadline, color = c.ink,
+                    modifier = Modifier.semantics { heading() })
                 Spacer(Modifier.height(Space.m))
                 Text(article.summary, style = Brief.type.quote, color = c.inkMuted)
                 Spacer(Modifier.height(Space.gutter))
