@@ -54,6 +54,14 @@ A cold build of the gates takes about 3 minutes.
 - Play Console account verification, upload key, and the four `PLAY_*` repository secrets for **Build signed Play bundle**. See `PLAY_RELEASE_CHECKLIST.md`.
 - GitHub Pages is not enabled, so the privacy and contact links point to `PRIVACY.md` and `CONTACT.md` on GitHub.
 
+## Design and publishing (November 2026 redesign)
+
+- The look is a strict design system: `docs/DESIGN_SYSTEM.md`. Colours, fonts, type, shapes and spacing live only in `ui/theme/Theme.kt`; `DesignRulesTest` fails the build on raw values elsewhere. Add a token instead of an exception.
+- Story types (`StoryFormat`: NEWS, BREAKING, EXPLAINER, OPINION, GUIDE, SPONSORED) each have one card and one reader header. Front-page order is `FeedLayout.compose`, covered by `FeedLayoutTest`.
+- The owner publishes from the **Publish a story** issue form (`.github/ISSUE_TEMPLATE/publish-story.yml` → `publish-from-issue.yml` → `scripts/issue_post.py` → `scripts/publish-post.py`). Editing the issue revises the story; Action = Unpublish removes it. Owner-only.
+- See screens without a device: `scripts/render-snapshots.sh` (Paparazzi in a throwaway copy, about 3 minutes). Read PNGs with a venv Pillow; the system Pillow is broken.
+- Sponsored posts must name a sponsor (parser drops them otherwise) and never lead. Opinion must be signed by a person.
+
 ## Code rules learned
 
 - Never read disk (assets, SharedPreferences, cache files) on the main thread at startup. `NewsViewModel` loads the device copy on `Dispatchers.IO` and exposes `isLoading`; keep new startup work there.

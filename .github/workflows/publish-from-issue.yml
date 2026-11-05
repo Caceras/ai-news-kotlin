@@ -1,0 +1,61 @@
+name: Publish from issue
+
+# The "Publish a story" issue form is the newsroom: submit it to publish, edit it
+# to revise, set Action to Unpublish to remove. Only the repository owner's own
+# issues and edits are acted on; everyone else's are ignored.
+on:
+  issues:
+    types: [opened, edited, reopened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: editorial-publishing
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      startsWith(github.event.issue.title, '[Publish]') &&
+      github.event.issue.user.login == github.repository_owner &&
+      github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pillow==11.3.0
+      - name: Test the publishing safeguards
+        run: python scripts/test_publishing.py
+      - name: Validate and publish
+        env:
+          # The issue body is untrusted prose: it is data, never interpolated into a command.
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GITHUB_TOKEN: ${{ github.token }}
+          RESULT_FILE: ${{ runner.temp }}/result.md
+        run: python scripts/issue_post.py
+      - name: Commit the edition
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add content/posts.json content/media
+          if git diff --cached --quiet; then echo "Nothing changed"; exit 0; fi
+          git commit -m "Publish story from issue #${{ github.event.issue.number }}"
+          git push origin HEAD:main
+      - name: Report back on the issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number }}
+          RESULT_FILE: ${{ runner.temp }}/result.md
+        run: |
+          [ -f "$RESULT_FILE" ] || echo "❌ Publishing stopped before the story was checked. See the workflow log." > "$RESULT_FILE"
+          gh issue comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$RESULT_FILE"
+          if grep -q '^✅' "$RESULT_FILE"; then gh issue close "$NUMBER" --repo "$GITHUB_REPOSITORY" --reason completed || true; fi

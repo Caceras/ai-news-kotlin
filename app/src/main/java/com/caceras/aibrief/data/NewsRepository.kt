@@ -43,9 +43,26 @@ data class NewsArticle(
      * empty list and are rendered from [summary] as before.
      */
     val blocks: List<PostBlock> = emptyList(),
+    val format: StoryFormat = StoryFormat.NEWS,
+    val kicker: String? = null,
+    val gallery: List<String> = emptyList(),
+    val authorImageUrl: String? = null,
+    val authorRole: String? = null,
+    val theme: CardTheme? = null,
+    val sponsor: String? = null,
+    val updatedAt: Instant? = null,
 ) {
     /** True for an original post, which has no external article to link out to. */
     val isOriginalPost: Boolean get() = blocks.isNotEmpty()
+
+    /** Guides and sponsored posts share the designed card. */
+    val isDesigned: Boolean get() = format == StoryFormat.GUIDE || format == StoryFormat.SPONSORED
+
+    /** The theme a designed card uses: the named one, or a stable one picked from the ID. */
+    val cardTheme: CardTheme get() = theme ?: CardTheme.forId(id)
+
+    /** The cover first, then the extra collage pictures, without repeats. */
+    val pictures: List<String> get() = (listOfNotNull(imageUrl?.takeIf { it.isNotBlank() }) + gallery).distinct()
 
     /**
      * Computed once per article. Story rows read [readingTimeMinutes] on every
@@ -210,6 +227,14 @@ class NewsRepository(context: Context) {
         summary = summary,
         category = category,
         blocks = blocks,
+        format = format,
+        kicker = kicker,
+        gallery = gallery,
+        authorImageUrl = authorImageUrl,
+        authorRole = authorRole,
+        theme = theme,
+        sponsor = sponsor,
+        updatedAt = updatedAt,
     )
 
     fun savedArticles(): List<NewsArticle> = restoredArticles(SAVED_ARTICLES_KEY)

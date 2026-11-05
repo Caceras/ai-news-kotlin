@@ -28,6 +28,57 @@ sealed interface PostBlock {
 }
 
 /**
+ * How a story is presented. Each format has exactly one card and one reader
+ * header, so an editor chooses the kind of story and the app chooses the look.
+ * Posts never carry their own colours, fonts or layout.
+ */
+enum class StoryFormat(val label: String) {
+    /** Reported news: photo on top, heavy headline, a one-line deck. */
+    NEWS("News"),
+
+    /** Fast-moving news: a split collage of up to three pictures and a red kicker. */
+    BREAKING("Breaking"),
+
+    /** Background writing that explains a topic. Reads like news, labelled as an explainer. */
+    EXPLAINER("Explainer"),
+
+    /** A signed column: portrait, serif headline, and a views-are-the-author's note. */
+    OPINION("Opinion"),
+
+    /** An AI Brief playbook or how-to, set on a designed gradient card. */
+    GUIDE("Guide"),
+
+    /** Paid content. Same card as a guide, always labelled with its sponsor. */
+    SPONSORED("Sponsored"),
+    ;
+
+    companion object {
+        /** Unknown or missing formats read as news, so a newer post never breaks an older build. */
+        fun parse(raw: String?): StoryFormat =
+            entries.firstOrNull { it.name.equals(raw?.trim(), ignoreCase = true) } ?: NEWS
+    }
+}
+
+/**
+ * The only backgrounds a designed card (guide or sponsored) may use. A post
+ * names one; it cannot supply colours of its own.
+ */
+enum class CardTheme {
+    SKY, LILAC, MINT, PEACH, OCEAN, INDIGO, BLUSH, NAVY;
+
+    /** Dark themes carry white type; light ones carry ink. */
+    val isDark: Boolean get() = this == OCEAN || this == INDIGO || this == NAVY
+
+    companion object {
+        fun parse(raw: String?): CardTheme? =
+            entries.firstOrNull { it.name.equals(raw?.trim(), ignoreCase = true) }
+
+        /** A stable theme for a post that did not name one, so it never changes between refreshes. */
+        fun forId(id: String): CardTheme = entries[Math.floorMod(id.hashCode(), entries.size)]
+    }
+}
+
+/**
  * An original post written by the owner of the app.
  *
  * These are published by committing `content/posts.json`, which the app reads at
@@ -46,6 +97,19 @@ data class OwnerPost(
     val imageUrl: String?,
     val publishedAt: Instant,
     val blocks: List<PostBlock>,
+    val format: StoryFormat = StoryFormat.NEWS,
+    /** A short red lead-in set before the headline, such as "Revealed". */
+    val kicker: String? = null,
+    /** Extra cover pictures, used by breaking news as a split collage. */
+    val gallery: List<String> = emptyList(),
+    val authorImageUrl: String? = null,
+    /** The author's title, such as "Columnist". */
+    val authorRole: String? = null,
+    val theme: CardTheme? = null,
+    /** Who paid for a sponsored post. Sponsored posts without one are refused. */
+    val sponsor: String? = null,
+    /** Set when a published story is revised, and shown beside the date. */
+    val updatedAt: Instant? = null,
 )
 
 /** Reads `content/posts.json`, the document that carries every original post. */
@@ -91,6 +155,10 @@ object OwnerPosts {
         val id = json.optString("id").trim().ifBlank { return null }
         val title = json.optString("title").trim().ifBlank { return null }
         val publishedAt = parseInstant(json.optString("publishedAt")) ?: return null
+        val format = StoryFormat.parse(json.optString("format"))
+        val sponsor = json.cleanText("sponsor", MAX_NAME)
+        // Paid content that does not say who paid is never shown.
+        if (format == StoryFormat.SPONSORED && sponsor == null) return null
 
         return OwnerPost(
             id = id,
@@ -101,8 +169,33 @@ object OwnerPosts {
             imageUrl = json.optString("imageUrl").trim().takeIf { it.startsWith("https://") },
             publishedAt = publishedAt,
             blocks = parseBlocks(json.optJSONArray("blocks")),
+            format = format,
+            kicker = json.cleanText("kicker", MAX_KICKER),
+            gallery = httpsList(json.optJSONArray("gallery")).take(MAX_GALLERY),
+            authorImageUrl = json.optString("authorImageUrl").trim().takeIf { it.startsWith("https://") },
+            authorRole = json.cleanText("authorRole", MAX_NAME),
+            theme = CardTheme.parse(json.optString("theme")),
+            sponsor = sponsor,
+            updatedAt = parseInstant(json.optString("updatedAt"))?.takeIf { it.isAfter(publishedAt) },
         )
     }
+
+    private fun JSONObject.cleanText(key: String, limit: Int): String? =
+        optString(key).trim().takeIf { it.isNotEmpty() && it.length <= limit }
+
+    /** HTTPS addresses only, in order, without repeats. */
+    fun httpsList(array: JSONArray?): List<String> {
+        if (array == null) return emptyList()
+        return (0 until array.length())
+            .map { array.optString(it).trim() }
+            .filter { it.startsWith("https://") }
+            .distinct()
+    }
+
+    /** Breaking news shows the cover plus at most two more pictures. */
+    const val MAX_GALLERY = 2
+    private const val MAX_KICKER = 24
+    private const val MAX_NAME = 80
 
     private fun parseBlocks(array: JSONArray?): List<PostBlock> {
         if (array == null) return emptyList()

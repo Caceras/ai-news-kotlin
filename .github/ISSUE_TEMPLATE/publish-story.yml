@@ -1,0 +1,128 @@
+name: Publish a story
+description: Publish, update or remove an AI Brief story. Only the owner's submissions are published.
+title: "[Publish] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill this in and submit. The story is checked and published automatically, and a comment says when it is live
+        (readers see it on their next refresh, usually within five minutes; no app update needed).
+        **To revise it later, edit this issue. To take it down, edit it and set Action to Unpublish.**
+        Only submissions from the repository owner are published.
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Publish or update
+        - Unpublish
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Story type
+      description: Each type has one fixed look in the app. News is the default.
+      options:
+        - News (photo on top, big headline)
+        - Breaking (collage of up to 3 pictures, red label, leads the app for 24 h)
+        - Explainer (background on a topic)
+        - Opinion (signed column with portrait)
+        - Guide (designed card, our own playbooks)
+        - Sponsored (designed card, always labelled with the sponsor)
+    validations:
+      required: true
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic
+      options:
+        - RESEARCH
+        - PRODUCTS
+        - POLICY
+        - BUILDERS
+        - ALL
+    validations:
+      required: true
+  - type: input
+    id: headline
+    attributes:
+      label: Headline
+      description: Up to 120 characters. Short and concrete reads best.
+    validations:
+      required: true
+  - type: input
+    id: kicker
+    attributes:
+      label: Kicker
+      description: Optional red lead-in before the headline, up to 24 characters, such as "Revealed" or "Exclusive".
+  - type: textarea
+    id: deck
+    attributes:
+      label: Deck
+      description: One or two sentences under the headline, up to 220 characters.
+    validations:
+      required: true
+  - type: textarea
+    id: pictures
+    attributes:
+      label: Pictures
+      description: >
+        Paste or drag a cover picture here (Breaking: up to three, shown as a collage). Use only pictures you own or
+        are licensed to use. Location and camera data are removed before publishing.
+  - type: input
+    id: author
+    attributes:
+      label: Author
+      description: Byline. Columns must be signed by a named person. Leave empty for "AI Brief editorial".
+  - type: input
+    id: role
+    attributes:
+      label: Author role
+      description: Optional, such as "Columnist" or "Founder, Hundisar.se".
+  - type: textarea
+    id: portrait
+    attributes:
+      label: Author photo
+      description: Opinion only. Paste a portrait; it is cropped square and set on a coloured shape.
+  - type: textarea
+    id: story
+    attributes:
+      label: Story
+      description: >
+        Separate paragraphs with a blank line. "## " starts a section heading, "> " a pull quote, "- " a bullet list.
+        Paste pictures on their own line.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: One per line, as "Label | https://link" or just the link. At least one is required.
+    validations:
+      required: true
+  - type: dropdown
+    id: theme
+    attributes:
+      label: Card colour
+      description: Guide and Sponsored only. Leave empty to pick one automatically.
+      options:
+        - SKY
+        - LILAC
+        - MINT
+        - PEACH
+        - BLUSH
+        - OCEAN
+        - INDIGO
+        - NAVY
+  - type: input
+    id: sponsor
+    attributes:
+      label: Sponsor
+      description: Sponsored only, and required for it. The company that paid; it is shown on the card and the story.
+  - type: input
+    id: publish_at
+    attributes:
+      label: Publish at
+      description: Optional. UTC time to release the story, such as 2026-11-06T07:00:00Z. Empty publishes now.
