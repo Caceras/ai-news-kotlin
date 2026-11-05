@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -78,7 +79,13 @@ fun RankingsModule(rankings: ModelRankings, limit: Int, onOpenSource: () -> Unit
                 .padding(horizontal = Space.gutter, vertical = Space.m),
                 verticalAlignment = Alignment.CenterVertically) {
                 Text("${model.rank}", style = Brief.type.headline,
-                    color = if (model.rank == 1) c.accent else c.inkMuted, modifier = Modifier.widthIn(min = 40.dp))
+                    color = if (model.rank == 1) c.accent else c.inkMuted, modifier = Modifier.widthIn(min = 32.dp))
+                // Logos sit on a white tile so dark marks stay visible in dark mode.
+                Box(Modifier.size(40.dp).clip(BriefShapes.button).background(c.onImage).padding(Space.xs)) {
+                    model.logoUrl?.let { AsyncArticleImage(it, null, Modifier.matchParentSize(), aspectRatio = null,
+                        fit = true) }
+                }
+                Spacer(Modifier.width(Space.m))
                 Column(Modifier.weight(1f)) {
                     Text(model.name, style = Brief.type.rowTitle, color = c.ink, maxLines = 2,
                         overflow = TextOverflow.Ellipsis)

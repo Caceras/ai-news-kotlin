@@ -2013,70 +2013,80 @@
           "name": "Gemini 4 Carbon",
           "maker": "Google",
           "score": 60.0,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/google.png"
         },
         {
           "rank": 2,
           "name": "Claude Opus 5.5",
           "maker": "Anthropic",
           "score": 59.1,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/anthropic.png"
         },
         {
           "rank": 3,
           "name": "GPT-6 Astra",
           "maker": "OpenAI",
           "score": 56.9,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/openai.png"
         },
         {
           "rank": 4,
           "name": "GPT-6.1 Sol",
           "maker": "OpenAI",
           "score": 54.6,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/openai.png"
         },
         {
           "rank": 5,
           "name": "Claude Sonnet 5.5",
           "maker": "Anthropic",
           "score": 54.5,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/anthropic.png"
         },
         {
           "rank": 6,
           "name": "GPT-6.1 Terra",
           "maker": "OpenAI",
           "score": 51.3,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/openai.png"
         },
         {
           "rank": 7,
           "name": "Gemini 4 Argon",
           "maker": "Google",
           "score": 50.4,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/google.png"
         },
         {
           "rank": 8,
           "name": "Muse Wonder Full",
           "maker": "Meta",
           "score": 50.1,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/meta.png"
         },
         {
           "rank": 9,
           "name": "Claude Fable 5.1",
           "maker": "Anthropic",
           "score": 50.0,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/anthropic.png"
         },
         {
           "rank": 10,
           "name": "Kimi K3.1 Pro",
           "maker": "Kimi",
           "score": 46.5,
-          "openWeights": false
+          "openWeights": false,
+          "logoUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/kimi.png"
         }
       ]
     },

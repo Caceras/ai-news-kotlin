@@ -29,6 +29,14 @@ AA_PAGE = "https://artificialanalysis.ai/leaderboards/models"
 AA_API = "https://artificialanalysis.ai/api/v2/data/llms/models"
 OPENROUTER = "https://openrouter.ai/api/v1/models"
 RANKED = 10
+LOGOS = ROOT / "content/media/logos"
+LOGO_URL = "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/logos/"
+
+
+def logo(maker):
+    """Our hosted copy of a maker's logo, when we have one."""
+    slug = re.sub(r"[^a-z0-9]+", "-", maker.lower()).strip("-")
+    return LOGO_URL + slug + ".png" if (LOGOS / f"{slug}.png").exists() else None
 RADAR = 8
 
 
@@ -53,8 +61,9 @@ def rank(models):
         if key not in best or score > best[key]["score"]:
             best[key] = {**m, "name": key}
     top = sorted(best.values(), key=lambda m: -m["score"])[:RANKED]
-    return [{"rank": i + 1, "name": m["name"], "maker": m["maker"], "score": round(m["score"], 1),
-             "openWeights": bool(m.get("openWeights"))} for i, m in enumerate(top)]
+    return [{k: v for k, v in {"rank": i + 1, "name": m["name"], "maker": m["maker"], "score": round(m["score"], 1),
+             "openWeights": bool(m.get("openWeights")), "logoUrl": logo(m["maker"])}.items() if v is not None}
+            for i, m in enumerate(top)]
 
 
 def models_from_api(key):

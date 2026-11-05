@@ -11,6 +11,8 @@ data class RankedModel(
     val maker: String,
     val score: Double,
     val openWeights: Boolean,
+    /** The maker's logo, hosted with the edition. */
+    val logoUrl: String? = null,
 )
 
 /** The top models by a published index, always shown with its source. */
@@ -80,6 +82,7 @@ data class EditionExtras(
                     maker = row.text("maker").orEmpty(),
                     score = score,
                     openWeights = row.optBoolean("openWeights", false),
+                    logoUrl = row.https("logoUrl"),
                 )
             }.sortedBy { it.rank }
             if (entries.isEmpty()) return null
