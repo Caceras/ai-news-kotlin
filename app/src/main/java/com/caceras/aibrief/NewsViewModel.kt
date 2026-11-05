@@ -1,6 +1,7 @@
 package com.caceras.aibrief
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
@@ -42,12 +43,26 @@ data class NewsUiState(
 internal fun restoredCategory(saved: String?): NewsCategory =
     NewsCategory.entries.firstOrNull { it.name == saved } ?: NewsCategory.ALL
 
+/** How long the edition on screen is trusted before returning to the app checks for a newer one. */
+internal const val STALE_AFTER_MILLIS = 30L * 60L * 1000L
+
+/**
+ * True when the last refresh started at least [STALE_AFTER_MILLIS] before [now].
+ * Both values come from the same monotonic clock, so changing the device time
+ * cannot suppress or force a refresh. Before the first attempt nothing is stale:
+ * the launch refresh already covers it.
+ */
+internal fun isEditionStale(lastAttempt: Long?, now: Long): Boolean =
+    lastAttempt != null && now - lastAttempt >= STALE_AFTER_MILLIS
+
 class NewsViewModel(
     application: Application,
     private val savedState: SavedStateHandle,
 ) : AndroidViewModel(application) {
     private val repository = NewsRepository(application)
     private val saveLock = Mutex()
+    /** Monotonic time of the latest refresh attempt, or null before the first one starts. */
+    private var lastRefreshAttempt: Long? = null
     // Starts empty and refreshing. The device's copy is read from disk off the
     // main thread so a cold start never blocks the first frame on storage.
     // The chosen topic is restored after the system reclaims the app in the
@@ -91,7 +106,17 @@ class NewsViewModel(
         viewModelScope.launch { loadLatest(userRequested) }
     }
 
+    /**
+     * Called when the app returns to the foreground. A reader who leaves AI
+     * Brief in the background overnight would otherwise keep seeing
+     * yesterday's edition until they found the refresh button.
+     */
+    fun refreshIfStale() {
+        if (isEditionStale(lastRefreshAttempt, SystemClock.elapsedRealtime())) refresh(userRequested = false)
+    }
+
     private suspend fun loadLatest(userRequested: Boolean) {
+        lastRefreshAttempt = SystemClock.elapsedRealtime()
         try {
             val load = repository.loadLatest()
             _uiState.value = _uiState.value.copy(

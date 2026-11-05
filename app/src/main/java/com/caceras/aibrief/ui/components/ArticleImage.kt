@@ -48,6 +48,13 @@ object ArticleImageCache {
         }
     }
 
+    /**
+     * The bitmap already decoded in memory, if any. Read during composition so
+     * a story scrolled back into view, or opened from the feed, draws its
+     * picture in the first frame instead of flashing the placeholder.
+     */
+    fun cached(url: String): Bitmap? = if (url.isBlank()) null else memoryCache.get(url)
+
     suspend fun load(context: Context, url: String): Bitmap? = withContext(Dispatchers.IO) {
         if (url.isBlank() || !url.startsWith("http")) return@withContext null
 
@@ -198,11 +205,10 @@ fun AsyncArticleImage(
     if (imageUrl.isNullOrBlank()) return
 
     val context = LocalContext.current
-    var bitmap by remember(imageUrl) { mutableStateOf<Bitmap?>(null) }
+    var bitmap by remember(imageUrl) { mutableStateOf(ArticleImageCache.cached(imageUrl)) }
 
     LaunchedEffect(imageUrl) {
-        val loaded = ArticleImageCache.load(context, imageUrl)
-        bitmap = loaded
+        if (bitmap == null) bitmap = ArticleImageCache.load(context, imageUrl)
     }
 
     val alpha by animateFloatAsState(
