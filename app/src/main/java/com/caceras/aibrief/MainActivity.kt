@@ -631,6 +631,7 @@ private fun AboutScreen(listState: LazyListState) {
                 text = "About AI Brief",
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.semantics { heading() },
             )
             Spacer(Modifier.height(14.dp))
             Text(
@@ -647,6 +648,7 @@ private fun AboutScreen(listState: LazyListState) {
                 text = "Our editorial approach",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.semantics { heading() },
             )
             Spacer(Modifier.height(8.dp))
             Text(
@@ -662,6 +664,7 @@ private fun AboutScreen(listState: LazyListState) {
                 text = "Privacy",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.semantics { heading() },
             )
             Spacer(Modifier.height(8.dp))
             Text(
@@ -682,6 +685,7 @@ private fun AboutScreen(listState: LazyListState) {
                 text = "Contact & Corrections",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.semantics { heading() },
             )
             Spacer(Modifier.height(8.dp))
             Text(
