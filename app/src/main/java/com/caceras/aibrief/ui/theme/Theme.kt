@@ -49,6 +49,8 @@ data class BriefColors(
     /** The masthead bar and section ribbons. */
     val masthead: Color,
     val onMasthead: Color,
+    /** A text action on the masthead navy, such as a snackbar's Undo. Readable on navy in both themes. */
+    val mastheadAction: Color,
     /** The second tone on a section ribbon's label block. */
     val ribbonLabel: Color,
     /** Links, selected tabs and the brand. */
@@ -76,6 +78,7 @@ private val LightBrief = BriefColors(
     rule = Color(0xFFE2E4E8),
     masthead = Color(0xFF0A1F44),
     onMasthead = Color(0xFFFFFFFF),
+    mastheadAction = Color(0xFF7FA5FF),
     ribbonLabel = Color(0xFF2F6BFF),
     accent = Color(0xFF1F55E0),
     onAccent = Color(0xFFFFFFFF),
@@ -96,6 +99,7 @@ private val DarkBrief = BriefColors(
     rule = Color(0xFF262B36),
     masthead = Color(0xFF0A1F44),
     onMasthead = Color(0xFFFFFFFF),
+    mastheadAction = Color(0xFF7FA5FF),
     ribbonLabel = Color(0xFF2F6BFF),
     accent = Color(0xFF7FA5FF),
     onAccent = Color(0xFF0B0D12),
@@ -274,15 +278,21 @@ object Brief {
         @Composable @ReadOnlyComposable get() = LocalBriefType.current
 }
 
-/** Material components (text fields, progress, snackbars) take their colours from the same roles. */
+/**
+ * Material components (text fields, progress, snackbars, the pull-to-refresh
+ * spinner) take their colours from the same roles. Snackbars sit on the
+ * masthead navy.
+ */
 private fun materialColors(c: BriefColors, dark: Boolean) = if (dark) {
     darkColorScheme(primary = c.accent, onPrimary = c.onAccent, background = c.paper, onBackground = c.ink,
         surface = c.card, onSurface = c.ink, surfaceVariant = c.placeholder, onSurfaceVariant = c.inkMuted,
-        outline = c.inkMuted, outlineVariant = c.rule, error = c.breaking)
+        outline = c.inkMuted, outlineVariant = c.rule, error = c.breaking,
+        inverseSurface = c.masthead, inverseOnSurface = c.onMasthead, inversePrimary = c.mastheadAction)
 } else {
     lightColorScheme(primary = c.accent, onPrimary = c.onAccent, background = c.paper, onBackground = c.ink,
         surface = c.card, onSurface = c.ink, surfaceVariant = c.placeholder, onSurfaceVariant = c.inkMuted,
-        outline = c.inkMuted, outlineVariant = c.rule, error = c.breaking)
+        outline = c.inkMuted, outlineVariant = c.rule, error = c.breaking,
+        inverseSurface = c.masthead, inverseOnSurface = c.onMasthead, inversePrimary = c.mastheadAction)
 }
 
 private fun materialType(t: BriefType) = Typography(

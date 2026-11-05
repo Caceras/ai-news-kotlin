@@ -14,6 +14,7 @@ import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
 import com.caceras.aibrief.data.NewsRepository
 import com.caceras.aibrief.data.SeedArticles
+import com.caceras.aibrief.data.restoredSaved
 import com.caceras.aibrief.data.toggledSaved
 import java.time.Instant
 import kotlinx.coroutines.CancellationException
@@ -146,6 +147,16 @@ class NewsViewModel(
      */
     fun toggleSaved(article: NewsArticle) {
         _uiState.update { it.copy(savedArticles = toggledSaved(it.savedArticles, article)) }
+        persistShelf()
+    }
+
+    /** Undoes a removal: puts [article] back at [index], the place it had on the shelf. */
+    fun restoreSaved(article: NewsArticle, index: Int) {
+        _uiState.update { it.copy(savedArticles = restoredSaved(it.savedArticles, article, index)) }
+        persistShelf()
+    }
+
+    private fun persistShelf() {
         viewModelScope.launch(Dispatchers.IO) {
             saveLock.withLock {
                 runCatching { repository.persistSaved(_uiState.value.savedArticles) }

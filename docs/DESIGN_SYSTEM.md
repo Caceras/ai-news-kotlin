@@ -20,7 +20,7 @@ needs something new, add a named token or role for it first.
 
 ## Tokens
 
-- **Colour roles** (`Brief.colors`): paper, card, ink, inkMuted, rule, masthead, onMasthead,
+- **Colour roles** (`Brief.colors`): paper, card, ink, inkMuted, rule, masthead, onMasthead, mastheadAction,
   ribbonLabel, accent, onAccent, breaking, onBreaking, opinionPaper, opinionAccent, placeholder,
   onImage, imageScrim. Light and dark themes define every role. `breaking` red is used only for
   breaking labels and kickers.
