@@ -109,9 +109,6 @@ fun RadarModule(radar: ModelRadar, limit: Int, onOpenUrl: (String) -> Unit, onSe
     val c = Brief.colors
     Column(Modifier.fillMaxWidth().background(c.card)) {
         SectionRibbon(radar.title)
-        Text("New and unannounced models, as listed on ${radar.source}. Stealth models are tested in public " +
-            "before their makers are named.", style = Brief.type.meta, color = c.inkMuted,
-            modifier = Modifier.padding(start = Space.gutter, end = Space.gutter, top = Space.m))
         radar.entries.take(limit).forEach { model ->
             Column(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}
                 .clickable(role = Role.Button, onClickLabel = "Open listing in browser") { onOpenUrl(model.url) }
@@ -128,10 +125,6 @@ fun RadarModule(radar: ModelRadar, limit: Int, onOpenUrl: (String) -> Unit, onSe
                 }
                 Spacer(Modifier.height(Space.xs))
                 Text(model.name, style = Brief.type.rowTitle, color = c.ink)
-                if (model.note.isNotBlank()) {
-                    Text(model.note, style = Brief.type.deck, color = c.inkMuted, maxLines = 2,
-                        overflow = TextOverflow.Ellipsis)
-                }
             }
             Rule(Modifier.padding(horizontal = Space.gutter))
         }
