@@ -61,6 +61,7 @@ object ArticleImageCache {
         if (diskFile.exists() && diskFile.length() in 1..MAX_IMAGE_BYTES) {
             val decoded = runCatching { decodeFileSafely(diskFile) }.getOrNull()
             if (decoded != null) {
+                diskFile.setLastModified(System.currentTimeMillis())
                 memoryCache.put(url, decoded)
                 return@withContext decoded
             } else {
@@ -101,12 +102,40 @@ object ArticleImageCache {
 
             val bitmap = decodeBytesSafely(bytes) ?: return@runCatching null
 
-            runCatching {
-                FileOutputStream(diskFile).use { fos -> fos.write(bytes) }
-            }
+            storeOnDisk(diskCacheDir, diskFile, bytes)
             memoryCache.put(url, bitmap)
             bitmap
         }.getOrNull()
+    }
+
+    /**
+     * Writes through a temporary file and renames it into place, so a process
+     * killed mid-write never leaves a truncated image that would later decode
+     * as a half-grey picture. Then evicts the least recently used images.
+     */
+    private fun storeOnDisk(dir: File, target: File, bytes: ByteArray) {
+        runCatching {
+            val temp = File.createTempFile(target.name, ".part", dir)
+            try {
+                FileOutputStream(temp).use { it.write(bytes) }
+                if (!temp.renameTo(target)) return@runCatching
+            } finally {
+                if (temp.exists()) temp.delete()
+            }
+            trimDiskCache(dir, MAX_DISK_CACHE_BYTES)
+        }
+    }
+
+    /** Keeps the image cache under [maxBytes], deleting the least recently used files first. */
+    internal fun trimDiskCache(dir: File, maxBytes: Long) {
+        val files = dir.listFiles()?.filter { it.isFile } ?: return
+        var total = files.sumOf { it.length() }
+        if (total <= maxBytes) return
+        for (file in files.sortedBy { it.lastModified() }) {
+            if (total <= maxBytes) break
+            val size = file.length()
+            if (file.delete()) total -= size
+        }
     }
 
     private fun decodeBytesSafely(bytes: ByteArray): Bitmap? {
@@ -141,6 +170,7 @@ object ArticleImageCache {
 
     private const val MAX_IMAGE_BYTES = 12L * 1024L * 1024L
     private const val MAX_DECODE_DIMENSION = 1600
+    private const val MAX_DISK_CACHE_BYTES = 48L * 1024L * 1024L
 
     private fun hashKey(url: String): String {
         return runCatching {
