@@ -64,6 +64,13 @@ data class NewsArticle(
     /** The cover first, then the extra collage pictures, without repeats. */
     val pictures: List<String> get() = (listOfNotNull(imageUrl?.takeIf { it.isNotBlank() }) + gallery).distinct()
 
+    /** [searchableText] plus sponsor and kicker, folded by [StorySearch] once per article. */
+    internal val foldedText: String by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        StorySearch.fold(listOfNotNull(searchableText, sponsor, kicker).joinToString(" "))
+    }
+
+    internal val foldedTitle: String by lazy(LazyThreadSafetyMode.PUBLICATION) { StorySearch.fold(title) }
+
     /**
      * Computed once per article. Story rows read [readingTimeMinutes] on every
      * recomposition and search scans every article on each keystroke, so

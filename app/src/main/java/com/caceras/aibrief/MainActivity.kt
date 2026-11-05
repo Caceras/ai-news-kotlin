@@ -110,6 +110,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
 import com.caceras.aibrief.data.PostBlock
+import com.caceras.aibrief.data.StorySearch
 import com.caceras.aibrief.ui.components.ArticleImageCache
 import com.caceras.aibrief.ui.components.ArticleReader
 import com.caceras.aibrief.ui.components.BrandMark
@@ -436,11 +437,9 @@ private fun FeedScreen(
     // Refiltered only when the edition, topic or query changes, not on every
     // recomposition such as the refresh indicator toggling.
     val articles = remember(state.articles, state.selectedCategory, query) {
-        val needle = query.trim()
-        state.articles.filter {
-            (state.selectedCategory == NewsCategory.ALL || it.category == state.selectedCategory) &&
-                (needle.isEmpty() || it.searchableText.contains(needle, ignoreCase = true))
-        }
+        StorySearch.filter(state.articles.filter {
+            state.selectedCategory == NewsCategory.ALL || it.category == state.selectedCategory
+        }, query)
     }
     // The front page is recomposed into slots only when the stories change.
     // Breaking news leaves the lead after a day, so the hour is part of the key.
