@@ -46,6 +46,7 @@ A cold build of the gates takes about 3 minutes.
 
 - Tests: sum `tests`/`failures` across `app/build/test-results/testReleaseUnitTest/*.xml`.
 - Lint: count `severity="Error"` and `severity="Fatal"` in `app/build/reports/lint-results-release.xml`.
+- Workflow status: query it with the GitHub MCP `actions_list` tool. Unauthenticated `curl` polling of `api.github.com` from the container returns nothing useful, so a Monitor built on it stays silent. The Android run takes about 6 minutes.
 - Play artifact: `python3 scripts/check-play-artifact.py app/build/outputs/apk/internalSharing/app-internalSharing.apk` checks that no self-update code or install permission is present.
 
 ## Owner-only blockers (already reported, do not re-notify)
