@@ -64,3 +64,4 @@ A cold build of the gates takes about 3 minutes.
 - Every external intent tells the reader when nothing can handle it (`startOrExplain` in `MainActivity`, a toast in `PostBlockContent`). Do not swallow `ActivityNotFoundException` silently.
 - Returning to the app refreshes the edition only after 30 minutes (`refreshIfStale`, monotonic clock). Do not refresh on every resume.
 - `AsyncArticleImage` seeds its state from `ArticleImageCache.cached` so memory-cached pictures draw in the first frame. Keep that when changing the loader.
+- `ArticleImageCache.onTrimMemory` (called from `MainActivity.onTrimMemory`) halves decoded images when the UI is hidden and drops them in the background. Route any new in-memory cache through the same hook.
