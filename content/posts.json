@@ -9,8 +9,8 @@
       "category": "PRODUCTS",
       "publishedAt": "2026-11-05T21:00:00Z",
       "format": "BREAKING",
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-astra.webp",
-      "imageCredit": "Illustration: AI Brief",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-astra-openai.webp",
+      "imageCredit": "Illustration: AI Brief, with the OpenAI logo",
       "blocks": [
         {
           "type": "paragraph",
