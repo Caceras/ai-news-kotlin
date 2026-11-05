@@ -3,7 +3,7 @@ package com.caceras.aibrief
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -765,7 +765,7 @@ private fun Context.startOrExplain(intent: Intent, unavailable: String) {
 }
 
 private fun Context.openExternalUrl(url: String) =
-    startOrExplain(Intent(Intent.ACTION_VIEW, Uri.parse(url)), "No browser is available to open this link.")
+    startOrExplain(Intent(Intent.ACTION_VIEW, url.toUri()), "No browser is available to open this link.")
 
 private fun Context.shareArticle(article: NewsArticle) {
     val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -787,7 +787,7 @@ private fun Context.shareArticle(article: NewsArticle) {
 }
 
 private fun Context.sendEmail(address: String) {
-    val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$address")).apply {
+    val intent = Intent(Intent.ACTION_SENDTO, "mailto:$address".toUri()).apply {
         putExtra(Intent.EXTRA_SUBJECT, "AI Brief feedback")
     }
     startOrExplain(intent, "No email app is set up. Write to $address.")
