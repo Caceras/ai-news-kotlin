@@ -42,7 +42,7 @@ For the researched plan and official sources, read [docs/PLAY_LAUNCH_PLAN.md](do
 - [ ] App icon: **512 × 512**, 32-bit PNG, at most 1,024 KB; follow Play icon rules.
 - [ ] Feature graphic: **1024 × 500**, JPEG or 24-bit PNG without alpha.
 - [ ] **At least two actual app screenshots** are required. Four 1080 × 1920 portrait screenshots are recommended for promotional eligibility, not the minimum listing requirement.
-- [ ] Screenshots retaken after the November 2026 redesign (headline-style feed, story types). Earlier screenshots in `docs/play` show the old design.
+- [x] Screenshots retaken after the November 2026 redesign: five 1080 × 1920 RGB PNGs in `docs/play/screenshots`, rendered from the real published edition (`content/posts.json`) by `scripts/render-snapshots.sh` (`StoreSnaps`). Re-render after a design change and upload them in Play Console (owner).
 - [ ] Screenshots show the real release candidate, no invented UI/reviews/awards. Dimensions are 320–3840 px and maximum side is at most twice the minimum side.
 
 ## Final quality gate

@@ -13,7 +13,7 @@ Prepared and checked on 3 October 2026. App source: **cab39cfa54ddf9e282506f4290
 - Six complete, original AI-assisted explainers bundled in assets/posts.json; every primary-source URL returned HTTP 200 in the source receipt. Editorial accuracy still requires the publisher's review.
 - Sideload certificate matches prior GitHub build 111 and local build 112, preserving direct phone-test update identity.
 - Mobile editor: browser-tested at 390px width; valid briefing copied, no horizontal overflow or page errors. Local contact/privacy routes render without login; public Pages deployment has not happened.
-- Store icon: 512×512 RGBA PNG. Feature graphic: 1024×500 RGB PNG. Four real Android screenshots: 1080×1920 RGB PNG, in docs/play/screenshots.
+- Store icon: 512×512 RGBA PNG. Feature graphic: 1024×500 RGB PNG. Five Android screenshots of the redesigned app (feed, reader, more stories, saved, dark Guide): 1080×1920 RGB PNG, in docs/play/screenshots, rendered from the published edition by `scripts/render-snapshots.sh`.
 
 ## Native reader evidence
 
