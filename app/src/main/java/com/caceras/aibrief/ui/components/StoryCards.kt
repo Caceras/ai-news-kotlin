@@ -124,9 +124,8 @@ fun Collage(article: NewsArticle, modifier: Modifier = Modifier, ratio: Float? =
     }
 }
 
-/** The red lead-in a headline carries: the post's own kicker, or "Breaking" for breaking news. */
-fun NewsArticle.kickerText(): String? =
-    kicker ?: if (format == StoryFormat.BREAKING) StoryFormat.BREAKING.label else null
+/** The red lead-in a headline carries, when the post has one. Breaking news says so with its flag and tag instead. */
+fun NewsArticle.kickerText(): String? = kicker
 
 /** The headline with its kicker set in red before it, as one line of type. */
 @Composable
