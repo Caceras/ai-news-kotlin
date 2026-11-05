@@ -48,6 +48,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
@@ -91,6 +93,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -396,6 +399,7 @@ private fun FeedScreen(
 ) {
     val c = Brief.colors
     val focus = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
     // Ticks once a minute while the app is in front, so "Updated 5 min ago"
     // never goes stale on screen, and stops in the background.
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -431,6 +435,9 @@ private fun FeedScreen(
                     Icon(Icons.Outlined.Close, "Close search", Modifier.size(20.dp))
                 } },
                 singleLine = true, shape = BriefShapes.button,
+                // Results filter as the reader types, so the keyboard's search key just puts it away.
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
                 textStyle = Brief.type.deck,
                 modifier = Modifier.fillMaxWidth().background(c.card)
                     .padding(horizontal = Space.gutter, vertical = Space.m)
