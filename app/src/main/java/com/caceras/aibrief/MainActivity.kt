@@ -66,9 +66,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.caceras.aibrief.data.FeedFreshness
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
 import com.caceras.aibrief.data.PostBlock
@@ -87,6 +88,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val SUPPORT_EMAIL = "rikicaceras@gmail.com"
@@ -323,6 +325,17 @@ private fun FeedScreen(
         }
     }
     val lead = articles.firstOrNull()
+    // Ticks once a minute while the app is in front, so "Updated 5 min ago"
+    // never goes stale on screen, and stops in the background.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val now by produceState(Instant.now(), lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while (true) {
+                value = Instant.now()
+                delay(60_000)
+            }
+        }
+    }
     LaunchedEffect(searchShown) { if (searchShown) focus.requestFocus() }
 
     Column(Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 840.dp)) {
@@ -361,11 +374,7 @@ private fun FeedScreen(
                         Box(Modifier.size(4.dp).clip(CircleShape)
                             .background(MaterialTheme.colorScheme.onSurfaceVariant))
                         Spacer(Modifier.width(5.dp))
-                        Text(when (state.freshness) {
-                            FeedFreshness.LIVE -> "Latest edition"
-                            FeedFreshness.CACHED -> "Cached edition"
-                            FeedFreshness.OFFLINE -> "Offline edition"
-                        }, style = MaterialTheme.typography.labelSmall,
+                        Text(editionLabel(state.freshness, state.lastUpdated, now), style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     CategoryFilterRow(state.selectedCategory) { category ->
