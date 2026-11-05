@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
@@ -201,7 +202,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                     onGrantInstallPermission = updateViewModel::requestInstallPermission,
                                     onDismissUpdate = updateViewModel::dismiss,
                                     onAbout = { selectTab(NavTab.ABOUT) })
-                                NavTab.SAVED -> SavedScreen(state.savedArticles, savedListState,
+                                NavTab.SAVED -> SavedScreen(state.savedArticles, state.isLoading, savedListState,
                                     onOpenArticle = { selectedArticleId = it.id },
                                     onBrowse = { selectTab(NavTab.HOME) })
                                 NavTab.ABOUT -> AboutScreen(aboutListState)
@@ -379,6 +380,8 @@ private fun FeedScreen(
                         StoryRow(article) { onOpenArticle(article) }
                     }
                 }
+            } else if (state.isLoading) item("loading") {
+                LoadingIndicator()
             } else item("empty") {
                 Column(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 36.dp)) {
                     Text(if (query.isBlank()) "More stories are on their way." else "No stories found.",
@@ -415,6 +418,7 @@ private fun FeedScreen(
 @Composable
 private fun SavedScreen(
     articles: List<NewsArticle>,
+    isLoading: Boolean,
     listState: LazyListState,
     onOpenArticle: (NewsArticle) -> Unit,
     onBrowse: () -> Unit,
@@ -440,7 +444,9 @@ private fun SavedScreen(
             StoryRow(article) { onOpenArticle(article) }
             Spacer(Modifier.height(10.dp))
         }
-        if (articles.isEmpty()) item("empty") {
+        if (isLoading) item("loading") {
+            LoadingIndicator()
+        } else if (articles.isEmpty()) item("empty") {
             Column(Modifier.fillMaxWidth().padding(vertical = 42.dp),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(Modifier.size(64.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
@@ -459,6 +465,15 @@ private fun SavedScreen(
                 Button(onClick = onBrowse, shape = RoundedCornerShape(4.dp)) { Text("Explore the latest") }
             }
         }
+    }
+}
+
+/** Shown for the moment it takes to read this device's copy of the edition. */
+@Composable
+private fun LoadingIndicator() {
+    Box(Modifier.fillMaxWidth().padding(vertical = 48.dp).semantics { contentDescription = "Loading stories" },
+        contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
     }
 }
 

@@ -53,3 +53,7 @@ A cold build of the gates takes about 3 minutes.
 
 - Play Console account verification, upload key, and the four `PLAY_*` repository secrets for **Build signed Play bundle**. See `PLAY_RELEASE_CHECKLIST.md`.
 - GitHub Pages is not enabled, so the privacy and contact links point to `PRIVACY.md` and `CONTACT.md` on GitHub.
+
+## Code rules learned
+
+- Never read disk (assets, SharedPreferences, cache files) on the main thread at startup. `NewsViewModel` loads the device copy on `Dispatchers.IO` and exposes `isLoading`; keep new startup work there.
