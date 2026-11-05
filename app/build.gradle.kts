@@ -107,6 +107,9 @@ android {
         /** The Google Play artifact. Carries no self-update code path. */
         release {
             isMinifyEnabled = true
+            // Drops drawables, strings and library resources R8 proved unused,
+            // so the Play download carries only what the app can display.
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
