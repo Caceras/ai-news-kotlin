@@ -35,7 +35,7 @@ class PublishedPostsFileTest {
         // A post silently dropped for a missing field would simply never appear
         // on the phone, with nothing to explain why. Compare what the file
         // declares against what actually parses.
-        val declared = Regex("\"id\"\\s*:").findAll(raw).count()
+        val declared = org.json.JSONObject(raw).getJSONArray("posts").length()
         val parsed = OwnerPosts.parse(raw).size
         assertTrue(
             "content/posts.json declares $declared posts but only $parsed parsed. " +

@@ -1,0 +1,46 @@
+name: Refresh model rankings and radar
+
+# Keeps the front page's data modules current: the newest and stealth models
+# from OpenRouter's public API every day, and the model rankings from the
+# Artificial Analysis API when the AA_API_KEY secret is set (free key from
+# artificialanalysis.ai; without it the last published table is kept).
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: editorial-publishing
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refresh the modules
+        env:
+          AA_API_KEY: ${{ secrets.AA_API_KEY }}
+        run: python scripts/update-extras.py
+      - name: Validate the edition
+        run: python scripts/publish-post.py --validate
+      - name: Publish if anything changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet content/posts.json; then
+            echo "Nothing new."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add content/posts.json
+          git commit -m 'Refresh model rankings and radar'
+          git push origin HEAD:main

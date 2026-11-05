@@ -2,6 +2,268 @@
   "version": 1,
   "posts": [
     {
+      "id": "2026-11-05-philosophy-3-existence-precedes-essence",
+      "title": "Sartre, Beauvoir and the algorithm that thinks it knows you",
+      "summary": "“Existence precedes essence.” Two existentialists insisted that people make themselves through their choices. That idea pushes back against software built to predict us.",
+      "author": "AI Brief editorial",
+      "category": "POLICY",
+      "publishedAt": "2026-11-05T20:02:00Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Recommendation systems are built on a simple bet: what you did before predicts what you will want next. Jean-Paul Sartre and Simone de Beauvoir, the best-known French existentialists, built their philosophy on a challenge to that kind of thinking about people."
+        },
+        {
+          "type": "paragraph",
+          "text": "This is the final part of AI Brief’s series on AI and philosophy. Neither writer lived to see modern AI; Sartre died in 1980 and Beauvoir in 1986. What follows asks what their ideas can help us notice, not what they would have said."
+        },
+        {
+          "type": "heading",
+          "text": "Existence precedes essence"
+        },
+        {
+          "type": "paragraph",
+          "text": "Sartre’s famous phrase, used in Being and Nothingness (1943) and Existentialism is a Humanism (1946), is “existence precedes essence.” A paper knife is made for a purpose, so its essence comes first. A person, Sartre argued, has no fixed essence in advance: we exist first and define ourselves through what we do."
+        },
+        {
+          "type": "paragraph",
+          "text": "A profile that sorts you into a type, and then serves you more of that type, quietly assumes the opposite. It treats your past choices as your nature."
+        },
+        {
+          "type": "heading",
+          "text": "Bad faith"
+        },
+        {
+          "type": "paragraph",
+          "text": "Sartre called the habit of denying our own freedom bad faith (mauvaise foi). His best-known example, as the Stanford Encyclopedia of Philosophy recounts, is a café waiter who plays at being a waiter, as if the role were simply what he is rather than something he chooses each day."
+        },
+        {
+          "type": "paragraph",
+          "text": "It is easy to see a modern version. “The system decided” can be a way of declining responsibility for a decision that a person chose to hand over, whether in hiring, lending or moderation. The existentialist reply would be that choosing to defer is still a choice."
+        },
+        {
+          "type": "heading",
+          "text": "Beauvoir: freedom involves others"
+        },
+        {
+          "type": "paragraph",
+          "text": "Beauvoir developed these ideas into an ethics. In The Ethics of Ambiguity (1947) she sketched figures who misread or flee their freedom; the encyclopedia notes that to take refuge in the role of the “serious man” is to refuse to recognise the experience of freedom. In The Second Sex (1949) she wrote the line first translated into English in 1953 as “One is not born but becomes a woman,” arguing that what society presents as nature is often made."
+        },
+        {
+          "type": "paragraph",
+          "text": "That idea travels well. Training data records how the world has been, including its unfairness. A system that learns from it can present a pattern as a fact about people, when it is a fact about the past."
+        },
+        {
+          "type": "heading",
+          "text": "Questions worth keeping"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "When software predicts what I want, am I choosing, or being steered toward who I was?",
+            "Who is responsible when a decision is handed to an automated system?",
+            "Which patterns in the data describe people, and which describe what was done to them?"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "This series has moved from Turing’s test, through Searle’s room, to the existentialists’ insistence on choice. The machines have changed a great deal since 1950. The questions have aged remarkably well."
+        },
+        {
+          "type": "heading",
+          "text": "Sources & further reading"
+        },
+        {
+          "type": "link",
+          "text": "Stanford Encyclopedia of Philosophy: Jean-Paul Sartre",
+          "url": "https://plato.stanford.edu/entries/sartre/"
+        },
+        {
+          "type": "link",
+          "text": "Stanford Encyclopedia of Philosophy: Simone de Beauvoir",
+          "url": "https://plato.stanford.edu/entries/beauvoir/"
+        }
+      ],
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-3-existentialism.webp",
+      "imageCredit": "Photo illustration: AI Brief. Photo: Jean-Paul Sartre and Simone de Beauvoir arrive at Stockholm Arlanda Airport, 29 April 1967. Svenska Dagbladet, public domain, via Wikimedia Commons.",
+      "series": {
+        "id": "ai-and-philosophy",
+        "title": "AI and philosophy",
+        "of": 3,
+        "part": 3
+      }
+    },
+    {
+      "id": "2026-11-05-philosophy-2-the-chinese-room",
+      "title": "The Chinese Room: does a fluent answer mean the machine understands?",
+      "summary": "John Searle’s 1980 thought experiment argues that following rules for symbols is not the same as knowing what they mean. It matters more in the age of chatbots.",
+      "author": "AI Brief editorial",
+      "category": "RESEARCH",
+      "publishedAt": "2026-11-05T20:01:00Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Imagine a person alone in a room. Notes written in Chinese are pushed in through a slot. The person does not read Chinese, but they have a rulebook that says, in effect: when you see these symbols, send back those symbols. From outside, the answers look like those of a fluent speaker."
+        },
+        {
+          "type": "paragraph",
+          "text": "This is the Chinese Room, a thought experiment first published in 1980 by the American philosopher John Searle (1932–2025). It is the second part of AI Brief’s series on AI and philosophy."
+        },
+        {
+          "type": "heading",
+          "text": "The argument"
+        },
+        {
+          "type": "paragraph",
+          "text": "Searle imagined himself as the person in the room, following a program. His point was that he would produce convincing answers without understanding a word. And if he does not understand by running the program, he argued, neither does a computer that runs the same program."
+        },
+        {
+          "type": "paragraph",
+          "text": "As the Stanford Encyclopedia of Philosophy summarises it, Searle held that running a computer program is not by itself sufficient for understanding. Computation is defined by the form of symbols, their syntax, whereas minds have meaning, their semantics. Shuffling the first does not produce the second."
+        },
+        {
+          "type": "paragraph",
+          "text": "The encyclopedia describes it as probably the most widely discussed philosophical argument in cognitive science since the Turing Test."
+        },
+        {
+          "type": "heading",
+          "text": "The replies"
+        },
+        {
+          "type": "paragraph",
+          "text": "Critics have answered in many ways. One of the best known, the systems reply, says that the person in the room is only one part of a larger system that includes the rulebook and the notes, and that the system as a whole might understand even if the person does not. Searle rejected this. The debate continues, and the encyclopedia’s entry on it is long."
+        },
+        {
+          "type": "heading",
+          "text": "Why it matters now"
+        },
+        {
+          "type": "paragraph",
+          "text": "Large language models are, in one sense, the room made real: systems trained to produce the next piece of text that fits. Whether that amounts to understanding is exactly the question Searle posed. The thought experiment does not settle it, but it gives the question a precise shape."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "A convincing answer shows a system can produce the right symbols. It does not, on its own, show what the system grasps.",
+            "When a chatbot is wrong in a confident, fluent way, the room is a useful picture to keep in mind.",
+            "The opposite mistake is possible too: dismissing a system’s abilities because we have decided in advance that it cannot understand."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Part 3 turns from machines to people: what Jean-Paul Sartre and Simone de Beauvoir might help us ask about living with systems that predict who we are."
+        },
+        {
+          "type": "heading",
+          "text": "Sources & further reading"
+        },
+        {
+          "type": "link",
+          "text": "Stanford Encyclopedia of Philosophy: The Chinese Room Argument",
+          "url": "https://plato.stanford.edu/entries/chinese-room/"
+        }
+      ],
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-2-chinese-room.webp",
+      "imageCredit": "Illustration: AI Brief",
+      "series": {
+        "id": "ai-and-philosophy",
+        "title": "AI and philosophy",
+        "of": 3,
+        "part": 2
+      }
+    },
+    {
+      "id": "2026-11-05-philosophy-1-can-a-machine-think",
+      "title": "Can a machine think? Turing’s question, 75 years on",
+      "summary": "In 1950 Alan Turing swapped an unanswerable question for a test. Chatbots now pass versions of it, and the argument he started is still open.",
+      "author": "AI Brief editorial",
+      "category": "RESEARCH",
+      "publishedAt": "2026-11-05T20:00:00Z",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "In 1950 the mathematician Alan Turing opened a paper in the journal Mind with a question that still sounds modern: “Can machines think?” He then set it aside as too vague to answer, and proposed something more practical."
+        },
+        {
+          "type": "paragraph",
+          "text": "This is the first part of AI Brief’s short series on what philosophy has to say about artificial intelligence."
+        },
+        {
+          "type": "heading",
+          "text": "The imitation game"
+        },
+        {
+          "type": "paragraph",
+          "text": "Turing’s replacement was a game. An interrogator exchanges typed messages with two hidden players, a person and a machine, and tries to tell which is which. If the machine can play well enough, Turing suggested, the question of whether it “thinks” matters less than it seemed."
+        },
+        {
+          "type": "paragraph",
+          "text": "He also made a prediction. The Stanford Encyclopedia of Philosophy quotes it in full:"
+        },
+        {
+          "type": "quote",
+          "text": "I believe that in about fifty years’ time it will be possible to programme computers, with a storage capacity of about 10⁹, to make them play the imitation game so well that an average interrogator will not have more than 70 percent chance of making the right identification after five minutes of questioning."
+        },
+        {
+          "type": "paragraph",
+          "text": "He added that by the end of the century people would be able to “speak of machines thinking without expecting to be contradicted.” The encyclopedia notes that most commentators consider that second claim to have been mistaken: in 2000, it still met plenty of contradiction."
+        },
+        {
+          "type": "heading",
+          "text": "Why the test still matters"
+        },
+        {
+          "type": "paragraph",
+          "text": "Today’s chatbots hold fluent conversations that many people find hard to tell from a person’s. That makes Turing’s question practical again. But the philosophical argument never rested only on whether machines could pass."
+        },
+        {
+          "type": "paragraph",
+          "text": "The encyclopedia separates two kinds of question about Turing’s proposal. The first is empirical: can computers play the game that well? The second is conceptual: if they can, does that tell us they think? A machine might pass by being very good at producing human-like text, which is not obviously the same as understanding it."
+        },
+        {
+          "type": "heading",
+          "text": "What to take from it"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Fluent conversation is evidence of something, but it is not proof of understanding.",
+            "Turing changed the debate from “what is a mind?” to “what can we observe?”, a move that still shapes how AI is judged.",
+            "Benchmarks are descendants of the imitation game, and inherit its central weakness: they measure behaviour, not what lies behind it."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Part 2 looks at the most famous objection to Turing’s approach: a man alone in a room, answering questions in a language he does not speak."
+        },
+        {
+          "type": "heading",
+          "text": "Sources & further reading"
+        },
+        {
+          "type": "link",
+          "text": "Stanford Encyclopedia of Philosophy: The Turing Test",
+          "url": "https://plato.stanford.edu/entries/turing-test/"
+        },
+        {
+          "type": "link",
+          "text": "Turing, A. M. (1950): Computing Machinery and Intelligence, Mind 59 (236)",
+          "url": "https://doi.org/10.1093/mind/LIX.236.433"
+        }
+      ],
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-1-turing.webp",
+      "imageCredit": "Photo illustration: AI Brief. Photo: Alan Turing aged about 16, c. 1928, public domain, via Wikimedia Commons.",
+      "series": {
+        "id": "ai-and-philosophy",
+        "title": "AI and philosophy",
+        "of": 3,
+        "part": 1
+      }
+    },
+    {
       "id": "2026-11-05-why-chatbots-guess",
       "title": "Why chatbots guess instead of saying “I don’t know”",
       "summary": "A 2025 research paper argues that the way models are trained and scored rewards a confident guess over an honest admission of uncertainty.",
@@ -68,7 +330,9 @@
           "url": "https://arxiv.org/abs/2509.04664"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-why-chatbots-guess.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-prompt-injection-explained",
@@ -142,7 +406,9 @@
           "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-prompt-injection.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-what-a-context-window-holds",
@@ -207,7 +473,9 @@
           "url": "https://platform.claude.com/docs/en/build-with-claude/context-windows"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-context-window.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-read-the-model-card",
@@ -274,7 +542,9 @@
         }
       ],
       "format": "GUIDE",
-      "theme": "LILAC"
+      "theme": "LILAC",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-model-card.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-cloned-voice-calls",
@@ -340,7 +610,9 @@
         }
       ],
       "format": "GUIDE",
-      "theme": "PEACH"
+      "theme": "PEACH",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-cloned-voice.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-what-happens-to-your-chats",
@@ -407,7 +679,9 @@
         }
       ],
       "format": "GUIDE",
-      "theme": "MINT"
+      "theme": "MINT",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-chat-privacy.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-eu-ai-act-risk-levels",
@@ -472,7 +746,9 @@
           "url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-eu-ai-act.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-retrieval-or-fine-tuning",
@@ -541,7 +817,9 @@
           "url": "https://arxiv.org/abs/2005.11401"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-retrieval-or-fine-tuning.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-ai-text-detectors",
@@ -611,7 +889,9 @@
           "url": "https://arxiv.org/abs/2303.11156"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-ai-text-detectors.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-11-05-who-owns-ai-made-work",
@@ -688,7 +968,9 @@
           "url": "https://www.copyright.gov/ai/"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-who-owns-ai-made-work.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-10-04-141708-before-an-ai-agent-acts-decide-what-it-may-do",
@@ -794,8 +1076,9 @@
           "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-agent-permissions.webp",
-      "format": "EXPLAINER"
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-agent-permissions.webp",
+      "format": "EXPLAINER",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-10-04-141707-when-ai-answers-from-your-files-follow-the-evidence",
@@ -906,8 +1189,9 @@
           "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-grounded-answers.webp",
-      "format": "EXPLAINER"
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-grounded-answers.webp",
+      "format": "EXPLAINER",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-10-04-141706-what-an-image-s-content-credentials-can-tell-you",
@@ -1018,8 +1302,9 @@
           "url": "https://deepmind.google/blog/identifying-ai-generated-images-with-synthid/"
         }
       ],
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-10-04-image-provenance.webp",
-      "format": "EXPLAINER"
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-image-provenance.webp",
+      "format": "EXPLAINER",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-10-03-trust-ai",
@@ -1069,7 +1354,9 @@
         }
       ],
       "format": "GUIDE",
-      "theme": "SKY"
+      "theme": "SKY",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-trust-ai.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-10-03-model-scores",
@@ -1123,7 +1410,9 @@
           "url": "https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-model-scores.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-10-03-open-weights",
@@ -1177,7 +1466,9 @@
           "url": "https://huggingface.co/docs/hub/model-cards"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-open-weights.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-10-03-human-oversight",
@@ -1226,7 +1517,9 @@
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-human-oversight.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-10-03-small-models",
@@ -1275,7 +1568,9 @@
           "url": "https://huggingface.co/docs/transformers/quantization/overview"
         }
       ],
-      "format": "EXPLAINER"
+      "format": "EXPLAINER",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-small-models.webp",
+      "imageCredit": "Illustration: AI Brief"
     },
     {
       "id": "2026-10-03-check-the-source",
@@ -1325,7 +1620,162 @@
         }
       ],
       "format": "GUIDE",
-      "theme": "MINT"
+      "theme": "MINT",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-check-the-source.webp",
+      "imageCredit": "Illustration: AI Brief"
     }
-  ]
+  ],
+  "extras": {
+    "rankings": {
+      "title": "Top AI models",
+      "metric": "Artificial Analysis Intelligence Index",
+      "source": "Artificial Analysis",
+      "sourceUrl": "https://artificialanalysis.ai/leaderboards/models",
+      "checkedAt": "2026-11-05T20:16:33Z",
+      "entries": [
+        {
+          "rank": 1,
+          "name": "Gemini 4 Carbon",
+          "maker": "Google",
+          "score": 60.0,
+          "openWeights": false
+        },
+        {
+          "rank": 2,
+          "name": "Claude Opus 5.5",
+          "maker": "Anthropic",
+          "score": 59.1,
+          "openWeights": false
+        },
+        {
+          "rank": 3,
+          "name": "GPT-6 Astra",
+          "maker": "OpenAI",
+          "score": 56.9,
+          "openWeights": false
+        },
+        {
+          "rank": 4,
+          "name": "GPT-6.1 Sol",
+          "maker": "OpenAI",
+          "score": 54.6,
+          "openWeights": false
+        },
+        {
+          "rank": 5,
+          "name": "Claude Sonnet 5.5",
+          "maker": "Anthropic",
+          "score": 54.5,
+          "openWeights": false
+        },
+        {
+          "rank": 6,
+          "name": "GPT-6.1 Terra",
+          "maker": "OpenAI",
+          "score": 51.3,
+          "openWeights": false
+        },
+        {
+          "rank": 7,
+          "name": "Gemini 4 Argon",
+          "maker": "Google",
+          "score": 50.4,
+          "openWeights": false
+        },
+        {
+          "rank": 8,
+          "name": "Muse Wonder Full",
+          "maker": "Meta",
+          "score": 50.1,
+          "openWeights": false
+        },
+        {
+          "rank": 9,
+          "name": "Claude Fable 5.1",
+          "maker": "Anthropic",
+          "score": 50.0,
+          "openWeights": false
+        },
+        {
+          "rank": 10,
+          "name": "Kimi K3.1 Pro",
+          "maker": "Kimi",
+          "score": 46.5,
+          "openWeights": false
+        }
+      ]
+    },
+    "radar": {
+      "title": "On the radar",
+      "source": "OpenRouter",
+      "sourceUrl": "https://openrouter.ai/models",
+      "checkedAt": "2026-11-05T20:17:09Z",
+      "entries": [
+        {
+          "name": "Crouton Alpha",
+          "maker": "Unannounced",
+          "listedAt": "2026-11-03",
+          "note": "Crouton Alpha is a lightweight model built for scalable coding, agentic, and multimodal workflows.",
+          "url": "https://openrouter.ai/stealth/crouton-alpha",
+          "stealth": true
+        },
+        {
+          "name": "Gemini Omni 1.2 Flash",
+          "maker": "Google",
+          "listedAt": "2026-11-05",
+          "note": "Gemini Omni 1.2 Flash is Google's native multimodal video generation and editing model, the successor to Gemini Omni 1.1 Flash.",
+          "url": "https://openrouter.ai/google/gemini-omni-1.2-flash",
+          "stealth": false
+        },
+        {
+          "name": "Gemini Omni 1.1 Flash",
+          "maker": "Google",
+          "listedAt": "2026-11-04",
+          "note": "Gemini Omni 1.1 Flash is Google's native multimodal video generation and editing model, the generally available successor to Gemini Omni Flash…",
+          "url": "https://openrouter.ai/google/gemini-omni-1.1-flash",
+          "stealth": false
+        },
+        {
+          "name": "ricursiveAI/Ripple-65B-Preview",
+          "maker": "ricursiveai",
+          "listedAt": "2026-11-04",
+          "note": "Ripple-65B-Preview by ricursiveAI, a 65B model with native tool calling, served in BF16.",
+          "url": "https://openrouter.ai/ricursiveai/ripple-65b-preview",
+          "stealth": false
+        },
+        {
+          "name": "Hy4",
+          "maker": "Tencent",
+          "listedAt": "2026-11-04",
+          "note": "The official release of Hy4 delivers comprehensive and substantial improvements over Hy4 Preview, with particularly strong gains in agentic…",
+          "url": "https://openrouter.ai/tencent/hy4",
+          "stealth": false
+        },
+        {
+          "name": "GLM 5.3 FlashX Legal",
+          "maker": "Z.ai",
+          "listedAt": "2026-11-02",
+          "note": "GLM-5.3-FlashX-Legal (GLM-Legal) is Z.ai's legal-domain variant of GLM-5.3-FlashX, a native multimodal model that accepts text, image, and video…",
+          "url": "https://openrouter.ai/z-ai/glm-5.3-flashx-legal",
+          "stealth": false
+        },
+        {
+          "name": "Particle-1",
+          "maker": "Particle AI",
+          "listedAt": "2026-10-28",
+          "note": "Particle-1 is a token-efficient agentic coding model from Particle AI, post-trained on DeepSeek V4.1 Flash.",
+          "url": "https://openrouter.ai/particle-ai/particle-1",
+          "stealth": false
+        },
+        {
+          "name": "GPT-6.1 Terra Pro",
+          "maker": "OpenAI",
+          "listedAt": "2026-10-26",
+          "note": "GPT-6.1 Terra Pro is the same underlying model as GPT-6.1 Terra, served with reasoning.mode set to pro for higher-quality responses on complex tasks.",
+          "url": "https://openrouter.ai/openai/gpt-6.1-terra-pro",
+          "stealth": false
+        }
+      ]
+    }
+  }
 }

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.caceras.aibrief.data.EditionExtras
 import com.caceras.aibrief.data.FeedFreshness
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
@@ -38,6 +39,8 @@ data class NewsUiState(
     val isLoading: Boolean = false,
     val freshness: FeedFreshness = FeedFreshness.OFFLINE,
     val lastUpdated: Instant? = null,
+    /** Model rankings and the radar, read from the same edition document. */
+    val extras: EditionExtras = EditionExtras.EMPTY,
 )
 
 /** Reads a topic saved by [NewsViewModel.selectCategory], falling back to all topics. */
@@ -89,6 +92,7 @@ class NewsViewModel(
                     savedArticles = saved,
                     freshness = initial.freshness,
                     lastUpdated = initial.updatedAt,
+                    extras = initial.extras,
                 )
             } catch (error: Exception) {
                 if (error is CancellationException) throw error
@@ -124,6 +128,7 @@ class NewsViewModel(
                 articles = load.articles,
                 freshness = load.freshness,
                 lastUpdated = load.updatedAt,
+                extras = load.extras,
             )
             if (userRequested && load.freshness != FeedFreshness.LIVE) _notices.trySend(OFFLINE_NOTICE)
         } catch (error: Exception) {

@@ -48,6 +48,8 @@ object StoredArticles {
         put("theme", theme?.name)
         put("sponsor", sponsor)
         updatedAt?.let { put("updatedAt", it.toEpochMilli()) }
+        put("imageCredit", imageCredit)
+        series?.let { put("series", OwnerPosts.encodeSeries(it)) }
     }
 
     private fun decodeArticle(json: JSONObject): NewsArticle? = runCatching {
@@ -75,6 +77,8 @@ object StoredArticles {
             theme = CardTheme.parse(json.optString("theme")),
             sponsor = json.optString("sponsor").takeIf { it.isNotBlank() },
             updatedAt = if (json.has("updatedAt")) Instant.ofEpochMilli(json.getLong("updatedAt")) else null,
+            imageCredit = json.optString("imageCredit").takeIf { it.isNotBlank() },
+            series = OwnerPosts.parseSeries(json.optJSONObject("series")),
         )
     }.getOrNull()
 }

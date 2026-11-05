@@ -72,6 +72,9 @@ fun ArticleReader(
     onShare: () -> Unit,
     onOpenSource: () -> Unit,
     onBack: () -> Unit,
+    /** Every part of this story's series, in order, when it belongs to one. */
+    seriesParts: List<NewsArticle> = emptyList(),
+    onOpenArticle: (NewsArticle) -> Unit = {},
 ) {
     val c = Brief.colors
     val haptic = LocalHapticFeedback.current
@@ -109,6 +112,9 @@ fun ArticleReader(
                         } else Text(article.summary, style = Brief.type.body, color = c.ink)
                     }
                 }
+            }
+            if (article.series != null && seriesParts.size > 1) item("series") {
+                SeriesContents(article, seriesParts, onOpenArticle)
             }
             item("footer") {
                 Column(Modifier.padding(start = Space.l, end = Space.l, top = Space.xxl)) {
@@ -153,12 +159,19 @@ private fun NewsHeader(article: NewsArticle) {
             }
         } else if (article.isOriginalPost || !article.imageUrl.isNullOrBlank()) {
             ArticleArtwork(article)
-            if (article.imageUrl.isNullOrBlank()) Text("AI-generated editorial illustration",
-                style = Brief.type.meta, color = c.inkMuted,
-                modifier = Modifier.padding(start = Space.l, end = Space.l, top = Space.s))
+            val credit = if (article.imageUrl.isNullOrBlank()) "AI-generated editorial illustration"
+                else article.imageCredit
+            credit?.let {
+                Text(it, style = Brief.type.meta, color = c.inkMuted,
+                    modifier = Modifier.padding(start = Space.l, end = Space.l, top = Space.s))
+            }
         }
         SelectionContainer {
             Column(Modifier.padding(start = Space.l, end = Space.l, top = Space.l, bottom = Space.xl)) {
+                article.series?.let {
+                    Text(it.label.uppercase(Locale.US), style = Brief.type.tag, color = c.opinionAccent)
+                    Spacer(Modifier.height(Space.xs))
+                }
                 Tag(article)
                 Spacer(Modifier.height(Space.s))
                 Headline(article, Brief.type.display, maxLines = Int.MAX_VALUE)
@@ -220,5 +233,32 @@ private fun DesignedHeader(article: NewsArticle) {
             Spacer(Modifier.height(Space.m))
         }
         Text(article.bylineText(), style = Brief.type.meta, color = c.inkMuted)
+    }
+}
+
+/** "In this series": every part, this one marked, the others one tap away. */
+@Composable
+private fun SeriesContents(article: NewsArticle, parts: List<NewsArticle>, onOpen: (NewsArticle) -> Unit) {
+    val c = Brief.colors
+    val series = article.series ?: return
+    Column(Modifier.padding(start = Space.l, end = Space.l, top = Space.xxl).fillMaxWidth()
+        .background(c.masthead, BriefShapes.card).padding(Space.gutter)) {
+        Text("IN THIS SERIES", style = Brief.type.tag, color = c.opinionAccent)
+        Spacer(Modifier.height(Space.xs))
+        Text(series.title, style = Brief.type.headlineSmall, color = c.onMasthead,
+            modifier = Modifier.semantics { heading() })
+        Spacer(Modifier.height(Space.s))
+        parts.forEach { part ->
+            val current = part.id == article.id
+            Row(Modifier.fillMaxWidth().minimumInteractiveComponentSize()
+                .then(if (current) Modifier else Modifier.clickable(role = Role.Button) { onOpen(part) })
+                .padding(vertical = Space.s), verticalAlignment = Alignment.CenterVertically) {
+                Text("${part.series?.part}", style = Brief.type.headline,
+                    color = if (current) c.opinionAccent else c.onMasthead.copy(alpha = 0.6f),
+                    modifier = Modifier.width(Space.xxl))
+                Text(part.title + if (current) "  (reading now)" else "", style = Brief.type.rowTitle,
+                    color = c.onMasthead)
+            }
+        }
     }
 }
