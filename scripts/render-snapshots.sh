@@ -12,7 +12,7 @@ cd "$work"
 sed -i 's/    id("org.jetbrains.kotlin.plugin.compose") version "2.1.21" apply false/&\n    id("app.cash.paparazzi") version "2.0.0-alpha02" apply false/' build.gradle.kts
 sed -i '0,/id("org.jetbrains.kotlin.plugin.compose")$/s//id("org.jetbrains.kotlin.plugin.compose")\n    id("app.cash.paparazzi")/' app/build.gradle.kts
 # The screens are private to MainActivity.kt; the copy opens them to the snapshot test.
-sed -i 's/^private fun \(Masthead\|BottomNavigation\|FeedScreen\|SavedScreen\|AboutScreen\)/internal fun \1/; s/^private enum class NavTab/internal enum class NavTab/' \
+sed -i 's/^private fun \(Masthead\|BottomNavigation\|FeedScreen\|ExploreScreen\|AboutScreen\)/internal fun \1/; s/^private enum class NavTab/internal enum class NavTab/' \
   app/src/main/java/com/caceras/aibrief/MainActivity.kt
 mkdir -p app/src/test/java/com/caceras/aibrief/snap
 for f in "$repo"/scripts/snapshots/*.kt.txt; do cp "$f" "app/src/test/java/com/caceras/aibrief/snap/$(basename "$f" .txt)"; done

@@ -13,7 +13,7 @@ POSTS = ROOT / "content/posts.json"
 CATEGORIES = {"RESEARCH", "PRODUCTS", "POLICY", "BUILDERS", "ALL"}
 # Story formats and card themes the app knows. Each has one fixed look in the
 # app (docs/DESIGN_SYSTEM.md); a post chooses one and never carries styling.
-FORMATS = {"NEWS", "BREAKING", "EXPLAINER", "OPINION", "GUIDE", "SPONSORED"}
+FORMATS = {"NEWS", "BREAKING", "EXPLAINER", "OPINION", "GUIDE", "SPONSORED", "REVIEW"}
 THEMES = {"SKY", "LILAC", "MINT", "PEACH", "OCEAN", "INDIGO", "BLUSH", "NAVY"}
 # Headline-style limits: short enough to read at a glance on a phone.
 TITLE_LIMIT = 120
@@ -79,6 +79,11 @@ def validate(document):
             elif kind == "bullets":
                 require(isinstance(block.get("items"), list) and block["items"], "Empty bullet list")
                 body_length += sum(len(text(item, "Bullet")) for item in block["items"])
+            elif kind == "video":
+                https_url(block.get("url"))
+                text(block.get("title"), "Video title", 200)
+                if block.get("imageUrl"):
+                    https_url(block["imageUrl"])
             elif kind in {"image", "link"}:
                 https_url(block.get("url"))
                 if kind == "link":
@@ -122,6 +127,10 @@ def validate_presentation(post, author, published):
         require(not post.get("sponsor"), "Only sponsored posts name a sponsor")
     if post.get("updatedAt"):
         require(instant(post["updatedAt"]) > published, "An update must come after publication")
+    if kind == "REVIEW":
+        require(isinstance(post.get("rating"), int) and 1 <= post["rating"] <= 5, "A review is rated 1 to 5 stars")
+    else:
+        require(post.get("rating") is None, "Only reviews carry a rating")
     if post.get("imageCredit") is not None:
         text(post["imageCredit"], "Image credit", 240)
     series = post.get("series")

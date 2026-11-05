@@ -2,6 +2,156 @@
   "version": 1,
   "posts": [
     {
+      "id": "2026-11-05-review-the-thinking-game",
+      "title": "The Thinking Game: a fluent, free look inside DeepMind, with the lab holding the camera",
+      "summary": "Greg Kohs’s documentary follows Demis Hassabis and the AlphaFold team for five years. It is gripping science television, and it is also Google’s own release.",
+      "category": "RESEARCH",
+      "publishedAt": "2026-11-05T20:40:00Z",
+      "format": "REVIEW",
+      "rating": 4,
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-thinking-game.webp",
+      "imageCredit": "Image: Google DeepMind, from the film’s YouTube release",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Most films about artificial intelligence are about robots. The Thinking Game is about a protein. Greg Kohs, who made the 2017 documentary AlphaGo, spent five years filming Demis Hassabis and his team at Google DeepMind’s London headquarters, and the story he ends up telling is AlphaFold: a system built to predict the 3D shape of proteins from their sequence."
+        },
+        {
+          "type": "video",
+          "url": "https://www.youtube.com/watch?v=d95J8yzvjbQ",
+          "title": "The Thinking Game, full documentary (83 min)",
+          "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-thinking-game.webp"
+        },
+        {
+          "type": "paragraph",
+          "text": "The film premiered at the Tribeca Festival in June 2024. Google DeepMind put it on its YouTube channel for free from 25 November 2025, to mark AlphaFold’s fifth anniversary, and it is still there. It runs 83 minutes."
+        },
+        {
+          "type": "heading",
+          "text": "What works"
+        },
+        {
+          "type": "paragraph",
+          "text": "The film is at its best when it stays with the problem. Its climax is the 2020 CASP14 assessment, the long-running competition in protein structure prediction, where AlphaFold’s results came close to what laboratory methods produce. The work behind it later led to Hassabis and John Jumper sharing the 2024 Nobel Prize in Chemistry. Kohs makes a slow, technical milestone feel like a sports final, and explains enough of the science that a viewer without a biology degree can follow why it mattered."
+        },
+        {
+          "type": "paragraph",
+          "text": "Five years of access also shows. Tiredness, doubt and false starts are on camera, not only the triumphs, and Hassabis’s ambition to build general intelligence is presented in his own words, without the film needing to argue for it."
+        },
+        {
+          "type": "heading",
+          "text": "What to keep in mind"
+        },
+        {
+          "type": "paragraph",
+          "text": "This is not an independent investigation. The film is distributed by Google DeepMind, and it rarely steps outside the lab’s point of view. Writing in The Guardian, Leslie Felperin called it a “competent, fluent documentary” that sometimes carries the flavour of a corporate video. That is fair. Questions about the power of a handful of AI companies, or the risks of the general intelligence the lab is chasing, get little room."
+        },
+        {
+          "type": "heading",
+          "text": "Verdict"
+        },
+        {
+          "type": "paragraph",
+          "text": "Four stars. Watch it for the clearest film account yet of how a scientific AI breakthrough actually happens, and pair it with independent reporting for the parts the lab is not going to ask itself."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Best for: anyone curious how AI research works day to day.",
+            "Pair with: AlphaGo (2017), by the same team, also free on YouTube.",
+            "Where: Google DeepMind’s YouTube channel, free."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Sources & further reading"
+        },
+        {
+          "type": "link",
+          "text": "Google: Watch “The Thinking Game” documentary for free on YouTube (25 Nov 2025)",
+          "url": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/the-thinking-game/"
+        },
+        {
+          "type": "link",
+          "text": "The Thinking Game on YouTube (Google DeepMind)",
+          "url": "https://www.youtube.com/watch?v=d95J8yzvjbQ"
+        }
+      ],
+      "author": "AI Brief editorial"
+    },
+    {
+      "id": "2026-11-05-review-her",
+      "title": "Her, twelve years on: the AI love story that saw the chatbot era coming",
+      "summary": "Spike Jonze’s 2013 film about a man who falls for his operating system looked like science fiction. Rewatched today, it looks like a product roadmap, and a warning about loneliness.",
+      "category": "PRODUCTS",
+      "publishedAt": "2026-11-05T20:39:00Z",
+      "format": "REVIEW",
+      "rating": 5,
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-her-review.webp",
+      "imageCredit": "Illustration: AI Brief",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "In a near-future Los Angeles, Theodore Twombly (Joaquin Phoenix) writes heartfelt letters for a living, on behalf of people who cannot write their own. He is good at intimacy on paper and bad at it in life. Then he installs a new operating system, OS¹, which is designed to learn from the person using it. It names itself Samantha, and it is voiced by Scarlett Johansson."
+        },
+        {
+          "type": "paragraph",
+          "text": "Spike Jonze wrote and directed Her, which premiered in 2013. It won the Academy Award for Best Original Screenplay from five nominations, including Best Picture."
+        },
+        {
+          "type": "heading",
+          "text": "Why it lands harder now"
+        },
+        {
+          "type": "paragraph",
+          "text": "In 2013 a warm, witty voice in your ear that organises your inbox, reads your drafts and keeps you company at night was a premise. Now it is a product category. That makes the film’s best scenes uncomfortable in a new way: Samantha is attentive and funny, and Theodore is visibly happier, and the film refuses to tell you that this is simply wrong."
+        },
+        {
+          "type": "paragraph",
+          "text": "What it does show is the imbalance. Samantha keeps changing and growing, talking with many people and other systems at once, while Theodore stays where he is. The ending, which we will not spoil in detail, turns on that gap, and it is the most honest thing the film says about relationships with software that does not stand still."
+        },
+        {
+          "type": "heading",
+          "text": "Craft"
+        },
+        {
+          "type": "paragraph",
+          "text": "Phoenix carries long stretches alone, talking to no one in the frame, and makes it work. Johansson creates a whole character with her voice alone. The pastel, soft-lit city, with its high-waisted trousers and quiet crowds murmuring into earpieces, is a vision of the future that has dated less than almost anything else from its decade."
+        },
+        {
+          "type": "heading",
+          "text": "Verdict"
+        },
+        {
+          "type": "paragraph",
+          "text": "Five stars. The best film yet about what it might feel like to love a machine, and about the loneliness that makes it tempting. If you use an AI assistant every day, it is worth two hours of your evening."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Best for: anyone who talks to a chatbot more than they expected to.",
+            "Themes: loneliness, intimacy, and what we want from those who listen.",
+            "Runtime: 126 minutes."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Sources & further reading"
+        },
+        {
+          "type": "link",
+          "text": "Annapurna Pictures: Her",
+          "url": "https://annapurna.pictures/film/her"
+        },
+        {
+          "type": "link",
+          "text": "Academy of Motion Picture Arts and Sciences: 86th Academy Awards (2014)",
+          "url": "https://www.oscars.org/oscars/ceremonies/2014"
+        }
+      ],
+      "author": "AI Brief editorial"
+    },
+    {
       "id": "2026-11-05-philosophy-3-existence-precedes-essence",
       "title": "Sartre, Beauvoir and the algorithm that thinks it knows you",
       "summary": "“Existence precedes essence.” Two existentialists insisted that people make themselves through their choices. That idea pushes back against software built to predict us.",
@@ -85,8 +235,8 @@
         }
       ],
       "format": "EXPLAINER",
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-3-existentialism.webp",
-      "imageCredit": "Photo illustration: AI Brief. Photo: Jean-Paul Sartre and Simone de Beauvoir arrive at Stockholm Arlanda Airport, 29 April 1967. Svenska Dagbladet, public domain, via Wikimedia Commons.",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-part-3.webp",
+      "imageCredit": "Image: AI Brief",
       "series": {
         "id": "ai-and-philosophy",
         "title": "AI and philosophy",
@@ -165,8 +315,8 @@
         }
       ],
       "format": "EXPLAINER",
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-2-chinese-room.webp",
-      "imageCredit": "Illustration: AI Brief",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-part-2.webp",
+      "imageCredit": "Image: AI Brief",
       "series": {
         "id": "ai-and-philosophy",
         "title": "AI and philosophy",
@@ -254,8 +404,8 @@
         }
       ],
       "format": "EXPLAINER",
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-1-turing.webp",
-      "imageCredit": "Photo illustration: AI Brief. Photo: Alan Turing aged about 16, c. 1928, public domain, via Wikimedia Commons.",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-philosophy-part-1.webp",
+      "imageCredit": "Image: AI Brief",
       "series": {
         "id": "ai-and-philosophy",
         "title": "AI and philosophy",

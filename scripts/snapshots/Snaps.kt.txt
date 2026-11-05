@@ -12,7 +12,8 @@ import com.android.resources.NightMode
 import com.caceras.aibrief.BottomNavigation
 import com.caceras.aibrief.FeedScreen
 import com.caceras.aibrief.Masthead
-import com.caceras.aibrief.SavedScreen
+import com.caceras.aibrief.ExploreScreen
+import com.caceras.aibrief.data.EditionExtras
 import com.caceras.aibrief.AboutScreen
 import com.caceras.aibrief.NavTab
 import com.caceras.aibrief.NewsUiState
@@ -50,6 +51,9 @@ class Snaps {
         gallery = if (f == StoryFormat.BREAKING) listOf("https://x.invalid/1.jpg", "https://x.invalid/2.jpg") else emptyList(),
         imageUrl = if (f == StoryFormat.BREAKING) "https://x.invalid/0.jpg" else null)
 
+    private val extras: EditionExtras = EditionExtras.parse(
+        listOf(java.io.File("../content/posts.json"), java.io.File("content/posts.json")).first { it.exists() }.readText())
+
     private val edition = listOf(
         a("b", 1, StoryFormat.BREAKING, "EU regulators open formal probe into frontier model training data", NewsCategory.POLICY, kicker = "Revealed"),
         a("n1", 2, StoryFormat.NEWS, "Open-weights model matches closed rivals on coding tests", NewsCategory.BUILDERS),
@@ -70,8 +74,8 @@ class Snaps {
             Column(Modifier.fillMaxSize()) {
                 Masthead(false, true, NewsCategory.ALL, {}, {}, {}, {})
                 androidx.compose.foundation.layout.Box(Modifier.weight(1f)) {
-                    FeedScreen(NewsUiState(edition, emptyList(), freshness = FeedFreshness.LIVE), UpdateState.Idle,
-                        rememberLazyListState(at), false, "", {}, {}, {}, {}, {}, {}, {})
+                    FeedScreen(NewsUiState(edition, emptyList(), freshness = FeedFreshness.LIVE, extras = extras), UpdateState.Idle,
+                        rememberLazyListState(at), false, "", {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
                 }
                 BottomNavigation(NavTab.HOME) {}
             }
@@ -93,8 +97,8 @@ class Snaps {
         AiBriefTheme { Column(Modifier.fillMaxSize()) {
             Masthead(false, false, NewsCategory.ALL, {}, {}, null, null)
             androidx.compose.foundation.layout.Box(Modifier.weight(1f)) {
-                SavedScreen(edition.take(4), false, rememberLazyListState(), {}, {}) }
-            BottomNavigation(NavTab.SAVED) {} } }
+                ExploreScreen(NewsUiState(edition, edition.take(2), extras = extras), rememberLazyListState(), {}, {}, {}) }
+            BottomNavigation(NavTab.EXPLORE) {} } }
     }
     @Test fun about() = paparazzi.snapshot {
         AiBriefTheme { Column(Modifier.fillMaxSize()) {

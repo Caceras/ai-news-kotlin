@@ -16,7 +16,8 @@ import com.caceras.aibrief.FeedScreen
 import com.caceras.aibrief.Masthead
 import com.caceras.aibrief.NavTab
 import com.caceras.aibrief.NewsUiState
-import com.caceras.aibrief.SavedScreen
+import com.caceras.aibrief.ExploreScreen
+import com.caceras.aibrief.data.EditionExtras
 import com.caceras.aibrief.data.FeedFreshness
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
@@ -77,6 +78,9 @@ class StoreSnaps {
     val paparazzi = Paparazzi(deviceConfig = phone, maxPercentDifference = 100.0,
         useDeviceResolution = true, snapshotHandler = fullSize)
 
+    private val extras: EditionExtras = EditionExtras.parse(
+        listOf(java.io.File("../content/posts.json"), java.io.File("content/posts.json")).first { it.exists() }.readText())
+
     private val edition: List<NewsArticle> = run {
         val file = listOf(File("../content/posts.json"), File("content/posts.json")).first { it.exists() }
         OwnerPosts.parse(file.readText()).sortedByDescending { it.publishedAt }.map { p ->
@@ -85,7 +89,7 @@ class StoreSnaps {
                 imageUrl = p.imageUrl, publishedAt = p.publishedAt, summary = p.summary, category = p.category,
                 blocks = p.blocks, format = p.format, kicker = p.kicker, gallery = p.gallery,
                 authorImageUrl = p.authorImageUrl, authorRole = p.authorRole, theme = p.theme,
-                sponsor = p.sponsor, updatedAt = p.updatedAt,
+                sponsor = p.sponsor, updatedAt = p.updatedAt, imageCredit = p.imageCredit, series = p.series,
             )
         }
     }
@@ -95,8 +99,8 @@ class StoreSnaps {
             Column(Modifier.fillMaxSize()) {
                 Masthead(false, true, NewsCategory.ALL, {}, {}, {}, {})
                 Box(Modifier.weight(1f)) {
-                    FeedScreen(NewsUiState(edition, emptyList(), freshness = FeedFreshness.LIVE),
-                        UpdateState.Idle, rememberLazyListState(scrolledTo), false, "", {}, {}, {}, {}, {}, {}, {})
+                    FeedScreen(NewsUiState(edition, emptyList(), freshness = FeedFreshness.LIVE, extras = extras),
+                        UpdateState.Idle, rememberLazyListState(scrolledTo), false, "", {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
                 }
                 BottomNavigation(NavTab.HOME) {}
             }
@@ -114,8 +118,8 @@ class StoreSnaps {
     @Test fun store04Saved() = paparazzi.snapshot("04-saved") {
         AiBriefTheme { Column(Modifier.fillMaxSize()) {
             Masthead(false, false, NewsCategory.ALL, {}, {}, null, null)
-            Box(Modifier.weight(1f)) { SavedScreen(edition.take(3), false, rememberLazyListState(), {}, {}) }
-            BottomNavigation(NavTab.SAVED) {} } }
+            Box(Modifier.weight(1f)) { ExploreScreen(NewsUiState(edition, edition.take(2), extras = extras), rememberLazyListState(), {}, {}, {}) }
+            BottomNavigation(NavTab.EXPLORE) {} } }
     }
 
     @Test fun store05Dark() {
