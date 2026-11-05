@@ -2,7 +2,7 @@ package com.caceras.aibrief.ui.components
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -93,7 +93,7 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier, opinion: B
             Column(modifier.fillMaxWidth().semantics(mergeDescendants = true) {}
                 .clickable(role = Role.Button, onClickLabel = "Watch, opens outside AI Brief") {
                     try {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(block.url)))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, block.url.toUri()))
                     } catch (_: ActivityNotFoundException) {
                         Toast.makeText(context, "No app is available to play this video.", Toast.LENGTH_LONG).show()
                     }
@@ -123,7 +123,7 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier, opinion: B
                     .spokenAs(block.text)
                     .clickable(role = Role.Button, onClickLabel = "Open in browser") {
                         try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(block.url)))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, block.url.toUri()))
                         } catch (_: ActivityNotFoundException) {
                             // Say why nothing opened; the post itself stays readable.
                             Toast.makeText(context, "No browser is available to open this link.", Toast.LENGTH_LONG).show()

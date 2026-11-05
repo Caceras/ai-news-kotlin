@@ -3,6 +3,7 @@ package com.caceras.aibrief.data
 import android.content.Context
 import android.text.Html
 import android.util.Xml
+import androidx.core.content.edit
 import com.caceras.aibrief.BuildConfig
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -201,10 +202,11 @@ class NewsRepository(context: Context) {
             // Cache the document, not only today's visible posts. Scheduled
             // writing becomes visible on a later refresh even when offline.
             // The ETag is stored with it, or cleared, so the two never disagree.
-            val editor = preferences.edit().putString(OWNER_POSTS_KEY, fetched.body)
-            if (fetched.etag != null) editor.putString(OWNER_POSTS_ETAG_KEY, fetched.etag)
-            else editor.remove(OWNER_POSTS_ETAG_KEY)
-            editor.apply()
+            preferences.edit {
+                putString(OWNER_POSTS_KEY, fetched.body)
+                if (fetched.etag != null) putString(OWNER_POSTS_ETAG_KEY, fetched.etag)
+                else remove(OWNER_POSTS_ETAG_KEY)
+            }
         }
         val raw = postDocument ?: localPostsRaw()
         val posts = visiblePosts(raw)
@@ -427,12 +429,12 @@ class NewsRepository(context: Context) {
         StoredArticles.decode(preferences.getString(key, null))
 
     private fun persistArticles(key: String, articles: List<NewsArticle>, maximum: Int) {
-        preferences.edit().putString(key, StoredArticles.encode(articles, maximum)).apply()
+        preferences.edit { putString(key, StoredArticles.encode(articles, maximum)) }
     }
 
     private fun cacheLiveArticles(articles: List<NewsArticle>) {
         persistArticles(CACHED_ARTICLES_KEY, articles, MAX_ARTICLES)
-        preferences.edit().putLong(CACHED_AT_KEY, Instant.now().toEpochMilli()).apply()
+        preferences.edit { putLong(CACHED_AT_KEY, Instant.now().toEpochMilli()) }
     }
 
     private fun cachedArticles(): List<NewsArticle>? = restoredArticles(CACHED_ARTICLES_KEY)
