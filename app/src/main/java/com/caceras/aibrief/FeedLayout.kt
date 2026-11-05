@@ -81,7 +81,7 @@ data class FeedModules(val rankings: Boolean = false, val radar: Boolean = false
  * 3. "Latest": the next four stories, newest first, as a list.
  * 4. One designed card (a guide or sponsored post), then the data modules:
  *    the model rankings, each series in its own rail, and the radar.
- * 5. Columns gather in one Opinion rail.
+ * 5. Reviews gather under their own ribbon, then columns in one Opinion rail.
  * 6. Remaining news runs in a rhythm of one big headline, a pair and two rows,
  *    with at most one designed card after each, so two never touch.
  * 7. Leftover guides close the page under their own ribbon.
@@ -109,6 +109,7 @@ object FeedLayout {
         val news = ArrayDeque(rest.filter { it.isNews && it !in inRails })
         val opinions = rest.filter { it.format == StoryFormat.OPINION }
         val designed = ArrayDeque(rest.filter { it.isDesigned })
+        val reviews = rest.filter { it.format == StoryFormat.REVIEW }
 
         val slots = mutableListOf<FeedSlot>(FeedSlot.Lead(lead))
         if (news.size >= 2) slots += FeedSlot.Pair(news.removeFirst(), news.removeFirst())
@@ -127,6 +128,10 @@ object FeedLayout {
             slots += FeedSlot.SeriesRail(parts.first().series!!.title, parts)
         }
         if (modules.radar) slots += FeedSlot.Radar
+        if (reviews.isNotEmpty()) {
+            slots += FeedSlot.Ribbon("Reviews")
+            reviews.forEach { slots += FeedSlot.Row(it) }
+        }
         if (opinions.isNotEmpty()) {
             slots += FeedSlot.Ribbon("Opinion")
             slots += FeedSlot.OpinionRail(opinions)

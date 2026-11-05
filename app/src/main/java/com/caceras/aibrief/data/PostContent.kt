@@ -25,6 +25,13 @@ sealed interface PostBlock {
 
     /** A primary source or further reading; no embedded browser or scripts. */
     data class Link(val text: String, val url: String) : PostBlock
+
+    /**
+     * A video to watch, such as a film on YouTube. Shown as its still with a
+     * play button; tapping opens the video in the reader's video app or
+     * browser. Nothing plays inside AI Brief, so no player or tracker loads.
+     */
+    data class Video(val url: String, val title: String, val imageUrl: String? = null) : PostBlock
 }
 
 /**
@@ -50,6 +57,9 @@ enum class StoryFormat(val label: String) {
 
     /** Paid content. Same card as a guide, always labelled with its sponsor. */
     SPONSORED("Sponsored"),
+
+    /** A review of a film, book or product, with a star rating. Never leads the front page. */
+    REVIEW("Review"),
     ;
 
     companion object {
@@ -123,6 +133,8 @@ data class OwnerPost(
     /** Who made the cover, shown under it in the reader, such as "Illustration: AI Brief". */
     val imageCredit: String? = null,
     val series: SeriesInfo? = null,
+    /** Stars out of five, for reviews only. */
+    val rating: Int? = null,
 )
 
 /** Reads `content/posts.json`, the document that carries every original post. */
@@ -192,6 +204,7 @@ object OwnerPosts {
             updatedAt = parseInstant(json.optString("updatedAt"))?.takeIf { it.isAfter(publishedAt) },
             imageCredit = json.cleanText("imageCredit", MAX_CREDIT),
             series = parseSeries(json.optJSONObject("series")),
+            rating = json.optInt("rating", 0).takeIf { format == StoryFormat.REVIEW && it in 1..5 },
         )
     }
 
@@ -282,6 +295,15 @@ object OwnerPosts {
                 .takeIf { it.startsWith("https://") }
                 ?.let { url -> json.text()?.let { PostBlock.Link(it, url) } }
 
+            "video" -> json.optString("url").trim()
+                .takeIf { it.startsWith("https://") }
+                ?.let { url ->
+                    json.optString("title").trim().takeIf { it.isNotEmpty() }?.let { title ->
+                        PostBlock.Video(url, title,
+                            json.optString("imageUrl").trim().takeIf { it.startsWith("https://") })
+                    }
+                }
+
             else -> null
         }
 
@@ -323,6 +345,12 @@ object OwnerPosts {
                         .put("type", "link")
                         .put("text", block.text)
                         .put("url", block.url)
+
+                    is PostBlock.Video -> JSONObject()
+                        .put("type", "video")
+                        .put("url", block.url)
+                        .put("title", block.title)
+                        .put("imageUrl", block.imageUrl)
                 },
             )
         }

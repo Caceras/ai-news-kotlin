@@ -5,21 +5,18 @@ Every cover is a flat, cut-paper poster: a single brand colour field, a halftone
 fade, the slanted AI Brief block, and one bold motif that names the story at a
 glance (the EU's stars and a clock for an AI Act deadline, a phone and sound
 waves for a cloned voice). Shapes carry a hard navy offset, like a print slightly
-out of register. Photo covers use only public-domain photographs: the photo is
-laid in faintly as a duotone and the people are cut out on top of an AI Brief
-backdrop.
+out of register. Series get their own artwork instead, so they never look like
+the everyday covers.
 
     python3 scripts/editorial-art/covers.py <out-dir> [cover-id ...]
 
-Needs Pillow and numpy; the photo covers also need rembg (BiRefNet portrait
-model) to cut people out. Sources for photos are listed in PHOTOS below.
+Needs Pillow.
 """
 import math
 import sys
 from pathlib import Path
 
-import numpy as np
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
 FONT = ROOT / "app/src/main/res/font/dm_sans_extrabold.ttf"
@@ -351,31 +348,6 @@ def toggle(c, x, y, w, on, track_on=BLUE, track_off=shade(NAVY, 0.55), knob=WHIT
     c.circle(kx, y + h / 2, h * 0.38, knob, shadow=False)
 
 
-def racks(c, x0, y0, x1, y1, columns=6, body=DEEP, slot=(18, 40, 86), led=BLUE, led2=MINT, seed=3):
-    """A wall of server racks: the AI Brief data-centre backdrop."""
-    rng = np.random.default_rng(seed)
-    cw = (x1 - x0) / columns
-    for i in range(columns):
-        rx = x0 + i * cw
-        c.rect(rx + 10, y0, rx + cw - 10, y1, body, r=6, shadow=False)
-        y = y0 + 22
-        while y < y1 - 40:
-            c.rect(rx + 26, y, rx + cw - 26, y + 34, slot, r=4, shadow=False)
-            for k in range(3):
-                if rng.random() < 0.7:
-                    col = led if rng.random() < 0.7 else led2
-                    c.circle(rx + 44 + k * 22, y + 17, 5, col, shadow=False)
-            c.rect(rx + cw - 120, y + 13, rx + cw - 44, y + 21, shade(slot, 0.25), r=3, shadow=False)
-            y += 48
-
-
-def duotone(photo, dark, light, contrast=1.0):
-    g = np.asarray(photo.convert("L"), dtype=np.float32) / 255.0
-    g = np.clip((g - 0.5) * contrast + 0.5, 0, 1)[..., None]
-    out = np.array(dark, dtype=np.float32) * (1 - g) + np.array(light, dtype=np.float32) * g
-    return Image.fromarray(out.astype(np.uint8), "RGB")
-
-
 # Covers ---------------------------------------------------------------------
 
 def eu_ai_act(out):
@@ -614,132 +586,21 @@ def check_source(out):
     c.save(out)
 
 
-# Photo covers: the AI and philosophy series --------------------------------
-
-PHOTOS = {
-    # Public domain (Sweden, anonymous press photo, 1967; US: PD-1996).
-    # https://commons.wikimedia.org/wiki/File:Sartre-beauvoir-takman-1967.jpg
-    "sartre-beauvoir": "sartre-beauvoir-1967.jpg",
-    # Public domain (author died 1954; published before 1931 in the US).
-    # https://commons.wikimedia.org/wiki/File:Alan_Turing_Aged_16.jpg
-    "turing": "turing-1928.jpg",
-}
-
-
-def cut_out(photo, crop):
-    from rembg import new_session, remove
-    region = photo.crop(crop)
-    return remove(region, session=new_session("birefnet-portrait"))
-
-
-def series_backdrop(seed):
-    c = Cover(DEEP, halftone=(18, 40, 86), grid=False)
-    racks(c, -20, 120, W + 20, H + 40, columns=7, seed=seed)
-    # Light falling through the aisle.
-    glow = Image.new("L", c.img.size, 0)
-    gd = ImageDraw.Draw(glow)
-    gd.ellipse([s(W * 0.15), s(-H * 0.3), s(W * 0.85), s(H * 0.9)], fill=110)
-    glow = glow.filter(ImageFilter.GaussianBlur(s(140)))
-    c.img = Image.composite(Image.new("RGB", c.img.size, BLUE), c.img, glow)
-    c.d = ImageDraw.Draw(c.img)
-    return c
-
-
-def lay_photo(c, photo, alpha, box):
-    """The original photograph, faint, as a navy duotone across the backdrop."""
-    x0, y0, x1, y1 = box
-    tone = duotone(photo, DEEP, SKY, contrast=1.2)
-    tone = fit(tone, x1 - x0, y1 - y0).resize((s(x1 - x0), s(y1 - y0)), Image.LANCZOS)
-    region = c.img.crop((s(x0), s(y0), s(x1), s(y1)))
-    c.img.paste(Image.blend(region, tone, alpha), (s(x0), s(y0)))
-
-
-def fit(image, w, h):
-    ratio = max(w / image.width, h / image.height)
-    image = image.resize((int(image.width * ratio + 1), int(image.height * ratio + 1)), Image.LANCZOS)
-    left = (image.width - w) // 2
-    top = (image.height - h) // 2
-    return image.crop((left, top, left + w, top + h))
-
-
-def series_mark(c, part):
-    """The series signature every part carries: three slanted blocks, this part's lit."""
+def her_review(out):
+    """For a review of Her: an earpiece and a voice, in the film's warm reds."""
+    c = Cover((200, 34, 52), halftone=(230, 70, 80))
+    c.slant(100, 110, 380, 64, WHITE)
+    c.circle(800, 520, 150, WHITE)
+    c.circle(800, 520, 70, (200, 34, 52), shadow=False)
+    c.circle(800, 520, 30, WHITE, shadow=False)
     for i in range(3):
-        c.slant(90 + i * 120, 110, 110, 54, ORANGE if i == part - 1 else (40, 60, 110))
-
-
-def philosophy_turing(out, src):
-    c = series_backdrop(seed=5)
-    photo = Image.open(src / PHOTOS["turing"]).convert("RGB")
-    lay_photo(c, photo, 0.28, (0, 0, W, H))
-    person = cut_out(photo, (40, 0, 675, 919))
-    person = person.resize((int(person.width * 0.98), int(person.height * 0.98)), Image.LANCZOS)
-    gray = person.convert("LA").convert("RGBA")
-    gray.putalpha(person.split()[3])
-    c.paste(gray, 840, H - gray.height + 20)
-    # The imitation game: two screens, one question.
-    c.rect(170, 330, 620, 640, (18, 40, 86), r=18)
-    c.rect(195, 355, 595, 615, BLUE, r=10, shadow=False)
-    c.text(395, 485, "A or B?", 80, WHITE, shadow=False)
-    series_mark(c, 1)
+        c.arc(800, 520, 230 + i * 80, -40, 40, 26, WHITE)
+        c.arc(800, 520, 230 + i * 80, 140, 220, 26, WHITE)
     c.save(out)
 
-
-def philosophy_chinese_room(out, src):
-    c = series_backdrop(seed=9)
-    # A closed room with a slot; symbols go in, symbols come out.
-    c.rect(520, 240, 1080, 860, (241, 236, 226))
-    c.rect(560, 280, 1040, 860, (226, 219, 205), shadow=False)
-    c.rect(700, 520, 900, 560, DEEP, r=8, shadow=False)  # the slot
-    c.rect(740, 620, 860, 860, (190, 180, 160), r=6, shadow=False)  # door
-    for i, (x, y) in enumerate([(300, 420), (360, 640), (1260, 380), (1300, 620)]):
-        card = WHITE if i < 2 else ORANGE
-        c.rect(x - 80, y - 80, x + 80, y + 80, card, r=12)
-        symbol(c, x, y, i)
-    c.line([(420, 540), (690, 540)], 18, ORANGE)
-    c.line([(910, 540), (1170, 500)], 18, ORANGE)
-    c.text(800, 400, "?", 160, RED)
-    series_mark(c, 2)
-    c.save(out)
-
-
-def philosophy_existentialism(out, src):
-    c = series_backdrop(seed=2)
-    photo = Image.open(src / PHOTOS["sartre-beauvoir"]).convert("RGB")
-    lay_photo(c, photo, 0.3, (0, 0, W, H))
-    people = cut_out(photo, (0, 180, 640, 993))
-    scale = (H - 120) / people.height
-    people = people.resize((int(people.width * scale), int(people.height * scale)), Image.LANCZOS)
-    c.paste(people, W - people.width - 140, H - people.height)
-    # A recommendation card the algorithm offers: "You are…"
-    c.rect(150, 340, 690, 660, WHITE, r=22)
-    c.text(420, 430, "YOU ARE…", 66, NAVY, shadow=False)
-    for i in range(3):
-        c.rect(210, 500 + i * 46, 630 - i * 110, 524 + i * 46, BLUE if i == 0 else SKY, r=12, shadow=False)
-    series_mark(c, 3)
-    c.save(out)
-
-
-def symbol(c, x, y, kind):
-    """Abstract marks standing in for symbols the person in the room cannot read."""
-    if kind == 0:
-        c.line([(x - 45, y + 35), (x, y - 45), (x + 45, y + 35), (x - 45, y + 35)], 12, NAVY, shadow=False)
-    elif kind == 1:
-        c.ring(x, y, 42, 12, NAVY, shadow=False)
-        c.circle(x, y, 12, NAVY, shadow=False)
-    elif kind == 2:
-        c.line([(x - 50, y + 20), (x - 25, y - 20), (x, y + 20), (x + 25, y - 20), (x + 50, y + 20)], 12, NAVY,
-               shadow=False)
-    else:
-        c.rect(x - 45, y - 45, x + 45, y + 45, None, r=6, outline=NAVY, width=12, shadow=False)
-        c.rect(x - 15, y - 15, x + 15, y + 15, NAVY, shadow=False)
-
-
-CJK = next((p for p in [Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"),
-                        Path("/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf"),
-                        Path("/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc")] if p.exists()), None)
 
 COVERS = {
+    "her-review": her_review,
     "eu-ai-act": eu_ai_act,
     "why-chatbots-guess": hallucination,
     "prompt-injection": prompt_injection,
@@ -760,22 +621,11 @@ COVERS = {
     "small-models": small_models,
     "check-the-source": check_source,
 }
-PHOTO_COVERS = {
-    "philosophy-1-turing": philosophy_turing,
-    "philosophy-2-chinese-room": philosophy_chinese_room,
-    "philosophy-3-existentialism": philosophy_existentialism,
-}
-
 if __name__ == "__main__":
     out_dir = Path(sys.argv[1])
     out_dir.mkdir(parents=True, exist_ok=True)
     wanted = set(sys.argv[2:])
-    src = Path(__file__).resolve().parent / "photos"
     for name, draw in COVERS.items():
         if not wanted or name in wanted:
             draw(out_dir / f"{name}.webp")
-            print("drew", name)
-    for name, draw in PHOTO_COVERS.items():
-        if not wanted or name in wanted:
-            draw(out_dir / f"{name}.webp", src)
             print("drew", name)

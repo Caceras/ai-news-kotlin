@@ -53,6 +53,7 @@ data class NewsArticle(
     val updatedAt: Instant? = null,
     val imageCredit: String? = null,
     val series: SeriesInfo? = null,
+    val rating: Int? = null,
 ) {
     /** True for an original post, which has no external article to link out to. */
     val isOriginalPost: Boolean get() = blocks.isNotEmpty()
@@ -89,6 +90,7 @@ data class NewsArticle(
                     is PostBlock.Bullets -> block.items.joinToString(" ")
                     is PostBlock.Image -> block.caption.orEmpty()
                     is PostBlock.Link -> block.text
+                    is PostBlock.Video -> block.title
                 }
             }
     }
@@ -283,6 +285,7 @@ class NewsRepository(context: Context) {
         updatedAt = updatedAt,
         imageCredit = imageCredit,
         series = series,
+        rating = rating,
     )
 
     fun savedArticles(): List<NewsArticle> = restoredArticles(SAVED_ARTICLES_KEY)

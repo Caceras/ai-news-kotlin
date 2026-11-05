@@ -50,6 +50,7 @@ object StoredArticles {
         updatedAt?.let { put("updatedAt", it.toEpochMilli()) }
         put("imageCredit", imageCredit)
         series?.let { put("series", OwnerPosts.encodeSeries(it)) }
+        rating?.let { put("rating", it) }
     }
 
     private fun decodeArticle(json: JSONObject): NewsArticle? = runCatching {
@@ -79,6 +80,7 @@ object StoredArticles {
             updatedAt = if (json.has("updatedAt")) Instant.ofEpochMilli(json.getLong("updatedAt")) else null,
             imageCredit = json.optString("imageCredit").takeIf { it.isNotBlank() },
             series = OwnerPosts.parseSeries(json.optJSONObject("series")),
+            rating = json.optInt("rating", 0).takeIf { it in 1..5 },
         )
     }.getOrNull()
 }

@@ -19,7 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -80,6 +85,30 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier, opinion: B
             block.caption?.let { caption ->
                 Spacer(Modifier.height(Space.s))
                 Text(caption, style = Brief.type.meta, color = c.inkMuted)
+            }
+        }
+
+        is PostBlock.Video -> {
+            val context = LocalContext.current
+            Column(modifier.fillMaxWidth().semantics(mergeDescendants = true) {}
+                .clickable(role = Role.Button, onClickLabel = "Watch, opens outside AI Brief") {
+                    try {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(block.url)))
+                    } catch (_: ActivityNotFoundException) {
+                        Toast.makeText(context, "No app is available to play this video.", Toast.LENGTH_LONG).show()
+                    }
+                }) {
+                Box(Modifier.fillMaxWidth().aspectRatio(Ratio.VIDEO).background(c.masthead, BriefShapes.thumb),
+                    contentAlignment = Alignment.Center) {
+                    block.imageUrl?.let { AsyncArticleImage(it, null, Modifier.matchParentSize(), aspectRatio = null) }
+                    Box(Modifier.size(Space.section + Space.xl).background(c.breaking, BriefShapes.round),
+                        contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.PlayArrow, null, Modifier.size(Space.xxl), tint = c.onBreaking)
+                    }
+                }
+                Spacer(Modifier.height(Space.s))
+                Text("▶  Watch: ${block.title}", style = Brief.type.button, color = c.ink)
+                Text("Opens in your video app or browser", style = Brief.type.meta, color = c.inkMuted)
             }
         }
 

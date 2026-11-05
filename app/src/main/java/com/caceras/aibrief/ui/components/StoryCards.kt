@@ -75,6 +75,7 @@ object Ratio {
     const val LEAD = 5f / 4f
     const val PAIR = 4f / 3f
     const val THUMB = 4f / 3f
+    const val VIDEO = 16f / 9f
 }
 
 /** A story's cover, or its topic illustration when it has none or the download fails. */
@@ -161,6 +162,7 @@ fun Deck(text: String, modifier: Modifier = Modifier, maxLines: Int = 2, color: 
 fun NewsArticle.tagText(): String = when (format) {
     StoryFormat.SPONSORED -> "Sponsored · ${sponsor.orEmpty()}"
     StoryFormat.NEWS -> category.takeIf { it != NewsCategory.ALL }?.label ?: "News"
+    StoryFormat.REVIEW -> listOfNotNull(format.label, rating?.let(::stars)).joinToString(" · ")
     else -> listOfNotNull(format.label, category.takeIf { it != NewsCategory.ALL }?.label).joinToString(" · ")
 }.uppercase(Locale.US)
 
@@ -171,6 +173,9 @@ fun Tag(article: NewsArticle, modifier: Modifier = Modifier, color: Color = Brie
         maxLines = if (article.format == StoryFormat.SPONSORED) Int.MAX_VALUE else 1,
         overflow = TextOverflow.Ellipsis, modifier = modifier)
 }
+
+/** "★★★★☆" for four out of five. */
+fun stars(rating: Int): String = "★".repeat(rating.coerceIn(0, 5)) + "☆".repeat(5 - rating.coerceIn(0, 5))
 
 /** "4 Oct · 5 min read" */
 fun NewsArticle.metaText(): String {

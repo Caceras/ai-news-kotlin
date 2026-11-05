@@ -179,6 +179,8 @@ private fun NewsHeader(article: NewsArticle) {
                 Deck(article.summary, maxLines = Int.MAX_VALUE)
                 Spacer(Modifier.height(Space.gutter))
                 Text(article.bylineText(), style = Brief.type.meta, color = c.inkMuted)
+                if (article.format == StoryFormat.REVIEW) Text("Review: the critic's own assessment.",
+                    style = Brief.type.meta, color = c.inkMuted, modifier = Modifier.padding(top = Space.xs))
                 if (article.isOfflineBrief) Text("Offline explainer · background reading",
                     style = Brief.type.meta, color = c.inkMuted, modifier = Modifier.padding(top = Space.xs))
             }
