@@ -1,5 +1,6 @@
 package com.caceras.aibrief.ui.components
 
+import android.content.ComponentCallbacks2
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -54,6 +55,23 @@ object ArticleImageCache {
      * picture in the first frame instead of flashing the placeholder.
      */
     fun cached(url: String): Bitmap? = if (url.isBlank()) null else memoryCache.get(url)
+
+    /**
+     * Gives decoded pictures back when Android asks. Each cover can hold
+     * several megabytes, and a backgrounded app that keeps them is among the
+     * first the system kills. Disk copies stay, so pictures return quickly.
+     */
+    fun onTrimMemory(level: Int) {
+        val target = trimTarget(level, memoryCache.maxSize()) ?: return
+        memoryCache.trimToSize(target)
+    }
+
+    /** The memory cache size to shrink to for a trim [level], or null to keep it. */
+    internal fun trimTarget(level: Int, maxSize: Int): Int? = when {
+        level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND -> 0
+        level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN -> maxSize / 2
+        else -> null
+    }
 
     suspend fun load(context: Context, url: String): Bitmap? = withContext(Dispatchers.IO) {
         if (url.isBlank() || !url.startsWith("http")) return@withContext null

@@ -73,6 +73,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
 import com.caceras.aibrief.data.PostBlock
+import com.caceras.aibrief.ui.components.ArticleImageCache
 import com.caceras.aibrief.ui.components.ArticleArtwork
 import com.caceras.aibrief.ui.components.FeatureStory
 import com.caceras.aibrief.ui.components.PostBlockContent
@@ -106,6 +107,11 @@ class MainActivity : ComponentActivity() {
                 AiBriefApp(newsViewModel, updateViewModel)
             }
         }
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        ArticleImageCache.onTrimMemory(level)
     }
 }
 
