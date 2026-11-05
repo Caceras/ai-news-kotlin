@@ -17,8 +17,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
 import org.xmlpull.v1.XmlPullParser
 
 enum class NewsCategory(val label: String) {
@@ -337,25 +335,11 @@ class NewsRepository(context: Context) {
             )
     }
 
-    private fun restoredArticles(key: String): List<NewsArticle> {
-        val rawArticles = preferences.getString(key, null) ?: return emptyList()
-        return runCatching {
-            val array = JSONArray(rawArticles)
-            buildList {
-                for (index in 0 until array.length()) {
-                    add(array.getJSONObject(index).toArticle())
-                }
-            }
-        }.getOrDefault(emptyList())
-    }
+    private fun restoredArticles(key: String): List<NewsArticle> =
+        StoredArticles.decode(preferences.getString(key, null))
 
     private fun persistArticles(key: String, articles: List<NewsArticle>, maximum: Int) {
-        val encoded = JSONArray().apply {
-            articles.take(maximum).forEach { article ->
-                put(article.toJson())
-            }
-        }
-        preferences.edit().putString(key, encoded.toString()).apply()
+        preferences.edit().putString(key, StoredArticles.encode(articles, maximum)).apply()
     }
 
     private fun cacheLiveArticles(articles: List<NewsArticle>) {
@@ -369,34 +353,6 @@ class NewsRepository(context: Context) {
     private fun cachedAt(): Instant? = preferences.getLong(CACHED_AT_KEY, 0)
         .takeIf { it > 0 }
         ?.let(Instant::ofEpochMilli)
-
-    private fun NewsArticle.toJson(): JSONObject = JSONObject().apply {
-        put("id", id)
-        put("title", title)
-        put("source", source)
-        put("author", author)
-        put("url", url)
-        put("imageUrl", imageUrl)
-        put("publishedAt", publishedAt.toEpochMilli())
-        put("summary", summary)
-        put("category", category.name)
-        put("isOfflineBrief", isOfflineBrief)
-        put("blocks", OwnerPosts.encodeBlocks(blocks))
-    }
-
-    private fun JSONObject.toArticle(): NewsArticle = NewsArticle(
-        id = getString("id"),
-        title = getString("title"),
-        source = getString("source"),
-        author = optString("author").takeIf { it.isNotBlank() },
-        url = getString("url"),
-        imageUrl = optString("imageUrl").takeIf { it.isNotBlank() },
-        publishedAt = Instant.ofEpochMilli(getLong("publishedAt")),
-        summary = getString("summary"),
-        category = NewsCategory.valueOf(getString("category")),
-        isOfflineBrief = optBoolean("isOfflineBrief", false),
-        blocks = OwnerPosts.decodeBlocks(optJSONArray("blocks")),
-    )
 
     private fun plainText(raw: String): String = Html.fromHtml(
         raw,
