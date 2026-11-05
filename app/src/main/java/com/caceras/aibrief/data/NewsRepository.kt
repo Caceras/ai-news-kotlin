@@ -179,7 +179,9 @@ class NewsRepository(context: Context) {
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("User-Agent", "AI-Brief-Android/${BuildConfig.VERSION_NAME}")
             if (connection.responseCode !in 200..299) return null
-            val body = connection.inputStream.bufferedReader().use { it.readText() }
+            if (connection.contentLengthLong > MAX_EDITION_BYTES) return null
+            // An oversized body is refused, keeping the last good document.
+            val body = connection.inputStream.use { readBoundedText(it) } ?: return null
             if (!OwnerPosts.isEditorialDocument(body)) return null
             body
         } finally {
