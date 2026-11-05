@@ -89,7 +89,7 @@ class StoreSnaps {
                 imageUrl = p.imageUrl, publishedAt = p.publishedAt, summary = p.summary, category = p.category,
                 blocks = p.blocks, format = p.format, kicker = p.kicker, gallery = p.gallery,
                 authorImageUrl = p.authorImageUrl, authorRole = p.authorRole, theme = p.theme,
-                sponsor = p.sponsor, updatedAt = p.updatedAt, imageCredit = p.imageCredit, series = p.series,
+                sponsor = p.sponsor, updatedAt = p.updatedAt, imageCredit = p.imageCredit, series = p.series, rating = p.rating,
             )
         }
     }
@@ -110,12 +110,12 @@ class StoreSnaps {
     @Test fun store01Feed() = feed("01-feed")
 
     @Test fun store02Reader() = paparazzi.snapshot("02-reader") {
-        AiBriefTheme { ArticleReader(edition.first(), true, {}, {}, {}, {}) }
+        AiBriefTheme { ArticleReader(edition.first { it.imageCredit == "Illustration: AI Brief" && it.format == StoryFormat.EXPLAINER }, true, {}, {}, {}, {}) }
     }
 
     @Test fun store03MoreStories() = feed("03-more-stories", scrolledTo = 3)
 
-    @Test fun store04Saved() = paparazzi.snapshot("04-saved") {
+    @Test fun store04Explore() = paparazzi.snapshot("04-explore") {
         AiBriefTheme { Column(Modifier.fillMaxSize()) {
             Masthead(false, false, NewsCategory.ALL, {}, {}, null, null)
             Box(Modifier.weight(1f)) { ExploreScreen(NewsUiState(edition, edition.take(2), extras = extras), rememberLazyListState(), {}, {}, {}) }

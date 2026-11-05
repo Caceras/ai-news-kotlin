@@ -49,7 +49,14 @@ A cold build of the gates takes about 3 minutes.
 - Workflow status: query it with the GitHub MCP `actions_list` tool. Unauthenticated `curl` polling of `api.github.com` from the container returns nothing useful, so a Monitor built on it stays silent. The Android run takes about 6 minutes.
 - Play artifact: `python3 scripts/check-play-artifact.py app/build/outputs/apk/internalSharing/app-internalSharing.apk` checks that no self-update code or install permission is present.
 
+## Working style the owner wants
+
+- Ship in small, frequent merges so changes are visible on the phone; do not batch 20+ minutes of work. Pre-launch: speed over polish.
+- Images the owner pastes inline are not saved as files; ask for files when they matter.
+
 ## Owner-only blockers (already reported, do not re-notify)
+
+- `AA_API_KEY` secret for daily model rankings; polls / most read / comments need a server and a privacy-policy + Data safety change (owner decision pending).
 
 - Play Console account verification, upload key, and the four `PLAY_*` repository secrets for **Build signed Play bundle**. See `PLAY_RELEASE_CHECKLIST.md`.
 - GitHub Pages is not enabled, so the privacy and contact links point to `PRIVACY.md` and `CONTACT.md` on GitHub.
@@ -57,9 +64,13 @@ A cold build of the gates takes about 3 minutes.
 ## Design and publishing (November 2026 redesign)
 
 - The look is a strict design system: `docs/DESIGN_SYSTEM.md`. Colours, fonts, type, shapes and spacing live only in `ui/theme/Theme.kt`; `DesignRulesTest` fails the build on raw values elsewhere. Add a token instead of an exception.
-- Story types (`StoryFormat`: NEWS, BREAKING, EXPLAINER, OPINION, GUIDE, SPONSORED) each have one card and one reader header. Front-page order is `FeedLayout.compose`, covered by `FeedLayoutTest`.
+- Story types (`StoryFormat`: NEWS, BREAKING, EXPLAINER, OPINION, GUIDE, SPONSORED, REVIEW) each have one card and one reader header. Reviews carry `rating` 1–5. Front-page order is `FeedLayout.compose`, covered by `FeedLayoutTest`: bleed lead (headline on the picture), pair, "Latest" four, designed card, rankings, series rails, radar, reviews, opinion, more stories, guides.
+- Posts can carry `series` ({id, title, part, of}), `imageCredit`, and `video` blocks (still + play button; opens outside the app).
+- Data modules live under `extras` in `content/posts.json` (`rankings`, `radar`), refreshed by `scripts/update-extras.py` and `.github/workflows/update-extras.yml` (daily). Rankings need the `AA_API_KEY` secret (owner); `--from-page` reads the public leaderboard once. Every module must name its source.
+- Story covers: `scripts/editorial-art/covers.py` (flat house style, venv Pillow). Series get their own artwork, never the house style. Only use photos we can license; the owner rejected cut-out photo collages.
+- Bottom tabs are Latest, Explore (saved stories, series, rankings, radar), About. Saved is a section of Explore.
 - The owner publishes from the **Publish a story** issue form (`.github/ISSUE_TEMPLATE/publish-story.yml` → `publish-from-issue.yml` → `scripts/issue_post.py` → `scripts/publish-post.py`). Editing the issue revises the story; Action = Unpublish removes it. Owner-only.
-- See screens without a device: `scripts/render-snapshots.sh` (Paparazzi in a throwaway copy, about 3 minutes). Read PNGs with a venv Pillow; the system Pillow is broken.
+- See screens without a device: `SNAPSHOT_PYTHON=<venv>/bin/python scripts/render-snapshots.sh <out>` (Paparazzi in a throwaway copy, about 3 minutes; covers load from `content/media`). Read PNGs with a venv Pillow; the system Pillow is broken.
 - Play screenshots come from `StoreSnaps` in the same script (`store-*.png`, 1080 × 1920 RGB, real edition only, never invented headlines). Copy them to `docs/play/screenshots` after a visible design change. Paparazzi shrinks to 1000 px unless `useDeviceResolution = true`.
 - Sponsored posts must name a sponsor (parser drops them otherwise) and never lead. Opinion must be signed by a person.
 
