@@ -163,7 +163,9 @@ fun NewsArticle.tagText(): String = when (format) {
 
 @Composable
 fun Tag(article: NewsArticle, modifier: Modifier = Modifier, color: Color = Brief.colors.accent) {
-    Text(article.tagText(), style = Brief.type.tag, color = color, maxLines = 1,
+    // A sponsored label wraps rather than hide who paid; other labels stay on one line.
+    Text(article.tagText(), style = Brief.type.tag, color = color,
+        maxLines = if (article.format == StoryFormat.SPONSORED) Int.MAX_VALUE else 1,
         overflow = TextOverflow.Ellipsis, modifier = modifier)
 }
 
@@ -376,39 +378,51 @@ fun BrandMark(color: Color, modifier: Modifier = Modifier) {
 @Composable
 fun DesignedCard(article: NewsArticle, modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
     val palette = cardPalette(article.cardTheme)
-    Box(modifier.fillMaxWidth().aspectRatio(1.18f).clip(BriefShapes.card).background(palette.brush)
-        .then(if (onClick != null) Modifier.story(onClick) else Modifier)) {
-        // The picture melts into the gradient from the left and top instead of sitting on it as a box.
-        ArticleArtwork(article, Modifier.align(Alignment.BottomEnd).fillMaxWidth(0.6f).fillMaxHeight(0.64f)
-            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-            .drawWithContent {
-                drawContent()
-                drawRect(Brush.horizontalGradient(0f to Color.Transparent, 0.55f to Color.Black),
-                    blendMode = BlendMode.DstIn)
-                drawRect(Brush.verticalGradient(0f to Color.Transparent, 0.35f to Color.Black),
-                    blendMode = BlendMode.DstIn)
-            }, ratio = null)
-        Column(Modifier.fillMaxSize().padding(Space.l)) {
-            BrandMark(palette.ink)
-            Spacer(Modifier.height(Space.l))
-            if (article.format == StoryFormat.SPONSORED) {
-                SponsorPill(article)
-                Spacer(Modifier.height(Space.s))
+    // The card keeps its designed shape, but grows instead of clipping when large
+    // system text needs more room, so the sponsor and title are always readable.
+    BoxWithConstraints(modifier.fillMaxWidth()) {
+        val designedHeight = maxWidth / DESIGNED_CARD_RATIO
+        Box(Modifier.fillMaxWidth().heightIn(min = designedHeight).clip(BriefShapes.card).background(palette.brush)
+            .then(if (onClick != null) Modifier.story(onClick) else Modifier)) {
+            Box(Modifier.matchParentSize()) {
+                // The picture melts into the gradient from the left and top instead of sitting on it as a box.
+                ArticleArtwork(article, Modifier.align(Alignment.BottomEnd).fillMaxWidth(0.6f)
+                    .height(designedHeight * 0.64f)
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                    .drawWithContent {
+                        drawContent()
+                        drawRect(Brush.horizontalGradient(0f to Color.Transparent, 0.55f to Color.Black),
+                            blendMode = BlendMode.DstIn)
+                        drawRect(Brush.verticalGradient(0f to Color.Transparent, 0.35f to Color.Black),
+                            blendMode = BlendMode.DstIn)
+                    }, ratio = null)
             }
-            Text(article.title, style = Brief.type.designedTitle, color = palette.ink, maxLines = 4,
-                overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.7f).semantics { heading() })
-            Spacer(Modifier.height(Space.m))
-            Text(article.summary, style = Brief.type.deck, color = palette.inkMuted, maxLines = 3,
-                overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.52f))
+            Column(Modifier.fillMaxWidth().padding(Space.l)) {
+                BrandMark(palette.ink)
+                Spacer(Modifier.height(Space.l))
+                if (article.format == StoryFormat.SPONSORED) {
+                    SponsorPill(article)
+                    Spacer(Modifier.height(Space.s))
+                }
+                Text(article.title, style = Brief.type.designedTitle, color = palette.ink, maxLines = 4,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.7f).semantics { heading() })
+                Spacer(Modifier.height(Space.m))
+                Text(article.summary, style = Brief.type.deck, color = palette.inkMuted, maxLines = 3,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.52f))
+            }
         }
     }
 }
 
+/** Width over height of a designed card at normal text size. */
+private const val DESIGNED_CARD_RATIO = 1.18f
+
 /** The disclosure every sponsored post carries. */
 @Composable
 fun SponsorPill(article: NewsArticle, modifier: Modifier = Modifier) {
+    // Never cut short: the sponsor's name must stay readable at any text size.
     Text("SPONSORED · ${article.sponsor.orEmpty().uppercase(Locale.US)}", style = Brief.type.tag,
-        color = Brief.colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        color = Brief.colors.ink,
         modifier = modifier.background(Brief.colors.card, BriefShapes.pill)
             .padding(horizontal = Space.s, vertical = Space.xs))
 }
