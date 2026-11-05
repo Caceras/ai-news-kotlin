@@ -299,6 +299,8 @@ fun AsyncArticleImage(
     aspectRatio: Float? = 16f / 9f,
     fallbackResource: Int? = null,
     shape: Shape = BriefShapes.none,
+    /** Show the whole picture, such as a logo, instead of filling the box. */
+    fit: Boolean = false,
 ) {
     if (imageUrl.isNullOrBlank()) return
 
@@ -328,7 +330,7 @@ fun AsyncArticleImage(
             .then(if (aspectRatio != null) Modifier.fillMaxWidth().aspectRatio(aspectRatio) else Modifier)
             .onSizeChanged { boxSize = it }
             .clip(shape)
-            .background(Brief.colors.placeholder),
+            .then(if (fit) Modifier else Modifier.background(Brief.colors.placeholder)),
     ) {
         if (fallbackResource != null) {
             Image(painterResource(fallbackResource), contentDescription,
@@ -338,7 +340,7 @@ fun AsyncArticleImage(
             Image(
                 bitmap = it.asImageBitmap(),
                 contentDescription = contentDescription,
-                contentScale = ContentScale.Crop,
+                contentScale = if (fit) ContentScale.Fit else ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(alpha),
