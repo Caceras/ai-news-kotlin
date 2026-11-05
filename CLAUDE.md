@@ -60,3 +60,5 @@ A cold build of the gates takes about 3 minutes.
 - The same applies to taps: `toggleSaved` updates the shelf in memory and persists on `Dispatchers.IO` under a `Mutex`. Do not call `NewsRepository` disk methods from UI callbacks.
 - Close every `HttpURLConnection` in a `finally`, including early returns.
 - A `git fetch origin main <branch>` aborts entirely if the session branch does not exist on the remote yet, leaving `origin/main` stale. Fetch `main` on its own.
+- Keep `res/mipmap-anydpi-v26`. Lint flags it as `ObsoleteSdkInt`, but renaming it to `mipmap-anydpi` breaks resource linking (`mipmap/ic_launcher not found`).
+- Every external intent tells the reader when nothing can handle it (`startOrExplain` in `MainActivity`, a toast in `PostBlockContent`). Do not swallow `ActivityNotFoundException` silently.
