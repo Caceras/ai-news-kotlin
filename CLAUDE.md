@@ -74,3 +74,4 @@ A cold build of the gates takes about 3 minutes.
 - `AsyncArticleImage` seeds its state from `ArticleImageCache.cached` so memory-cached pictures draw in the first frame. Keep that when changing the loader.
 - `ArticleImageCache.onTrimMemory` (called from `MainActivity.onTrimMemory`) halves decoded images when the UI is hidden and drops them in the background. Route any new in-memory cache through the same hook.
 - Cards must grow with large system text, not clip it: use `heightIn(min = …)` for a designed shape, never a fixed `aspectRatio` on a box holding text. Sponsor disclosures (`SponsorPill`, sponsored `Tag`) wrap and are never ellipsized. `scripts/render-snapshots.sh` renders a `largeText` (fontScale 2) snapshot to check.
+- The edition fetch sends the stored ETag (`OwnerPostsValidator`); a 304 reuses the cached document. Store or clear the ETag together with `OWNER_POSTS_KEY`, never one without the other.
