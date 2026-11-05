@@ -166,6 +166,7 @@ fun TopicsStrip(onSelect: (NewsCategory) -> Unit) {
             NewsCategory.entries.filter { it != NewsCategory.ALL }.forEach { category ->
                 Box(
                     Modifier.width(148.dp).height(188.dp).clip(RoundedCornerShape(3.dp))
+                        .spokenAs("Explore ${category.label}")
                         .clickable(role = Role.Button) { onSelect(category) },
                 ) {
                     Image(painterResource(categoryArtwork(category)), null,

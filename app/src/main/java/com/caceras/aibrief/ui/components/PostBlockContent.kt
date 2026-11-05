@@ -129,6 +129,7 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.primary,
                 modifier = modifier
                     .minimumInteractiveComponentSize()
+                    .spokenAs(block.text)
                     .clickable(role = Role.Button, onClickLabel = "Open in browser") {
                         try {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(block.url)))
