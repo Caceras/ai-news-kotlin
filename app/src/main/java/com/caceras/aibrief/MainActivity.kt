@@ -316,6 +316,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                             (state.articles + state.savedArticles).filter { it.series?.id == series.id }
                                 .distinctBy { it.id }.sortedBy { it.series?.part }
                         }.orEmpty(),
+                        upNext = UpNext.after(article, state.articles, readerTrail.stops.map { it.id }.toSet()),
                         onOpenArticle = { next ->
                             if (next.id != article.id) {
                                 readerTrail = readerTrail.push(TrailStop(article.id,
