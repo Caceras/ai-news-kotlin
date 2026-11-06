@@ -80,8 +80,10 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier, opinion: B
             }
         }
 
-        is PostBlock.Image -> Column(modifier.fillMaxWidth()) {
-            AsyncArticleImage(block.url, block.caption, Modifier.fillMaxWidth())
+        // The caption printed under the picture is its text alternative, so the
+        // picture and caption are one TalkBack stop and the caption is read once.
+        is PostBlock.Image -> Column(modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
+            AsyncArticleImage(block.url, null, Modifier.fillMaxWidth())
             block.caption?.let { caption ->
                 Spacer(Modifier.height(Space.s))
                 Text(caption, style = Brief.type.meta, color = c.inkMuted)
@@ -107,7 +109,8 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier, opinion: B
                     }
                 }
                 Spacer(Modifier.height(Space.s))
-                Text("▶  Watch: ${block.title}", style = Brief.type.button, color = c.ink)
+                Text("▶  Watch: ${block.title}", style = Brief.type.button, color = c.ink,
+                    modifier = Modifier.spokenAs("Watch: ${block.title}"))
                 Text("Opens in your video app or browser", style = Brief.type.meta, color = c.inkMuted)
             }
         }
