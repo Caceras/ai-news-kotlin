@@ -25,12 +25,16 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.FormatSize
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -47,6 +51,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.LayoutDirection
+import com.caceras.aibrief.ReaderTextSize
 import com.caceras.aibrief.readingProgress
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.StoryFormat
@@ -92,6 +97,10 @@ fun ArticleReader(
     /** Opens a correction email about this story; the link is hidden when null. */
     onReportError: (() -> Unit)? = null,
     listState: LazyListState = rememberLazyListState(),
+    /** How large the headline and story text are set, on top of the system font size. */
+    textSize: ReaderTextSize = ReaderTextSize.STANDARD,
+    /** Moves to the next text size; the Aa button is hidden when null. */
+    onCycleTextSize: (() -> Unit)? = null,
 ) {
     val c = Brief.colors
     val haptic = LocalHapticFeedback.current
@@ -103,6 +112,10 @@ fun ArticleReader(
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back to stories", tint = c.onMasthead)
             }
             BrandMark(c.onMasthead, Modifier.weight(1f))
+            if (onCycleTextSize != null) IconButton(onClick = onCycleTextSize) {
+                Icon(Icons.Outlined.FormatSize, "Text size: ${textSize.label}. Change text size",
+                    tint = c.onMasthead)
+            }
             IconButton(onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onToggleSaved()
@@ -115,21 +128,23 @@ fun ArticleReader(
         ReadingProgressBar(listState)
         LazyColumn(Modifier.weight(1f), state = listState, contentPadding = PaddingValues(bottom = Space.section)) {
             item("header") {
-                when {
-                    opinion -> OpinionHeader(article)
-                    article.isDesigned -> DesignedHeader(article)
-                    else -> NewsHeader(article)
+                ScaledText(textSize) {
+                    when {
+                        opinion -> OpinionHeader(article)
+                        article.isDesigned -> DesignedHeader(article)
+                        else -> NewsHeader(article)
+                    }
                 }
             }
             item("prose") {
-                SelectionContainer {
+                ScaledText(textSize) { SelectionContainer {
                     Column(Modifier.readingMeasure().padding(horizontal = Space.l)) {
                         if (article.isOriginalPost) article.blocks.forEachIndexed { index, block ->
                             if (index > 0) Spacer(Modifier.height(Space.l))
                             PostBlockContent(block, opinion = opinion)
                         } else Text(article.summary, style = Brief.type.body, color = c.ink)
                     }
-                }
+                } }
             }
             if (article.series != null && seriesParts.size > 1) item("series") {
                 SeriesContents(article, seriesParts, onOpenArticle)
@@ -176,6 +191,19 @@ fun ArticleReader(
             }
         }
     }
+}
+
+/**
+ * Sets text inside [content] [size] times larger than the system font size.
+ * Only text grows: spacing and pictures keep their size, and cards around the
+ * text grow with it (see the large-text rule in CLAUDE.md).
+ */
+@Composable
+private fun ScaledText(size: ReaderTextSize, content: @Composable () -> Unit) {
+    val density = LocalDensity.current
+    if (size == ReaderTextSize.STANDARD) content()
+    else CompositionLocalProvider(LocalDensity provides Density(density.density, density.fontScale * size.scale),
+        content = content)
 }
 
 /**

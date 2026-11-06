@@ -43,6 +43,8 @@ data class NewsUiState(
     val extras: EditionExtras = EditionExtras.EMPTY,
     /** Stories this reader has opened, oldest first; see [ReadHistory]. */
     val readIds: Set<String> = emptySet(),
+    /** How large story text is set in the reader; see [ReaderTextSize]. */
+    val readerTextSize: ReaderTextSize = ReaderTextSize.STANDARD,
 )
 
 /** Reads a topic saved by [NewsViewModel.selectCategory], falling back to all topics. */
@@ -69,6 +71,8 @@ class NewsViewModel(
     private val saveLock = Mutex()
     /** Monotonic time of the latest refresh attempt, or null before the first one starts. */
     private var lastRefreshAttempt: Long? = null
+    /** True once the reader has changed the text size in this session. */
+    private var textSizeChosen = false
     // Starts empty and refreshing. The device's copy is read from disk off the
     // main thread so a cold start never blocks the first frame on storage.
     // The chosen topic is restored after the system reclaims the app in the
@@ -89,6 +93,9 @@ class NewsViewModel(
                 val (initial, saved, read) = withContext(Dispatchers.IO) {
                     Triple(repository.initialLoad(), repository.savedArticles(), repository.readStoryIds())
                 }
+                val storedSize = withContext(Dispatchers.IO) { repository.readerTextSize() }
+                // A size picked while the device copy was loading wins over the stored one.
+                val textSize = if (textSizeChosen) _uiState.value.readerTextSize else storedSize
                 _uiState.value = _uiState.value.copy(
                     articles = initial.articles,
                     savedArticles = saved,
@@ -97,6 +104,7 @@ class NewsViewModel(
                     freshness = initial.freshness,
                     lastUpdated = initial.updatedAt,
                     extras = initial.extras,
+                    readerTextSize = textSize,
                 )
             } catch (error: Exception) {
                 if (error is CancellationException) throw error
@@ -182,6 +190,17 @@ class NewsViewModel(
         _notices.trySend(HISTORY_CLEARED_NOTICE)
         if (_uiState.value.isLoading) return
         persistReadHistory()
+    }
+
+    /** Moves story text to the next size and says which; stored on the IO dispatcher. */
+    fun cycleReaderTextSize() {
+        textSizeChosen = true
+        _uiState.update { it.copy(readerTextSize = it.readerTextSize.next()) }
+        val size = _uiState.value.readerTextSize
+        _notices.trySend("Text size: ${size.label}")
+        viewModelScope.launch(Dispatchers.IO) {
+            saveLock.withLock { runCatching { repository.persistReaderTextSize(_uiState.value.readerTextSize) } }
+        }
     }
 
     private fun persistReadHistory() {

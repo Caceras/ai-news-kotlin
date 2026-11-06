@@ -270,6 +270,16 @@ object Measure {
     val text = 640.dp
 }
 
+/**
+ * How much larger than the system font size story text is set, by the reader's
+ * choice in the story toolbar. Applied on top of Android's own font scale.
+ */
+object ReaderScale {
+    const val standard = 1f
+    const val large = 1.15f
+    const val largest = 1.3f
+}
+
 /** Motion values shared by every screen. */
 object Motion {
     /** How small an open story gets while a back swipe previews leaving it (Material predictive back). */
