@@ -599,6 +599,29 @@ def her_review(out):
     c.save(out)
 
 
+def thinking_game(out):
+    """For a review of The Thinking Game: a folded protein chain on a film frame."""
+    c = Cover(DEEP)
+    c.slant(100, 110, 380, 64, MINT)
+    # Film frame with sprocket holes.
+    c.rect(330, 220, 1270, 860, NAVY, r=18)
+    for x in range(380, 1250, 90):
+        c.rect(x, 245, x + 44, 285, DEEP, r=6, shadow=False)
+        c.rect(x, 795, x + 44, 835, DEEP, r=6, shadow=False)
+    # A protein chain folding into a helix and a sheet, beads on a ribbon.
+    pts = []
+    for i in range(120):
+        t = i / 119
+        x = 470 + 660 * t
+        y = 540 + 150 * math.sin(t * math.pi * 5) * (1 - t * 0.6) - 60 * math.cos(t * math.pi * 1.5)
+        pts.append((x, y))
+    c.line(pts, 34, MINT)
+    for i in range(0, 120, 12):
+        x, y = pts[i]
+        c.circle(x, y, 26, ORANGE if i % 24 else WHITE, shadow=False)
+    c.save(out)
+
+
 def turing_test(out):
     """Can a machine think? Two hidden players, one question."""
     c = Cover(NAVY)
@@ -625,20 +648,10 @@ def chinese_room(out):
     c.save(out)
 
 
-def astra(out):
-    """Breaking: a model release. A rocket-bright star over the grid."""
-    c = Cover(DEEP)
-    for i in range(5):
-        c.ring(800, 500, 120 + i * 90, 6, (40, 70, 140), shadow=False)
-    c.star(800, 500, 230, WHITE, shadow=True)
-    c.star(800, 500, 120, BLUE)
-    c.save(out)
-
-
 COVERS = {
     "turing-test": turing_test,
     "chinese-room": chinese_room,
-    "astra": astra,
+    "thinking-game": thinking_game,
     "her-review": her_review,
     "eu-ai-act": eu_ai_act,
     "why-chatbots-guess": hallucination,
