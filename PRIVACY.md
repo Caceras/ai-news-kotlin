@@ -12,7 +12,7 @@ AI Brief does not require an account. It does not request location, contacts, mi
 
 Saved articles, their text, cached editions, and the list of stories you have opened (used to mark them as read) are kept in private app storage on your device. Search is performed on your device; search queries are not sent to a search service. Article images may be cached in private app storage. Android cloud backup is disabled for app data.
 
-We do not upload your bookmarks, reading history, or search queries. Local data remains until you remove a saved article, clear the app’s storage in Android Settings, uninstall the app, or the system removes a cache. These actions do not delete copies of our public articles from the publication.
+We do not upload your bookmarks, reading history, or search queries. Local data remains until you remove a saved article, tap Clear reading history on the About page, clear the app’s storage in Android Settings, uninstall the app, or the system removes a cache. These actions do not delete copies of our public articles from the publication.
 
 ## Network requests and hosting
 

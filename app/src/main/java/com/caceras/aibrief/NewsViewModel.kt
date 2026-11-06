@@ -104,6 +104,8 @@ class NewsViewModel(
             } finally {
                 _uiState.value = _uiState.value.copy(isLoading = false)
             }
+            // markRead holds back writes while loading; save any story opened in that moment.
+            if (_uiState.value.readIds.isNotEmpty()) persistReadHistory()
             loadLatest(userRequested = false)
         }
     }
@@ -171,6 +173,18 @@ class NewsViewModel(
         _uiState.update { it.copy(readIds = ReadHistory.marked(it.readIds, article.id)) }
         // Until the stored list is loaded, writing would replace it with this one story.
         if (_uiState.value.isLoading) return
+        persistReadHistory()
+    }
+
+    /** Forgets every opened story, so all headlines show as unread again. */
+    fun clearReadHistory() {
+        _uiState.update { it.copy(readIds = emptySet()) }
+        _notices.trySend(HISTORY_CLEARED_NOTICE)
+        if (_uiState.value.isLoading) return
+        persistReadHistory()
+    }
+
+    private fun persistReadHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             saveLock.withLock { runCatching { repository.persistReadStoryIds(_uiState.value.readIds) } }
         }
@@ -193,6 +207,7 @@ class NewsViewModel(
             }
         }
         private const val TOPIC_KEY = "topic"
+        private const val HISTORY_CLEARED_NOTICE = "Reading history cleared"
         private const val OFFLINE_NOTICE = "Couldn't reach the latest edition. Showing the copy on this device."
     }
 }
