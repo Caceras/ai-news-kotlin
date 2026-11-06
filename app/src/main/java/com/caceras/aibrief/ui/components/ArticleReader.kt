@@ -39,6 +39,15 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.unit.LayoutDirection
+import com.caceras.aibrief.readingProgress
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.StoryFormat
 import com.caceras.aibrief.ui.theme.Brief
@@ -103,6 +112,7 @@ fun ArticleReader(
             }
             IconButton(onClick = onShare) { Icon(Icons.Outlined.Share, "Share article", tint = c.onMasthead) }
         }
+        ReadingProgressBar(listState)
         LazyColumn(Modifier.weight(1f), state = listState, contentPadding = PaddingValues(bottom = Space.section)) {
             item("header") {
                 when {
@@ -167,6 +177,36 @@ fun ArticleReader(
         }
     }
 }
+
+/**
+ * A thin bar under the masthead that fills as the reader moves through the
+ * story's text. It is drawn, not recomposed, on every scroll frame, and
+ * TalkBack skips it: the reader's position is already announced by the list.
+ */
+@Composable
+private fun ReadingProgressBar(listState: LazyListState) {
+    val c = Brief.colors
+    val progress by remember(listState) {
+        derivedStateOf {
+            val info = listState.layoutInfo
+            val prose = info.visibleItemsInfo.firstOrNull { it.key == "prose" }
+            when {
+                prose != null -> readingProgress(prose.offset, prose.size, info.viewportSize.height)
+                listState.firstVisibleItemIndex > PROSE_INDEX -> 1f
+                else -> 0f
+            }
+        }
+    }
+    Box(Modifier.fillMaxWidth().height(Space.xxs).background(c.masthead).clearAndSetSemantics {}
+        .drawBehind {
+            val filled = size.width * progress
+            val left = if (layoutDirection == LayoutDirection.Rtl) size.width - filled else 0f
+            drawRect(c.mastheadAction, topLeft = Offset(left, 0f), size = Size(filled, size.height))
+        })
+}
+
+/** Position of the "prose" item in the reader's list, after the header. */
+private const val PROSE_INDEX = 1
 
 /**
  * Centres a column of reading text and stops it at [Measure.text]. On a
