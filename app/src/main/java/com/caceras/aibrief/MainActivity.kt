@@ -200,7 +200,9 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     var selectedArticleId by rememberSaveable { mutableStateOf<String?>(null) }
     // Stories opened from inside a story (series parts), so Back returns to
     // the part the reader came from before it returns to the front page.
-    var readerTrail by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var readerTrail by rememberSaveable(stateSaver = ReaderTrail.Saver) { mutableStateOf(ReaderTrail()) }
+    // Where to land in the story Back returns to; consumed when it opens.
+    var returnTo by remember { mutableStateOf<TrailStop?>(null) }
     var searchShown by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
     // The open story stays on screen when it leaves both lists, such as
@@ -246,7 +248,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     LaunchedEffect(state.isLoading, selectedArticle) {
         if (!state.isLoading && selectedArticle == null) {
             selectedArticleId = null
-            readerTrail = emptyList()
+            readerTrail = ReaderTrail()
         }
     }
     LaunchedEffect(pagerState.settledPage) { currentTab = NavTab.entries[pagerState.settledPage] }
@@ -255,12 +257,15 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         (updateState as? UpdateState.NeedsPermission)?.let { updateViewModel.retryInstall(it.apk) }
     }
     fun openFromFeed(article: NewsArticle) {
-        readerTrail = emptyList()
+        readerTrail = ReaderTrail()
+        returnTo = null
         selectedArticleId = article.id
     }
     fun closeReader() {
-        selectedArticleId = readerTrail.lastOrNull()
-        readerTrail = readerTrail.dropLast(1)
+        val (stop, rest) = readerTrail.pop()
+        returnTo = stop
+        readerTrail = rest
+        selectedArticleId = stop?.id
     }
 
     BackHandler(enabled = selectedArticle != null || searchShown || currentTab != NavTab.HOME) {
@@ -280,8 +285,12 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
             .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
                 .asPaddingValues())) {
             AnimatedContent(targetState = selectedArticle, modifier = Modifier.fillMaxSize(),
-                transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "articleTransition") { article ->
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                // A refreshed copy of the open story updates in place, keeping the reader's place.
+                contentKey = { it?.id }, label = "articleTransition") { article ->
                 if (article != null) {
+                    val start = returnTo?.takeIf { it.id == article.id }
+                    val readerListState = rememberLazyListState(start?.index ?: 0, start?.offset ?: 0)
                     ArticleReader(article, state.savedArticles.any { it.id == article.id },
                         onToggleSaved = {
                             val shelfIndex = state.savedArticles.indexOfFirst { it.id == article.id }
@@ -301,13 +310,17 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                         onShare = { context.shareArticle(article) },
                         onOpenSource = { context.openExternalUrl(article.url) },
                         onBack = ::closeReader,
+                        listState = readerListState,
                         seriesParts = article.series?.let { series ->
                             (state.articles + state.savedArticles).filter { it.series?.id == series.id }
                                 .distinctBy { it.id }.sortedBy { it.series?.part }
                         }.orEmpty(),
                         onOpenArticle = { next ->
                             if (next.id != article.id) {
-                                readerTrail = readerTrail + article.id
+                                readerTrail = readerTrail.push(TrailStop(article.id,
+                                    readerListState.firstVisibleItemIndex,
+                                    readerListState.firstVisibleItemScrollOffset))
+                                returnTo = null
                                 selectedArticleId = next.id
                             }
                         })
