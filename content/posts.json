@@ -2,32 +2,6 @@
   "version": 1,
   "posts": [
     {
-      "id": "2026-11-05-demo-astra",
-      "title": "6.2 Astra RELEASED",
-      "summary": "Demo story to preview the breaking-news design. Not real news.",
-      "author": "AI Brief editorial",
-      "category": "PRODUCTS",
-      "publishedAt": "2026-11-05T21:00:00Z",
-      "format": "BREAKING",
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-astra-openai.webp",
-      "imageCredit": "Illustration: AI Brief, with the OpenAI logo",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "This is a placeholder story so the breaking-news layout can be seen on a phone. There is no GPT-6.2 Astra release; the newest Astra model listed on OpenRouter is GPT-6 Astra, from 4 September 2026."
-        },
-        {
-          "type": "heading",
-          "text": "Sources"
-        },
-        {
-          "type": "link",
-          "text": "OpenRouter: models",
-          "url": "https://openrouter.ai/models"
-        }
-      ]
-    },
-    {
       "id": "2026-11-05-pick-up-the-phone",
       "title": "Pick up the phone",
       "summary": "On the cat, the obstacle and the phone call that is never made.",

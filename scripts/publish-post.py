@@ -99,9 +99,19 @@ def validate(document):
     return document
 
 
+# A story that calls itself a demo is invented news. Google Play's News and
+# misleading-content rules apply to everything the edition carries, so design
+# previews belong in snapshots, never in the live edition.
+PLACEHOLDER = re.compile(r"not real news|placeholder story|demo story|lorem ipsum", re.IGNORECASE)
+
+
 def validate_presentation(post, author, published):
     """The rules each story format must meet before it can be published."""
     kind = post.get("format", "NEWS")
+    prose = " ".join([post.get("title", ""), post.get("summary", "")] +
+                     [block.get("text", "") for block in post.get("blocks") or []
+                      if isinstance(block, dict) and isinstance(block.get("text"), str)])
+    require(not PLACEHOLDER.search(prose), "Publish real stories only, not demos or placeholders")
     require(kind in FORMATS, f"Unknown story type: {kind}")
     if post.get("kicker") is not None:
         text(post["kicker"], "Kicker", KICKER_LIMIT)
