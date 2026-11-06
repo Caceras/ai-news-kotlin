@@ -69,6 +69,8 @@ A cold build of the gates takes about 3 minutes.
 - Posts can carry `series` ({id, title, part, of}), `imageCredit`, and `video` blocks (still + play button; opens outside the app).
 - Data modules live under `extras` in `content/posts.json` (`rankings`, `radar`), refreshed by `scripts/update-extras.py` and `.github/workflows/update-extras.yml` (daily). Rankings need the `AA_API_KEY` secret (owner); `--from-page` reads the public leaderboard once. Every module must name its source.
 - Story covers: `scripts/editorial-art/covers.py` (flat house style, venv Pillow). Series get their own artwork, never the house style. Only use photos we can license; the owner rejected cut-out photo collages.
+- A film's or video's thumbnail, poster or still is not licensed just because the video is free to watch (The Thinking Game's YouTube thumbnail, with festival logos, had to be replaced). Reviews get a house illustration. `imageCredit` must name who really made the picture.
+- `scripts/snapshots/Snaps.kt.txt` calls screen functions directly; when a screen gains a parameter, update it or the snapshot script stops compiling.
 - Bottom tabs are Latest, Explore (saved stories, series, rankings, radar), About. Saved is a section of Explore.
 - The owner publishes from the **Publish a story** issue form (`.github/ISSUE_TEMPLATE/publish-story.yml` → `publish-from-issue.yml` → `scripts/issue_post.py` → `scripts/publish-post.py`). Editing the issue revises the story; Action = Unpublish removes it. Owner-only.
 - See screens without a device: `SNAPSHOT_PYTHON=<venv>/bin/python scripts/render-snapshots.sh <out>` (Paparazzi in a throwaway copy, about 3 minutes; covers load from `content/media`). Read PNGs with a venv Pillow; the system Pillow is broken.
