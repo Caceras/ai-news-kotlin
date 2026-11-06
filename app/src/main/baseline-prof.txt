@@ -1,0 +1,13 @@
+# Startup profile for AI Brief's own code.
+#
+# Android compiles these classes and methods ahead of time at install (Play
+# ships the profile in the bundle; profileinstaller applies it for direct
+# installs), so the first launches do not run the front page, the edition
+# parser and the image loader in the interpreter. Compose and AndroidX bring
+# their own profiles; this file covers only com.caceras.aibrief. R8 rewrites
+# the names to match the shrunk build.
+#
+# The app is small enough that everything it ships is on the path to the first
+# frame or the first story, so the rules cover the whole package.
+Lcom/caceras/aibrief/**;
+HSPLcom/caceras/aibrief/**->**(**)**
