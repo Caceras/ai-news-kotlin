@@ -592,8 +592,13 @@ private fun FeedScreen(
             OutlinedTextField(query, onQueryChange,
                 placeholder = { Text("Search AI Brief", style = Brief.type.deck) },
                 leadingIcon = { Icon(Icons.Outlined.Search, null, Modifier.size(20.dp)) },
-                trailingIcon = { IconButton(onClick = onCloseSearch) {
-                    Icon(Icons.Outlined.Close, "Close search", Modifier.size(20.dp))
+                // With words typed, the cross clears them and keeps the keyboard up for
+                // another try; on an empty field it closes search.
+                trailingIcon = { IconButton(onClick = {
+                    if (query.isEmpty()) onCloseSearch() else { onQueryChange(""); focus.requestFocus() }
+                }) {
+                    Icon(Icons.Outlined.Close, if (query.isEmpty()) "Close search" else "Clear search",
+                        Modifier.size(20.dp))
                 } },
                 singleLine = true, shape = BriefShapes.button,
                 // Results filter as the reader types, so the keyboard's search key just puts it away.
