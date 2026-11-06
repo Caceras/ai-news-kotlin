@@ -131,6 +131,7 @@ import com.caceras.aibrief.ui.components.spokenAs
 import com.caceras.aibrief.ui.theme.AiBriefTheme
 import com.caceras.aibrief.ui.theme.Brief
 import com.caceras.aibrief.ui.theme.BriefShapes
+import com.caceras.aibrief.ui.theme.Measure
 import com.caceras.aibrief.ui.theme.Space
 import com.caceras.aibrief.update.UpdateBanner
 import com.caceras.aibrief.update.UpdateManifest
@@ -523,7 +524,7 @@ private fun FeedScreen(
     val slots = remember(articles, hour, modules) { FeedLayout.compose(articles, now, modules) }
     LaunchedEffect(searchShown) { if (searchShown) focus.requestFocus() }
 
-    Column(Modifier.fillMaxSize().background(c.paper).wrapContentWidth().widthIn(max = 840.dp)) {
+    Column(Modifier.fillMaxSize().background(c.paper).wrapContentWidth().widthIn(max = Measure.page)) {
         if (searchShown) {
             OutlinedTextField(query, onQueryChange,
                 placeholder = { Text("Search AI Brief", style = Brief.type.deck) },
@@ -674,7 +675,7 @@ private fun ExploreScreen(
             .map { parts -> parts.sortedBy { it.series!!.part } }
     }
     LazyColumn(state = listState,
-        modifier = Modifier.fillMaxSize().background(c.paper).wrapContentWidth().widthIn(max = 840.dp),
+        modifier = Modifier.fillMaxSize().background(c.paper).wrapContentWidth().widthIn(max = Measure.page),
         contentPadding = PaddingValues(bottom = Space.xxl)) {
         item("header") {
             PageHeader("Explore", "Your saved stories, our series, and the models everyone is talking about.")
@@ -768,7 +769,7 @@ private fun AboutScreen(listState: LazyListState, readCount: Int, onClearReadHis
     val haptic = LocalHapticFeedback.current
     val c = Brief.colors
     LazyColumn(state = listState,
-        modifier = Modifier.fillMaxSize().background(c.paper).wrapContentWidth().widthIn(max = 840.dp),
+        modifier = Modifier.fillMaxSize().background(c.paper).wrapContentWidth().widthIn(max = Measure.page),
         contentPadding = PaddingValues(bottom = Space.section)) {
         item("header") {
             PageHeader("About AI Brief",

@@ -43,6 +43,7 @@ import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.StoryFormat
 import com.caceras.aibrief.ui.theme.Brief
 import com.caceras.aibrief.ui.theme.BriefShapes
+import com.caceras.aibrief.ui.theme.Measure
 import com.caceras.aibrief.ui.theme.Space
 import java.time.Instant
 import java.time.ZoneId
@@ -86,7 +87,7 @@ fun ArticleReader(
     val c = Brief.colors
     val haptic = LocalHapticFeedback.current
     val opinion = article.format == StoryFormat.OPINION
-    Column(Modifier.fillMaxSize().background(c.card).wrapContentWidth().widthIn(max = 840.dp)) {
+    Column(Modifier.fillMaxSize().background(c.card).wrapContentWidth().widthIn(max = Measure.page)) {
         Row(Modifier.fillMaxWidth().background(c.masthead).padding(horizontal = Space.xs),
             verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
@@ -112,7 +113,7 @@ fun ArticleReader(
             }
             item("prose") {
                 SelectionContainer {
-                    Column(Modifier.padding(horizontal = Space.l)) {
+                    Column(Modifier.readingMeasure().padding(horizontal = Space.l)) {
                         if (article.isOriginalPost) article.blocks.forEachIndexed { index, block ->
                             if (index > 0) Spacer(Modifier.height(Space.l))
                             PostBlockContent(block, opinion = opinion)
@@ -131,7 +132,7 @@ fun ArticleReader(
                 }
             }
             item("footer") {
-                Column(Modifier.padding(start = Space.l, end = Space.l, top = Space.xxl)) {
+                Column(Modifier.readingMeasure().padding(start = Space.l, end = Space.l, top = Space.xxl)) {
                     Rule()
                     Spacer(Modifier.height(Space.l))
                     if (article.url.isNotBlank()) {
@@ -167,6 +168,14 @@ fun ArticleReader(
     }
 }
 
+/**
+ * Centres a column of reading text and stops it at [Measure.text]. On a
+ * tablet or a phone held sideways, lines of body type would otherwise run past
+ * a hundred characters, which is hard to read; pictures keep the full width.
+ */
+private fun Modifier.readingMeasure(): Modifier =
+    fillMaxWidth().wrapContentWidth().widthIn(max = Measure.text).fillMaxWidth()
+
 @Composable
 private fun NewsHeader(article: NewsArticle) {
     val c = Brief.colors
@@ -191,7 +200,8 @@ private fun NewsHeader(article: NewsArticle) {
             }
         }
         SelectionContainer {
-            Column(Modifier.padding(start = Space.l, end = Space.l, top = Space.l, bottom = Space.xl)) {
+            Column(Modifier.readingMeasure()
+                .padding(start = Space.l, end = Space.l, top = Space.l, bottom = Space.xl)) {
                 article.series?.let {
                     Text(it.label.uppercase(Locale.US), style = Brief.type.tag, color = c.opinionAccent)
                     Spacer(Modifier.height(Space.xs))
