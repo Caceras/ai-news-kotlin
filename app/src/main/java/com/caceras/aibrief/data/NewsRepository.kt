@@ -321,6 +321,15 @@ class NewsRepository(context: Context) {
         preferences.edit { putString(READ_STORIES_KEY, com.caceras.aibrief.ReadHistory.encode(ids)) }
     }
 
+    /** The story text size picked in the reader; see [com.caceras.aibrief.ReaderTextSize]. */
+    fun readerTextSize(): com.caceras.aibrief.ReaderTextSize =
+        com.caceras.aibrief.ReaderTextSize.decode(preferences.getString(READER_TEXT_SIZE_KEY, null))
+
+    /** Writes the text size to disk, so callers run it off the main thread. */
+    fun persistReaderTextSize(size: com.caceras.aibrief.ReaderTextSize) {
+        preferences.edit { putString(READER_TEXT_SIZE_KEY, size.name) }
+    }
+
     private fun fetchFeed(feed: FeedSource): List<NewsArticle> {
         val connection = URL(feed.url).openConnection() as HttpURLConnection
         return try {
@@ -500,6 +509,7 @@ class NewsRepository(context: Context) {
         const val OWNER_POSTS_ETAG_KEY = "owner_posts_etag"
         const val SAVED_ARTICLES_KEY = "saved_articles"
         const val READ_STORIES_KEY = "read_story_ids"
+        const val READER_TEXT_SIZE_KEY = "reader_text_size"
         const val CACHED_ARTICLES_KEY = "cached_articles"
         const val CACHED_AT_KEY = "cached_at"
         const val NETWORK_TIMEOUT_MILLIS = 7_000

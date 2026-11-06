@@ -368,6 +368,8 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                         onReportError = { context.reportError(article) },
                         onBack = { closeReader() },
                         listState = readerListState,
+                        textSize = state.readerTextSize,
+                        onCycleTextSize = viewModel::cycleReaderTextSize,
                         seriesParts = article.series?.let { series ->
                             (state.articles + state.savedArticles).filter { it.series?.id == series.id }
                                 .distinctBy { it.id }.sortedBy { it.series?.part }
