@@ -312,6 +312,15 @@ class NewsRepository(context: Context) {
         persistArticles(SAVED_ARTICLES_KEY, saved, MAX_SAVED_ARTICLES)
     }
 
+    /** The ids of stories this reader has opened; see [com.caceras.aibrief.ReadHistory]. */
+    fun readStoryIds(): Set<String> =
+        com.caceras.aibrief.ReadHistory.decode(preferences.getString(READ_STORIES_KEY, null))
+
+    /** Writes the read list to disk, so callers run it off the main thread. */
+    fun persistReadStoryIds(ids: Set<String>) {
+        preferences.edit { putString(READ_STORIES_KEY, com.caceras.aibrief.ReadHistory.encode(ids)) }
+    }
+
     private fun fetchFeed(feed: FeedSource): List<NewsArticle> {
         val connection = URL(feed.url).openConnection() as HttpURLConnection
         return try {
@@ -490,6 +499,7 @@ class NewsRepository(context: Context) {
         const val OWNER_POSTS_KEY = "owner_posts_document"
         const val OWNER_POSTS_ETAG_KEY = "owner_posts_etag"
         const val SAVED_ARTICLES_KEY = "saved_articles"
+        const val READ_STORIES_KEY = "read_story_ids"
         const val CACHED_ARTICLES_KEY = "cached_articles"
         const val CACHED_AT_KEY = "cached_at"
         const val NETWORK_TIMEOUT_MILLIS = 7_000
