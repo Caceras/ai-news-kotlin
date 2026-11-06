@@ -77,6 +77,8 @@ fun ArticleReader(
     /** Every part of this story's series, in order, when it belongs to one. */
     seriesParts: List<NewsArticle> = emptyList(),
     onOpenArticle: (NewsArticle) -> Unit = {},
+    /** The story offered after this one, opened through [onOpenArticle]; hidden when null. */
+    upNext: NewsArticle? = null,
     /** Opens a correction email about this story; the link is hidden when null. */
     onReportError: (() -> Unit)? = null,
     listState: LazyListState = rememberLazyListState(),
@@ -120,6 +122,13 @@ fun ArticleReader(
             }
             if (article.series != null && seriesParts.size > 1) item("series") {
                 SeriesContents(article, seriesParts, onOpenArticle)
+            }
+            if (upNext != null) item("upNext") {
+                Column(Modifier.padding(top = Space.xxl)) {
+                    Text("UP NEXT", style = Brief.type.tag, color = c.accent,
+                        modifier = Modifier.padding(horizontal = Space.gutter).semantics { heading() })
+                    RowCard(upNext) { onOpenArticle(upNext) }
+                }
             }
             item("footer") {
                 Column(Modifier.padding(start = Space.l, end = Space.l, top = Space.xxl)) {
