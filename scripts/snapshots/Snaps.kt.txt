@@ -103,7 +103,7 @@ class Snaps {
     @Test fun about() = paparazzi.snapshot {
         AiBriefTheme { Column(Modifier.fillMaxSize()) {
             Masthead(false, false, NewsCategory.ALL, {}, {}, null, null)
-            androidx.compose.foundation.layout.Box(Modifier.weight(1f)) { AboutScreen(rememberLazyListState()) }
+            androidx.compose.foundation.layout.Box(Modifier.weight(1f)) { AboutScreen(rememberLazyListState(), 0, {}) }
             BottomNavigation(NavTab.ABOUT) {} } }
     }
     @Test fun readerBreaking() = reader(edition[0])
