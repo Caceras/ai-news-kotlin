@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -75,6 +77,7 @@ fun ArticleReader(
     /** Every part of this story's series, in order, when it belongs to one. */
     seriesParts: List<NewsArticle> = emptyList(),
     onOpenArticle: (NewsArticle) -> Unit = {},
+    listState: LazyListState = rememberLazyListState(),
 ) {
     val c = Brief.colors
     val haptic = LocalHapticFeedback.current
@@ -95,7 +98,7 @@ fun ArticleReader(
             }
             IconButton(onClick = onShare) { Icon(Icons.Outlined.Share, "Share article", tint = c.onMasthead) }
         }
-        LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(bottom = Space.section)) {
+        LazyColumn(Modifier.weight(1f), state = listState, contentPadding = PaddingValues(bottom = Space.section)) {
             item("header") {
                 when {
                     opinion -> OpinionHeader(article)
