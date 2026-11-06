@@ -250,10 +250,19 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         keyboard?.hide()
         searchShown = false
         query = ""
-        if (tab == NavTab.HOME && currentTab == NavTab.HOME) {
-            scope.launch { homeListState.animateScrollToItem(0) }
-            viewModel.refresh(userRequested = true)
-            updateViewModel.checkForUpdate()
+        // Tapping the tab you are on returns to its top, like every Android app;
+        // on Latest it also fetches the newest edition.
+        if (tab == currentTab) {
+            val list = when (tab) {
+                NavTab.HOME -> homeListState
+                NavTab.EXPLORE -> exploreListState
+                NavTab.ABOUT -> aboutListState
+            }
+            scope.launch { list.animateScrollToItem(0) }
+            if (tab == NavTab.HOME) {
+                viewModel.refresh(userRequested = true)
+                updateViewModel.checkForUpdate()
+            }
         }
         currentTab = tab
         scope.launch { pagerState.animateScrollToPage(tab.ordinal) }
