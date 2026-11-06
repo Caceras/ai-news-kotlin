@@ -97,7 +97,7 @@ class Snaps {
         AiBriefTheme { Column(Modifier.fillMaxSize()) {
             Masthead(false, false, NewsCategory.ALL, {}, {}, null, null)
             androidx.compose.foundation.layout.Box(Modifier.weight(1f)) {
-                ExploreScreen(NewsUiState(edition, edition.take(2), extras = extras), rememberLazyListState(), {}, {}, {}) }
+                ExploreScreen(NewsUiState(edition, edition.take(2), extras = extras), rememberLazyListState(), {}, {}, {}, {}) }
             BottomNavigation(NavTab.EXPLORE) {} } }
     }
     @Test fun about() = paparazzi.snapshot {

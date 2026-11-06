@@ -54,6 +54,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.BookmarkRemove
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Info
@@ -70,6 +71,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -104,6 +108,8 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -277,6 +283,23 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         returnTo = null
         selectedArticleId = article.id
     }
+    // Saves or removes a story and says so; a removal can be undone, putting
+    // the story back where it was on the shelf.
+    fun toggleSaved(article: NewsArticle) {
+        val shelfIndex = state.savedArticles.indexOfFirst { it.id == article.id }
+        viewModel.toggleSaved(article)
+        scope.launch {
+            snackbar.currentSnackbarData?.dismiss()
+            if (shelfIndex < 0) {
+                snackbar.showSnackbar("Saved for offline reading, in Explore",
+                    duration = SnackbarDuration.Short)
+            } else if (snackbar.showSnackbar("Removed from your reading list",
+                    actionLabel = "Undo", duration = SnackbarDuration.Short) ==
+                SnackbarResult.ActionPerformed) {
+                viewModel.restoreSaved(article, shelfIndex)
+            }
+        }
+    }
     fun closeReader(fromProgress: Float = 0f) {
         exitProgress = fromProgress
         backProgress = 0f
@@ -339,21 +362,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                         }
                     }) {
                     ArticleReader(article, state.savedArticles.any { it.id == article.id },
-                        onToggleSaved = {
-                            val shelfIndex = state.savedArticles.indexOfFirst { it.id == article.id }
-                            viewModel.toggleSaved(article)
-                            scope.launch {
-                                snackbar.currentSnackbarData?.dismiss()
-                                if (shelfIndex < 0) {
-                                    snackbar.showSnackbar("Saved for offline reading, in Explore",
-                                        duration = SnackbarDuration.Short)
-                                } else if (snackbar.showSnackbar("Removed from your reading list",
-                                        actionLabel = "Undo", duration = SnackbarDuration.Short) ==
-                                    SnackbarResult.ActionPerformed) {
-                                    viewModel.restoreSaved(article, shelfIndex)
-                                }
-                            }
-                        },
+                        onToggleSaved = { toggleSaved(article) },
                         onShare = { context.shareArticle(article) },
                         onOpenSource = { context.openExternalUrl(article.url) },
                         onReportError = { context.reportError(article) },
@@ -418,6 +427,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                         })
                                     NavTab.EXPLORE -> ExploreScreen(state, exploreListState,
                                         onOpenArticle = ::openFromFeed,
+                                        onRemoveSaved = ::toggleSaved,
                                         onOpenUrl = { context.openExternalUrl(it) },
                                         onBrowse = { selectTab(NavTab.HOME) })
                                     NavTab.ABOUT -> AboutScreen(aboutListState,
@@ -716,6 +726,7 @@ private fun ExploreScreen(
     state: NewsUiState,
     listState: LazyListState,
     onOpenArticle: (NewsArticle) -> Unit,
+    onRemoveSaved: (NewsArticle) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBrowse: () -> Unit,
 ) {
@@ -734,7 +745,9 @@ private fun ExploreScreen(
         item("saved-ribbon") {
             SectionRibbon(if (saved.isEmpty()) "Saved" else "Saved · ${saved.size}")
         }
-        items(saved, key = { "saved-${it.id}" }) { article -> RowCard(article) { onOpenArticle(article) } }
+        items(saved, key = { "saved-${it.id}" }) { article ->
+            SavedRow(article, onOpen = { onOpenArticle(article) }, onRemove = { onRemoveSaved(article) })
+        }
         if (state.isLoading) item("loading") {
             LoadingIndicator()
         } else if (saved.isEmpty()) item("saved-empty") {
@@ -768,6 +781,36 @@ private fun ExploreScreen(
         state.extras.radar?.let { radar ->
             item("radar") { RadarModule(radar, limit = radar.entries.size, onOpenUrl = onOpenUrl, onSeeAll = null) }
         }
+    }
+}
+
+/**
+ * A saved story. Swiping it sideways removes it from the shelf (the snackbar
+ * offers Undo); TalkBack users get the same as a "Remove from Saved" action.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SavedRow(article: NewsArticle, onOpen: () -> Unit, onRemove: () -> Unit) {
+    val c = Brief.colors
+    val swipe = rememberSwipeToDismissBoxState()
+    LaunchedEffect(swipe.currentValue) {
+        if (swipe.currentValue != SwipeToDismissBoxValue.Settled) onRemove()
+    }
+    SwipeToDismissBox(swipe,
+        modifier = Modifier.semantics {
+            customActions = listOf(CustomAccessibilityAction("Remove from Saved") { onRemove(); true })
+        },
+        backgroundContent = {
+            val towardStart = swipe.dismissDirection == SwipeToDismissBoxValue.EndToStart
+            Row(Modifier.fillMaxSize().background(c.masthead).padding(horizontal = Space.gutter),
+                horizontalArrangement = if (towardStart) Arrangement.End else Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.BookmarkRemove, null, Modifier.size(22.dp), tint = c.onMasthead)
+                Spacer(Modifier.width(Space.s))
+                Text("Remove", style = Brief.type.meta, color = c.onMasthead)
+            }
+        }) {
+        RowCard(article, onOpen)
     }
 }
 
