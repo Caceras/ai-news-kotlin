@@ -84,6 +84,7 @@ class PublishingTest(unittest.TestCase):
             ({'kicker': 'A kicker that is far too long to read'}, 'a long kicker'),
             ({'title': 'x' * 121}, 'a long headline'),
             ({'theme': 'NEON'}, 'an unknown card colour'),
+            ({'summary': 'Demo story to preview the design. Not real news.'}, 'a placeholder story'),
         ]:
             draft = dict(self.draft, author='AI Brief editorial', **change)
             with self.assertRaises(ValueError, msg=reason):
