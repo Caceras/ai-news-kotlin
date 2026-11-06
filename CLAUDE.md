@@ -65,6 +65,7 @@ A cold build of the gates takes about 3 minutes.
 ## Design and publishing (November 2026 redesign)
 
 - The look is a strict design system: `docs/DESIGN_SYSTEM.md`. Colours, fonts, type, shapes and spacing live only in `ui/theme/Theme.kt`; `DesignRulesTest` fails the build on raw values elsewhere. Add a token instead of an exception.
+- Text colours must reach 4.5:1 on their surface (`ContrastTest`). Accent colours that fail as text get a separate text token (`breakingInk`, `opinionInk`); when a screen sets a role as text on a new surface, add the pair to the test.
 - Story types (`StoryFormat`: NEWS, BREAKING, EXPLAINER, OPINION, GUIDE, SPONSORED, REVIEW) each have one card and one reader header. Reviews carry `rating` 1–5. Front-page order is `FeedLayout.compose`, covered by `FeedLayoutTest`: bleed lead (headline on the picture), pair, "Latest" four, designed card, rankings, series rails, radar, reviews, opinion, more stories, guides.
 - Posts can carry `series` ({id, title, part, of}), `imageCredit`, and `video` blocks (still + play button; opens outside the app).
 - Data modules live under `extras` in `content/posts.json` (`rankings`, `radar`), refreshed by `scripts/update-extras.py` and `.github/workflows/update-extras.yml` (daily). Rankings need the `AA_API_KEY` secret (owner); `--from-page` reads the public leaderboard once. Every module must name its source.

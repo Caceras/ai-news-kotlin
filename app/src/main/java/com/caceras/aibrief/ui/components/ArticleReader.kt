@@ -203,7 +203,7 @@ private fun NewsHeader(article: NewsArticle) {
             Column(Modifier.readingMeasure()
                 .padding(start = Space.l, end = Space.l, top = Space.l, bottom = Space.xl)) {
                 article.series?.let {
-                    Text(it.label.uppercase(Locale.US), style = Brief.type.tag, color = c.opinionAccent)
+                    Text(it.label.uppercase(Locale.US), style = Brief.type.tag, color = c.opinionInk)
                     Spacer(Modifier.height(Space.xs))
                 }
                 Tag(article)
@@ -231,7 +231,7 @@ private fun OpinionHeader(article: NewsArticle) {
             Portrait(article, 96.dp)
             Spacer(Modifier.width(Space.gutter))
             Column {
-                Text(StoryFormat.OPINION.label.uppercase(Locale.US), style = Brief.type.label, color = c.opinionAccent)
+                Text(StoryFormat.OPINION.label.uppercase(Locale.US), style = Brief.type.label, color = c.opinionInk)
                 Spacer(Modifier.height(Space.xs))
                 Text(article.author ?: article.source, style = Brief.type.rowTitle, color = c.ink)
                 article.authorRole?.let { Text(it, style = Brief.type.meta, color = c.inkMuted) }
