@@ -25,6 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +41,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -139,11 +141,22 @@ fun kickerHeadline(article: NewsArticle): AnnotatedString {
     }
 }
 
+/**
+ * Stories this reader has opened. Provided around the front page and Explore,
+ * not the reader, so headlines there turn muted once read.
+ */
+val LocalReadStories = staticCompositionLocalOf<Set<String>> { emptySet() }
+
 @Composable
 fun Headline(article: NewsArticle, style: TextStyle, modifier: Modifier = Modifier, maxLines: Int = 4,
-             color: Color = Brief.colors.ink) {
-    Text(kickerHeadline(article), style = style, color = color, maxLines = maxLines,
-        overflow = TextOverflow.Ellipsis, modifier = modifier.semantics { heading() })
+             color: Color? = null) {
+    val read = article.id in LocalReadStories.current
+    Text(kickerHeadline(article), style = style,
+        color = color ?: if (read) Brief.colors.inkMuted else Brief.colors.ink, maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis, modifier = modifier.semantics {
+            heading()
+            if (read) stateDescription = "Read"
+        })
 }
 
 /** The one-line follow-up under a headline. The arrow is decoration and is not read aloud. */

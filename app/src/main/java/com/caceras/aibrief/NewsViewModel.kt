@@ -41,6 +41,8 @@ data class NewsUiState(
     val lastUpdated: Instant? = null,
     /** Model rankings and the radar, read from the same edition document. */
     val extras: EditionExtras = EditionExtras.EMPTY,
+    /** Stories this reader has opened, oldest first; see [ReadHistory]. */
+    val readIds: Set<String> = emptySet(),
 )
 
 /** Reads a topic saved by [NewsViewModel.selectCategory], falling back to all topics. */
@@ -84,12 +86,14 @@ class NewsViewModel(
     init {
         viewModelScope.launch {
             try {
-                val (initial, saved) = withContext(Dispatchers.IO) {
-                    repository.initialLoad() to repository.savedArticles()
+                val (initial, saved, read) = withContext(Dispatchers.IO) {
+                    Triple(repository.initialLoad(), repository.savedArticles(), repository.readStoryIds())
                 }
                 _uiState.value = _uiState.value.copy(
                     articles = initial.articles,
                     savedArticles = saved,
+                    // A story opened while the device copy was loading stays read.
+                    readIds = _uiState.value.readIds.fold(read) { ids, id -> ReadHistory.marked(ids, id) },
                     freshness = initial.freshness,
                     lastUpdated = initial.updatedAt,
                     extras = initial.extras,
@@ -159,6 +163,17 @@ class NewsViewModel(
     fun restoreSaved(article: NewsArticle, index: Int) {
         _uiState.update { it.copy(savedArticles = restoredSaved(it.savedArticles, article, index)) }
         persistShelf()
+    }
+
+    /** Remembers that [article] was opened; written on the IO dispatcher, like the shelf. */
+    fun markRead(article: NewsArticle) {
+        if (article.id in _uiState.value.readIds) return
+        _uiState.update { it.copy(readIds = ReadHistory.marked(it.readIds, article.id)) }
+        // Until the stored list is loaded, writing would replace it with this one story.
+        if (_uiState.value.isLoading) return
+        viewModelScope.launch(Dispatchers.IO) {
+            saveLock.withLock { runCatching { repository.persistReadStoryIds(_uiState.value.readIds) } }
+        }
     }
 
     private fun persistShelf() {

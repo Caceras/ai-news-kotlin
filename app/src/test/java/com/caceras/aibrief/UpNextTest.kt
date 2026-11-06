@@ -58,4 +58,14 @@ class UpNextTest {
         assertNull(UpNext.after(a, listOf(a)))
         assertNull(UpNext.after(a, listOf(a, b), setOf("b")))
     }
+
+    @Test
+    fun `prefers a story the reader has not opened`() {
+        assertEquals("c", UpNext.after(a, listOf(a, b, c), readIds = setOf("a", "b"))?.id)
+    }
+
+    @Test
+    fun `offers a read story when every story is read`() {
+        assertEquals("b", UpNext.after(a, listOf(a, b, c), readIds = setOf("a", "b", "c"))?.id)
+    }
 }

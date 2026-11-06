@@ -76,6 +76,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -116,6 +117,7 @@ import com.caceras.aibrief.ui.components.ArticleReader
 import com.caceras.aibrief.ui.components.BrandMark
 import com.caceras.aibrief.ui.components.DesignedCard
 import com.caceras.aibrief.ui.components.HeadlineCard
+import com.caceras.aibrief.ui.components.LocalReadStories
 import com.caceras.aibrief.ui.components.LeadStory
 import com.caceras.aibrief.ui.components.OpinionRail
 import com.caceras.aibrief.ui.components.PairCards
@@ -213,6 +215,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         .firstOrNull { it.id == selectedArticleId }
     val selectedArticle = listedArticle ?: lastShownArticle?.takeIf { it.id == selectedArticleId }
     SideEffect { if (listedArticle != null) lastShownArticle = listedArticle }
+    LaunchedEffect(selectedArticle?.id) { selectedArticle?.let(viewModel::markRead) }
     val pagerState = rememberPagerState(initialPage = currentTab.ordinal,
         pageCount = { NavTab.entries.size })
     val scope = rememberCoroutineScope()
@@ -316,7 +319,8 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                             (state.articles + state.savedArticles).filter { it.series?.id == series.id }
                                 .distinctBy { it.id }.sortedBy { it.series?.part }
                         }.orEmpty(),
-                        upNext = UpNext.after(article, state.articles, readerTrail.stops.map { it.id }.toSet()),
+                        upNext = UpNext.after(article, state.articles, readerTrail.stops.map { it.id }.toSet(),
+                            state.readIds),
                         onOpenArticle = { next ->
                             if (next.id != article.id) {
                                 readerTrail = readerTrail.push(TrailStop(article.id,
@@ -348,27 +352,29 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                 viewModel.refresh(userRequested = true); updateViewModel.checkForUpdate()
                             }) else null,
                         )
-                        HorizontalPager(state = pagerState, modifier = Modifier.weight(1f),
-                            beyondViewportPageCount = 1) { page ->
-                            when (NavTab.entries[page]) {
-                                NavTab.HOME -> FeedScreen(state, updateState, homeListState,
-                                    searchShown, query, onQueryChange = { query = it },
-                                    onCloseSearch = { query = ""; searchShown = false; keyboard?.hide() },
-                                    onOpenArticle = { keyboard?.hide(); openFromFeed(it) },
-                                    onInstallUpdate = updateViewModel::downloadAndInstall,
-                                    onGrantInstallPermission = updateViewModel::requestInstallPermission,
-                                    onDismissUpdate = updateViewModel::dismiss,
-                                    onAbout = { selectTab(NavTab.ABOUT) },
-                                    onExplore = { selectTab(NavTab.EXPLORE) },
-                                    onOpenUrl = { context.openExternalUrl(it) },
-                                    onRefresh = {
-                                        viewModel.refresh(userRequested = true); updateViewModel.checkForUpdate()
-                                    })
-                                NavTab.EXPLORE -> ExploreScreen(state, exploreListState,
-                                    onOpenArticle = ::openFromFeed,
-                                    onOpenUrl = { context.openExternalUrl(it) },
-                                    onBrowse = { selectTab(NavTab.HOME) })
-                                NavTab.ABOUT -> AboutScreen(aboutListState)
+                        CompositionLocalProvider(LocalReadStories provides state.readIds) {
+                            HorizontalPager(state = pagerState, modifier = Modifier.weight(1f),
+                                beyondViewportPageCount = 1) { page ->
+                                when (NavTab.entries[page]) {
+                                    NavTab.HOME -> FeedScreen(state, updateState, homeListState,
+                                        searchShown, query, onQueryChange = { query = it },
+                                        onCloseSearch = { query = ""; searchShown = false; keyboard?.hide() },
+                                        onOpenArticle = { keyboard?.hide(); openFromFeed(it) },
+                                        onInstallUpdate = updateViewModel::downloadAndInstall,
+                                        onGrantInstallPermission = updateViewModel::requestInstallPermission,
+                                        onDismissUpdate = updateViewModel::dismiss,
+                                        onAbout = { selectTab(NavTab.ABOUT) },
+                                        onExplore = { selectTab(NavTab.EXPLORE) },
+                                        onOpenUrl = { context.openExternalUrl(it) },
+                                        onRefresh = {
+                                            viewModel.refresh(userRequested = true); updateViewModel.checkForUpdate()
+                                        })
+                                    NavTab.EXPLORE -> ExploreScreen(state, exploreListState,
+                                        onOpenArticle = ::openFromFeed,
+                                        onOpenUrl = { context.openExternalUrl(it) },
+                                        onBrowse = { selectTab(NavTab.HOME) })
+                                    NavTab.ABOUT -> AboutScreen(aboutListState)
+                                }
                             }
                         }
                         if (!keyboardVisible) BottomNavigation(currentTab, ::selectTab)
