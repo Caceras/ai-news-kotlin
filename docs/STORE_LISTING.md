@@ -18,16 +18,18 @@ Read original explainers and editorial briefings in a native Android reader. Eac
 
 Find a clearer view of AI:
 
-- Open the featured story or browse the latest writing.
-- Explore Research, Products, Policy, and Builders.
+- Open the lead story or browse the latest writing on a newspaper-style front page.
+- Filter by Research, Products, Policy, and Builders.
+- Read explainers, guides, signed opinion columns, reviews with star ratings, and multi-part series.
+- Follow a table of leading AI models and a radar of new releases, each naming its public source.
 - Search headlines and article bodies on your device.
-- Save original articles to a private reading shelf.
+- Save stories to a private reading shelf in Explore; stories you have opened are marked as read.
 - Read a bundled edition when you first open the app offline, and keep downloaded writing available when the connection fails.
 - Open source links in your browser and share stories through Android.
 
 New writing is published by the editor and arrives when you refresh the edition; a normal article update does not require installing a new app version. Publication dates and offline-edition labels make the reading context clear.
 
-AI Brief needs no reader account. It includes no advertising SDKs or analytics trackers. Search and saved articles stay on your device. The app makes ordinary HTTPS requests to its content and image hosts; read the privacy policy for hosting and connection details.
+AI Brief needs no reader account. It includes no advertising SDKs or analytics trackers. Searches, saved articles and your reading history stay on your device. The app makes ordinary HTTPS requests to its content and image hosts; read the privacy policy for hosting and connection details.
 
 The launch edition includes AI-assisted editorial explainers. Illustrative artwork is labeled and is not presented as a photograph of a news event. The app does not generate answers or images from reader prompts.
 
@@ -42,7 +44,9 @@ https://github.com/Caceras/ai-news-kotlin/blob/main/PRIVACY.md
 
 All reader functionality is available without sign-in, payment, membership, or special access. No test credentials are needed.
 
-On launch, read the featured story or a bundled offline edition. Use Latest to browse, choose a topic to filter, and use the magnifying-glass action to search. Open an article and tap its bookmark to save it. Saved opens the local reading shelf. Source links open in the default browser. About contains publisher information, the contact page, the privacy policy and a corrections email action.
+On launch, read the lead story or a bundled offline edition. The bottom bar has three tabs: Latest (the front page; choose a topic to filter, and use the magnifying-glass action to search), Explore (saved stories, series, model rankings and the new-model radar) and About (publisher information, editorial standards, the privacy policy, the contact page, an email action, and Clear reading history once a story has been opened). Open a story and tap its bookmark to save it; it then appears under Saved in Explore. The end of every story has the original source link, "Spotted an error? Report it" (a corrections email) and the next story. Source and video links open outside the app.
+
+Sponsored stories, when published, are labelled Sponsored with the sponsor's name on the card and in the story, and never lead the front page. Opinion columns are signed and labelled Opinion.
 
 The Android app is an editor-published reader. Readers cannot submit public posts or generate AI content. Publisher management happens outside the app and is not needed to review any reader feature. The Play edition has no self-updater or package-install permission.
 
@@ -50,7 +54,7 @@ The public edition is fetched from the publisher's repository over HTTPS. If the
 
 ## Declarations to finish in Console
 
-Ads: No for this code.
+Ads: No for this code: the app has no ad SDKs. If the owner ever publishes paid Sponsored stories, answer the Ads declaration Yes before they go live.
 
 Access restrictions: None for the reader.
 
