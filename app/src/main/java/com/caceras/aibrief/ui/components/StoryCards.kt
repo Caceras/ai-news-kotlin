@@ -57,6 +57,8 @@ import com.caceras.aibrief.ui.theme.Brief
 import com.caceras.aibrief.ui.theme.BriefShapes
 import com.caceras.aibrief.ui.theme.Space
 import com.caceras.aibrief.ui.theme.cardPalette
+import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -189,9 +191,21 @@ fun Tag(article: NewsArticle, modifier: Modifier = Modifier, color: Color = Brie
 /** "★★★★☆" for four out of five. */
 fun stars(rating: Int): String = "★".repeat(rating.coerceIn(0, 5)) + "☆".repeat(5 - rating.coerceIn(0, 5))
 
+private val CARD_DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM", Locale.US)
+private val CARD_DATE_WITH_YEAR: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.US)
+
+/**
+ * "4 Oct" this year, "4 Oct 2025" otherwise, so a story from last year never
+ * passes for this week's on the front page.
+ */
+internal fun cardDate(publishedAt: Instant, zone: ZoneId, today: LocalDate): String {
+    val day = publishedAt.atZone(zone).toLocalDate()
+    return (if (day.year == today.year) CARD_DATE else CARD_DATE_WITH_YEAR).format(day)
+}
+
 /** "4 Oct · 5 min read" */
-fun NewsArticle.metaText(): String {
-    val date = DateTimeFormatter.ofPattern("d MMM", Locale.US).withZone(ZoneId.systemDefault()).format(publishedAt)
+fun NewsArticle.metaText(zone: ZoneId = ZoneId.systemDefault(), today: LocalDate = LocalDate.now(zone)): String {
+    val date = cardDate(publishedAt, zone, today)
     return listOfNotNull(
         source.takeUnless { isOriginalPost },
         date,
