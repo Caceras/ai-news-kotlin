@@ -149,6 +149,14 @@ android {
         }
     }
 
+    androidResources {
+        // The app is written in English only. Without this filter, libraries
+        // ship their own strings in about 85 languages, so a phone set to
+        // Swedish would mix Swedish system labels (TalkBack's "Dismiss",
+        // pull-to-refresh, menus) into an English app and carry unused text.
+        localeFilters += listOf("en")
+    }
+
     lint {
         // Correctness problems block the pipeline; "a newer dependency exists"
         // and similar advisory findings are reported without failing a build.
