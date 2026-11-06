@@ -241,8 +241,8 @@
       "publishedAt": "2026-11-05T20:40:00Z",
       "format": "REVIEW",
       "rating": 4,
-      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-thinking-game.webp",
-      "imageCredit": "Image: Google DeepMind, from the film’s YouTube release",
+      "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-thinking-game-art.webp",
+      "imageCredit": "Illustration: AI Brief",
       "blocks": [
         {
           "type": "paragraph",
@@ -252,7 +252,7 @@
           "type": "video",
           "url": "https://www.youtube.com/watch?v=d95J8yzvjbQ",
           "title": "The Thinking Game, full documentary (83 min)",
-          "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-thinking-game.webp"
+          "imageUrl": "https://raw.githubusercontent.com/Caceras/ai-news-kotlin/main/content/media/2026-11-05-thinking-game-art.webp"
         },
         {
           "type": "paragraph",
