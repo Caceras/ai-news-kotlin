@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -309,13 +310,14 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     }
 
     val c = Brief.colors
-    // The masthead colour runs up under the status bar; everything else
-    // respects system bars, cutouts and the keyboard.
+    // The masthead colour runs up under the status bar and the tab bar's colour
+    // down under the navigation bar; content respects system bars, cutouts and
+    // the keyboard.
+    val bottomInset = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
     Box(Modifier.fillMaxSize().background(c.masthead)
         .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top).asPaddingValues())) {
         Box(Modifier.fillMaxSize().background(c.paper)
-            .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-                .asPaddingValues())) {
+            .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues())) {
             AnimatedContent(targetState = selectedArticle, modifier = Modifier.fillMaxSize(),
                 transitionSpec = { fadeIn() togetherWith fadeOut() },
                 // A refreshed copy of the open story updates in place, keeping the reader's place.
@@ -326,7 +328,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                     val shift = with(LocalDensity.current) { Motion.backPreviewShift.toPx() }
                     val start = returnTo?.takeIf { it.id == article.id }
                     val readerListState = rememberLazyListState(start?.index ?: 0, start?.offset ?: 0)
-                    Box(Modifier.fillMaxSize().graphicsLayer {
+                    Box(Modifier.fillMaxSize().windowInsetsPadding(bottomInset).graphicsLayer {
                         val scale = BackPreview.scale(preview)
                         scaleX = scale
                         scaleY = scale
@@ -374,7 +376,9 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                         })
                     }
                 } else {
-                    Column(Modifier.fillMaxSize()) {
+                    // With the tab bar hidden for the keyboard, the list stops above the keyboard.
+                    Column(Modifier.fillMaxSize().then(if (keyboardVisible) Modifier.windowInsetsPadding(bottomInset)
+                        else Modifier)) {
                         Masthead(
                             isRefreshing = state.isRefreshing,
                             showTopics = currentTab == NavTab.HOME && !searchShown,
@@ -422,11 +426,11 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                 }
                             }
                         }
-                        if (!keyboardVisible) BottomNavigation(currentTab, ::selectTab)
+                        if (!keyboardVisible) BottomNavigation(currentTab, bottomInset, ::selectTab)
                     }
                 }
             }
-            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter)
+            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).windowInsetsPadding(bottomInset)
                 .padding(start = Space.gutter, end = Space.gutter,
                     bottom = if (selectedArticle == null && !keyboardVisible) 78.dp else Space.gutter))
         }
@@ -492,9 +496,14 @@ private fun TopicTabs(selected: NewsCategory, onSelect: (NewsCategory) -> Unit) 
 }
 
 @Composable
-private fun BottomNavigation(activeTab: NavTab, onSelect: (NavTab) -> Unit) {
+private fun BottomNavigation(
+    activeTab: NavTab,
+    bottomInset: WindowInsets = WindowInsets(0),
+    onSelect: (NavTab) -> Unit,
+) {
     val c = Brief.colors
-    Column(Modifier.background(c.card)) {
+    // The bar's colour continues under the system navigation bar; the tabs sit above it.
+    Column(Modifier.background(c.card).windowInsetsPadding(bottomInset)) {
         Rule()
         Row(Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
             NavTab.entries.forEach { tab ->
