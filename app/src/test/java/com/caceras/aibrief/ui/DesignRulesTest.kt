@@ -31,6 +31,7 @@ class DesignRulesTest {
         Rule("raw padding", Regex("""\bpadding\([^)]*\d+(\.\d+)?\.dp"""), "use a step from Space"),
         Rule("raw gap", Regex("""\bspacedBy\(\s*\d+(\.\d+)?\.dp"""), "use a step from Space"),
         Rule("raw spacer", Regex("""Spacer\(Modifier\.(height|width)\(\s*\d+(\.\d+)?\.dp"""), "use a step from Space"),
+        Rule("raw column width", Regex("""widthIn\(max = \d+(\.\d+)?\.dp"""), "use a width from Measure"),
     )
 
     /** File name to rule names it may break, each with a reason. Keep this empty if you can. */

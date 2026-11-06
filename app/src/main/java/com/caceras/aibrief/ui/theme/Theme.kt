@@ -254,6 +254,14 @@ object Space {
     val section = 40.dp
 }
 
+/** Widest content on large screens: tablets, foldables and landscape phones. */
+object Measure {
+    /** The column every screen is centred in. */
+    val page = 840.dp
+    /** The widest a column of reading text gets, about 70 characters of body type. */
+    val text = 640.dp
+}
+
 /** The only corner shapes. News photos are square-cornered; designed cards are round. */
 object BriefShapes {
     val none: Shape = RoundedCornerShape(0.dp)

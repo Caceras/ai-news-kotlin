@@ -9,7 +9,7 @@ enforced in code, not left to taste.
 
 | Rule | Where it lives | What fails if broken |
 |---|---|---|
-| Colours, fonts, type sizes and weights, corner shapes and spacing are defined once | `ui/theme/Theme.kt` | `DesignRulesTest` fails the build on any raw `Color(0x…)`, `.sp`, `FontWeight.`, `FontFamily`/`Font(`, `MaterialTheme.typography`/`colorScheme`, `RoundedCornerShape(`, or literal dp in `padding`, `spacedBy` or `Spacer` anywhere else |
+| Colours, fonts, type sizes and weights, corner shapes and spacing are defined once | `ui/theme/Theme.kt` | `DesignRulesTest` fails the build on any raw `Color(0x…)`, `.sp`, `FontWeight.`, `FontFamily`/`Font(`, `MaterialTheme.typography`/`colorScheme`, `RoundedCornerShape(`, or literal dp in `padding`, `spacedBy`, `Spacer` or `widthIn(max = …)` anywhere else |
 | Each story type has exactly one card and one reader header | `ui/components/StoryCards.kt`, `ArticleReader.kt` | Posts cannot carry styling; unknown fields are ignored |
 | Front-page order | `FeedLayout.kt` | `FeedLayoutTest` |
 | Story types, limits and labels | `scripts/publish-post.py`, `OwnerPosts` parser | `test_publishing.py`, `StoryFormatTest`, the Content workflow |
@@ -28,6 +28,7 @@ needs something new, add a named token or role for it first.
   bodyHeading, wordmark, pageTitle, opinionHeadline, opinionBody, quote, designedTitle, button, ribbon.
   Headlines are DM Sans ExtraBold; columns and quotes are Newsreader. No other faces.
 - **Spacing** (`Space`): hairline 1, xxs 2, xs 4, s 8, m 12, gutter 16, l 20, xl 24, xxl 32, section 40 (dp).
+- **Widths** (`Measure`): every screen is centred in a `page` column of 840 dp; reading text in the story reader stops at `text`, 640 dp (about 70 characters), so tablets and landscape phones keep a readable line length while pictures use the full column.
   Every screen uses the 16 dp gutter.
 - **Shapes** (`BriefShapes`): none (news photos), thumb 4, button 6, card 18, pill, round, portraitBlob.
 - **Card themes** (`CardTheme`): SKY, LILAC, MINT, PEACH, BLUSH (light), OCEAN, INDIGO, NAVY (dark).
