@@ -88,6 +88,7 @@ A cold build of the gates takes about 3 minutes.
 - A `git fetch origin main <branch>` aborts entirely if the session branch does not exist on the remote yet, leaving `origin/main` stale. Fetch `main` on its own.
 - Keep `res/mipmap-anydpi-v26`. Lint flags it as `ObsoleteSdkInt`, but renaming it to `mipmap-anydpi` breaks resource linking (`mipmap/ic_launcher not found`).
 - Every external intent tells the reader when nothing can handle it (`startOrExplain` in `MainActivity`, a toast in `PostBlockContent`). Do not swallow `ActivityNotFoundException` silently.
+- Back from a story is predictive (`PredictiveBackHandler` + `BackPreview`, manifest `enableOnBackInvokedCallback`). Every back handler must go through `OnBackPressedDispatcher` (Compose `BackHandler`/`PredictiveBackHandler`); never override `onBackPressed` or catch `KEYCODE_BACK`.
 - Returning to the app refreshes the edition only after 30 minutes (`refreshIfStale`, monotonic clock). Do not refresh on every resume.
 - `AsyncArticleImage` seeds its state from `ArticleImageCache.cached` so memory-cached pictures draw in the first frame. Keep that when changing the loader.
 - `ArticleImageCache.onTrimMemory` (called from `MainActivity.onTrimMemory`) halves decoded images when the UI is hidden and drops them in the background. Route any new in-memory cache through the same hook.
