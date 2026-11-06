@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Shape
 import com.caceras.aibrief.BuildConfig
+import com.caceras.aibrief.data.SingleFlight
 import com.caceras.aibrief.ui.theme.Brief
 import com.caceras.aibrief.ui.theme.BriefShapes
 import java.io.File
@@ -40,7 +41,9 @@ import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
 
 /**
@@ -93,6 +96,12 @@ object ArticleImageCache {
             return (image.bitmap.byteCount / 1024).coerceAtLeast(1)
         }
     }
+
+    /**
+     * Downloads in progress. A cover on a card and the same cover in the story
+     * just opened, or a picture used twice on the front page, is fetched once.
+     */
+    private val downloads = SingleFlight<String, ByteArray?>(CoroutineScope(SupervisorJob() + Dispatchers.IO))
 
     /** The size each picture was most recently decoded at, so the first frame can find it. */
     private val latestSize = ConcurrentHashMap<String, DecodeSize>()
@@ -158,12 +167,13 @@ object ArticleImageCache {
             }
         }
 
-        // 3. Network fetch
+        // 3. Network fetch, shared with any other box waiting for the same picture
         return@withContext runCatching {
-            val bytes = download(url) ?: return@runCatching null
+            val bytes = downloads.run(url) {
+                download(url)?.also { storeOnDisk(diskCacheDir, diskFile, it) }
+            } ?: return@runCatching null
             val bitmap = decodeBytesSafely(bytes, size) ?: return@runCatching null
 
-            storeOnDisk(diskCacheDir, diskFile, bytes)
             val image = DecodedImage(bitmap, size)
             keep(url, image)
             image
