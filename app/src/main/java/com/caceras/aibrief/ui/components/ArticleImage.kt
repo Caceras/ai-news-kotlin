@@ -342,7 +342,10 @@ fun AsyncArticleImage(
             .clip(shape)
             .then(if (fit) Modifier else Modifier.background(Brief.colors.placeholder)),
     ) {
-        if (fallbackResource != null) {
+        // The illustration is a full-size bitmap decoded on the main thread, so it
+        // is only composed while the picture is missing or still fading in. A picture
+        // already in memory starts at full opacity and never decodes it.
+        if (fallbackResource != null && (bitmap == null || alpha < 1f)) {
             Image(painterResource(fallbackResource), contentDescription,
                 contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         }
