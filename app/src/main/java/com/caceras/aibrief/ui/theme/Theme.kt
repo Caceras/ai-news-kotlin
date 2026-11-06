@@ -270,6 +270,14 @@ object Measure {
     val text = 640.dp
 }
 
+/** Motion values shared by every screen. */
+object Motion {
+    /** How small an open story gets while a back swipe previews leaving it (Material predictive back). */
+    const val backPreviewScale = 0.9f
+    /** How far it slides away from the edge the swipe started at. */
+    val backPreviewShift = Space.s
+}
+
 /** The only corner shapes. News photos are square-cornered; designed cards are round. */
 object BriefShapes {
     val none: Shape = RoundedCornerShape(0.dp)

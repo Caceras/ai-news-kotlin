@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
@@ -77,6 +78,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -85,6 +88,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -132,6 +136,7 @@ import com.caceras.aibrief.ui.theme.AiBriefTheme
 import com.caceras.aibrief.ui.theme.Brief
 import com.caceras.aibrief.ui.theme.BriefShapes
 import com.caceras.aibrief.ui.theme.Measure
+import com.caceras.aibrief.ui.theme.Motion
 import com.caceras.aibrief.ui.theme.Space
 import com.caceras.aibrief.update.UpdateBanner
 import com.caceras.aibrief.update.UpdateManifest
@@ -141,6 +146,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -206,6 +212,11 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     var readerTrail by rememberSaveable(stateSaver = ReaderTrail.Saver) { mutableStateOf(ReaderTrail()) }
     // Where to land in the story Back returns to; consumed when it opens.
     var returnTo by remember { mutableStateOf<TrailStop?>(null) }
+    // A back swipe in progress over the open story, and where the story was
+    // left when the swipe completed, so it fades out from there.
+    var backProgress by remember { mutableFloatStateOf(0f) }
+    var backEdge by remember { mutableIntStateOf(0) }
+    var exitProgress by remember { mutableFloatStateOf(0f) }
     var searchShown by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
     // The open story stays on screen when it leaves both lists, such as
@@ -265,16 +276,33 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
         returnTo = null
         selectedArticleId = article.id
     }
-    fun closeReader() {
+    fun closeReader(fromProgress: Float = 0f) {
+        exitProgress = fromProgress
+        backProgress = 0f
         val (stop, rest) = readerTrail.pop()
         returnTo = stop
         readerTrail = rest
         selectedArticleId = stop?.id
     }
 
-    BackHandler(enabled = selectedArticle != null || searchShown || currentTab != NavTab.HOME) {
+    // The open story shrinks and slides with a back swipe, previewing that
+    // Back leaves it; letting go closes it, cancelling springs it back.
+    PredictiveBackHandler(enabled = selectedArticle != null) { swipe ->
+        var last = 0f
+        try {
+            swipe.collect { event ->
+                backEdge = event.swipeEdge
+                last = event.progress
+                backProgress = last
+            }
+            closeReader(fromProgress = last)
+        } catch (e: CancellationException) {
+            backProgress = 0f
+            throw e
+        }
+    }
+    BackHandler(enabled = selectedArticle == null && (searchShown || currentTab != NavTab.HOME)) {
         when {
-            selectedArticle != null -> closeReader()
             searchShown -> { searchShown = false; query = ""; keyboard?.hide() }
             else -> selectTab(NavTab.HOME)
         }
@@ -293,8 +321,21 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                 // A refreshed copy of the open story updates in place, keeping the reader's place.
                 contentKey = { it?.id }, label = "articleTransition") { article ->
                 if (article != null) {
+                    // The story leaving keeps the shape the swipe left it in while it fades.
+                    val preview = if (article.id == selectedArticleId) backProgress else exitProgress
+                    val shift = with(LocalDensity.current) { Motion.backPreviewShift.toPx() }
                     val start = returnTo?.takeIf { it.id == article.id }
                     val readerListState = rememberLazyListState(start?.index ?: 0, start?.offset ?: 0)
+                    Box(Modifier.fillMaxSize().graphicsLayer {
+                        val scale = BackPreview.scale(preview)
+                        scaleX = scale
+                        scaleY = scale
+                        translationX = BackPreview.direction(backEdge) * shift * preview.coerceIn(0f, 1f)
+                        if (preview > 0f) {
+                            shape = BriefShapes.card
+                            clip = true
+                        }
+                    }) {
                     ArticleReader(article, state.savedArticles.any { it.id == article.id },
                         onToggleSaved = {
                             val shelfIndex = state.savedArticles.indexOfFirst { it.id == article.id }
@@ -314,7 +355,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                         onShare = { context.shareArticle(article) },
                         onOpenSource = { context.openExternalUrl(article.url) },
                         onReportError = { context.reportError(article) },
-                        onBack = ::closeReader,
+                        onBack = { closeReader() },
                         listState = readerListState,
                         seriesParts = article.series?.let { series ->
                             (state.articles + state.savedArticles).filter { it.series?.id == series.id }
@@ -331,6 +372,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                 selectedArticleId = next.id
                             }
                         })
+                    }
                 } else {
                     Column(Modifier.fillMaxSize()) {
                         Masthead(
