@@ -309,6 +309,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                         },
                         onShare = { context.shareArticle(article) },
                         onOpenSource = { context.openExternalUrl(article.url) },
+                        onReportError = { context.reportError(article) },
                         onBack = ::closeReader,
                         listState = readerListState,
                         seriesParts = article.series?.let { series ->
@@ -836,6 +837,15 @@ private fun Context.shareArticle(article: NewsArticle) {
         })
     }
     startOrExplain(Intent.createChooser(shareIntent, "Share article"), "No app is available for sharing.")
+}
+
+private fun Context.reportError(article: NewsArticle) {
+    val email = correctionEmail(article, "${BuildConfig.VERSION_NAME} (build ${BuildConfig.BUILD_NUMBER})")
+    val intent = Intent(Intent.ACTION_SENDTO, "mailto:$SUPPORT_EMAIL".toUri()).apply {
+        putExtra(Intent.EXTRA_SUBJECT, email.subject)
+        putExtra(Intent.EXTRA_TEXT, email.body)
+    }
+    startOrExplain(intent, "No email app is set up. Write to $SUPPORT_EMAIL.")
 }
 
 private fun Context.sendEmail(address: String) {

@@ -77,6 +77,8 @@ fun ArticleReader(
     /** Every part of this story's series, in order, when it belongs to one. */
     seriesParts: List<NewsArticle> = emptyList(),
     onOpenArticle: (NewsArticle) -> Unit = {},
+    /** Opens a correction email about this story; the link is hidden when null. */
+    onReportError: (() -> Unit)? = null,
     listState: LazyListState = rememberLazyListState(),
 ) {
     val c = Brief.colors
@@ -140,6 +142,12 @@ fun ArticleReader(
                         article.isOriginalPost -> "Published by AI Brief · Caceras"
                         else -> "Reporting and research from ${article.source}."
                     }, style = Brief.type.meta, color = c.inkMuted)
+                    if (onReportError != null) {
+                        Text("Spotted an error? Report it", style = Brief.type.button, color = c.ink,
+                            modifier = Modifier.minimumInteractiveComponentSize()
+                                .clickable(role = Role.Button, onClickLabel = "Email a correction",
+                                    onClick = onReportError))
+                    }
                     Spacer(Modifier.height(Space.l))
                     Text("Back to stories  ←", style = Brief.type.button, color = c.accent,
                         modifier = Modifier.minimumInteractiveComponentSize().spokenAs("Back to stories")
