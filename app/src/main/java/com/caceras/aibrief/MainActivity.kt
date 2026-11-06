@@ -806,6 +806,9 @@ private fun Context.openExternalUrl(url: String) =
 private fun Context.shareArticle(article: NewsArticle) {
     val shareIntent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
+        // The share sheet previews the headline, and mail apps use it as the subject.
+        putExtra(Intent.EXTRA_TITLE, article.title)
+        putExtra(Intent.EXTRA_SUBJECT, article.title)
         putExtra(Intent.EXTRA_TEXT, buildString {
             append(article.title)
             append("\n\n")
