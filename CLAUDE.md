@@ -75,6 +75,7 @@ A cold build of the gates takes about 3 minutes.
 - Play screenshots come from `StoreSnaps` in the same script (`store-*.png`, 1080 × 1920 RGB, real edition only, never invented headlines). Copy them to `docs/play/screenshots` after a visible design change. Paparazzi shrinks to 1000 px unless `useDeviceResolution = true`.
 - Breaking lasts `BREAKING_WINDOW` (24 h from `updatedAt ?: publishedAt`). `AiBriefApp` maps stale breaking stories to NEWS (`NewsArticle.asOf`) for every screen; check `isBreakingAt`, never `format == BREAKING` with a clock of your own.
 - Sponsored posts must name a sponsor (parser drops them otherwise) and never lead. Opinion must be signed by a person.
+- Never publish demo or placeholder stories to the live edition, even when they are labelled, to preview a design (a fake "Astra released" breaking story with a real logo had to be pulled). Preview designs in Paparazzi snapshots. `publish-post.py` rejects "demo story", "placeholder story" and "not real news".
 
 ## Code rules learned
 
