@@ -373,7 +373,9 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                         onOpenArticle = ::openFromFeed,
                                         onOpenUrl = { context.openExternalUrl(it) },
                                         onBrowse = { selectTab(NavTab.HOME) })
-                                    NavTab.ABOUT -> AboutScreen(aboutListState)
+                                    NavTab.ABOUT -> AboutScreen(aboutListState,
+                                        readCount = state.readIds.size,
+                                        onClearReadHistory = viewModel::clearReadHistory)
                                 }
                             }
                         }
@@ -761,7 +763,7 @@ private fun AboutSection(title: String, body: String, link: Pair<String, () -> U
 }
 
 @Composable
-private fun AboutScreen(listState: LazyListState) {
+private fun AboutScreen(listState: LazyListState, readCount: Int, onClearReadHistory: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val c = Brief.colors
@@ -786,11 +788,19 @@ private fun AboutScreen(listState: LazyListState) {
         item("privacy") {
             SectionRibbon("Privacy")
             AboutSection("No accounts, no tracking",
-                "No accounts, advertising SDKs or analytics trackers. Saved articles and search queries stay on this " +
-                    "device. The app fetches our public edition and article images over HTTPS, so hosting providers " +
-                    "receive normal connection data such as your IP address. Clear app storage or uninstall to " +
-                    "delete saved articles and caches.",
+                "No accounts, advertising SDKs or analytics trackers. Saved articles, the stories you have opened " +
+                    "and search queries stay on this device. The app fetches our public edition and article images " +
+                    "over HTTPS, so hosting providers receive normal connection data such as your IP address. Clear " +
+                    "app storage or uninstall to delete saved articles and caches.",
                 "Read the privacy policy" to { context.openExternalUrl(PRIVACY_URL) })
+            if (readCount > 0) {
+                Box(Modifier.padding(horizontal = Space.gutter, vertical = Space.s)) {
+                    SecondaryButton("Clear reading history") {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onClearReadHistory()
+                    }
+                }
+            }
         }
         item("contact") {
             SectionRibbon("Contact")
