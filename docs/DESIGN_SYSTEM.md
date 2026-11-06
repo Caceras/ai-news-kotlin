@@ -21,9 +21,11 @@ needs something new, add a named token or role for it first.
 ## Tokens
 
 - **Colour roles** (`Brief.colors`): paper, card, ink, inkMuted, rule, masthead, onMasthead, mastheadAction,
-  ribbonLabel, accent, onAccent, breaking, onBreaking, opinionPaper, opinionAccent, placeholder,
-  onImage, imageScrim. Light and dark themes define every role. `breaking` red is used only for
-  breaking labels and kickers.
+  ribbonLabel, accent, onAccent, breaking, onBreaking, breakingInk, opinionPaper, opinionAccent, opinionInk,
+  placeholder, onImage, imageScrim. Light and dark themes define every role. `breaking` red is the fill
+  behind breaking labels; `breakingInk` is the same red as text (kickers). `opinionAccent` is for shapes and
+  for text on masthead navy; `opinionInk` is opinion orange as text on paper and cards.
+  Text colours meet WCAG AA contrast (4.5:1) on the surfaces they sit on; `ContrastTest` checks every pair.
 - **Type** (`Brief.type`): display, headline, headlineSmall, rowTitle, deck, label, tag, meta, body,
   bodyHeading, wordmark, pageTitle, opinionHeadline, opinionBody, quote, designedTitle, button, ribbon.
   Headlines are DM Sans ExtraBold; columns and quotes are Newsreader. No other faces.

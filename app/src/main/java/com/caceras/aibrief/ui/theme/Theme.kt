@@ -56,12 +56,16 @@ data class BriefColors(
     /** Links, selected tabs and the brand. */
     val accent: Color,
     val onAccent: Color,
-    /** Breaking labels and kickers. Never used for anything else. */
+    /** The fill behind breaking labels, flags and banners. Never used for anything else. */
     val breaking: Color,
     val onBreaking: Color,
-    /** The warm paper an opinion column sits on, and its accent. */
+    /** Breaking red set as text on paper and cards: the kicker before a headline. */
+    val breakingInk: Color,
+    /** The warm paper an opinion column sits on, and its accent (shapes, bars, text on masthead navy). */
     val opinionPaper: Color,
     val opinionAccent: Color,
+    /** Opinion orange set as text on paper, cards and opinion paper, dark enough to read. */
+    val opinionInk: Color,
     /** Placeholder behind an image while it loads. */
     val placeholder: Color,
     /** Text set on top of photographs and dark designed cards. */
@@ -70,7 +74,7 @@ data class BriefColors(
     val imageScrim: Color,
 )
 
-private val LightBrief = BriefColors(
+internal val LightBrief = BriefColors(
     paper = Color(0xFFF1F2F4),
     card = Color(0xFFFFFFFF),
     ink = Color(0xFF0B0D12),
@@ -79,19 +83,21 @@ private val LightBrief = BriefColors(
     masthead = Color(0xFF0A1F44),
     onMasthead = Color(0xFFFFFFFF),
     mastheadAction = Color(0xFF7FA5FF),
-    ribbonLabel = Color(0xFF2F6BFF),
+    ribbonLabel = Color(0xFF2A66F5),
     accent = Color(0xFF1F55E0),
     onAccent = Color(0xFFFFFFFF),
     breaking = Color(0xFFD7262E),
     onBreaking = Color(0xFFFFFFFF),
+    breakingInk = Color(0xFFC41F27),
     opinionPaper = Color(0xFFFBF1E6),
     opinionAccent = Color(0xFFE8833A),
+    opinionInk = Color(0xFFA84B14),
     placeholder = Color(0xFFE4E7EC),
     onImage = Color(0xFFFFFFFF),
     imageScrim = Color(0xD90A0F1A),
 )
 
-private val DarkBrief = BriefColors(
+internal val DarkBrief = BriefColors(
     paper = Color(0xFF0B0D12),
     card = Color(0xFF151922),
     ink = Color(0xFFF2F3F5),
@@ -100,13 +106,15 @@ private val DarkBrief = BriefColors(
     masthead = Color(0xFF0A1F44),
     onMasthead = Color(0xFFFFFFFF),
     mastheadAction = Color(0xFF7FA5FF),
-    ribbonLabel = Color(0xFF2F6BFF),
+    ribbonLabel = Color(0xFF2A66F5),
     accent = Color(0xFF7FA5FF),
     onAccent = Color(0xFF0B0D12),
-    breaking = Color(0xFFFF4A52),
+    breaking = Color(0xFFD7262E),
     onBreaking = Color(0xFFFFFFFF),
+    breakingInk = Color(0xFFFF4A52),
     opinionPaper = Color(0xFF241B14),
     opinionAccent = Color(0xFFF29A55),
+    opinionInk = Color(0xFFF29A55),
     placeholder = Color(0xFF1E232D),
     onImage = Color(0xFFFFFFFF),
     imageScrim = Color(0xD9000000),
@@ -130,7 +138,7 @@ private fun lightCard(start: Long, end: Long, glow: Long) = CardPalette(
 
 private fun darkCard(start: Long, end: Long, glow: Long) = CardPalette(
     brush = Brush.linearGradient(listOf(Color(start), Color(end))), edge = Color(end),
-    ink = Color(0xFFFFFFFF), inkMuted = Color(0xFFD5DEEA), glow = Color(glow),
+    ink = Color(0xFFFFFFFF), inkMuted = Color(0xFFEEF2F8), glow = Color(glow),
 )
 
 /** The eight card backgrounds. A post picks one by name and can never add a ninth. */

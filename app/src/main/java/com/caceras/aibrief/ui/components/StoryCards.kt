@@ -132,7 +132,7 @@ fun NewsArticle.kickerText(): String? = kicker
 /** The headline with its kicker set in red before it, as one line of type. */
 @Composable
 fun kickerHeadline(article: NewsArticle): AnnotatedString {
-    val red = Brief.colors.breaking
+    val red = Brief.colors.breakingInk
     return buildAnnotatedString {
         article.kickerText()?.let { kicker ->
             withStyle(SpanStyle(color = red)) { append(kicker.uppercase(Locale.US)); append(": ") }
@@ -313,7 +313,7 @@ fun SectionRibbon(title: String, modifier: Modifier = Modifier, breaking: Boolea
     val c = Brief.colors
     Box(modifier.fillMaxWidth().padding(top = Space.m).background(if (breaking) c.breaking else c.masthead)
         .semantics { heading() }, contentAlignment = Alignment.Center) {
-        Box(Modifier.background(if (breaking) c.ink else c.ribbonLabel, Slant)
+        Box(Modifier.background(if (breaking) c.masthead else c.ribbonLabel, Slant)
             .padding(horizontal = Space.xxl, vertical = Space.s)) {
             Text(title.uppercase(Locale.US), style = Brief.type.ribbon, color = c.onMasthead)
         }
@@ -352,7 +352,7 @@ fun OpinionCard(article: NewsArticle, modifier: Modifier = Modifier, onClick: ()
                 Text(article.author ?: article.source, style = Brief.type.rowTitle, color = c.ink, maxLines = 1,
                     overflow = TextOverflow.Ellipsis)
                 Text((article.authorRole ?: StoryFormat.OPINION.label).uppercase(Locale.US),
-                    style = Brief.type.tag, color = c.opinionAccent)
+                    style = Brief.type.tag, color = c.opinionInk)
             }
         }
         Spacer(Modifier.height(Space.m))
