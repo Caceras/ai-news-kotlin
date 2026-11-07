@@ -188,10 +188,20 @@ fun NewsArticle.tagText(): String = when (format) {
     else -> listOfNotNull(format.label, category.takeIf { it != NewsCategory.ALL }?.label).joinToString(" · ")
 }.uppercase(Locale.US)
 
+/**
+ * The label above a story in the reader. A breaking story's red band already
+ * says "Breaking", so its label names only the topic (or nothing) instead of
+ * saying it twice, on screen and in TalkBack.
+ */
+fun NewsArticle.readerTagText(): String? =
+    if (format == StoryFormat.BREAKING) category.takeIf { it != NewsCategory.ALL }?.label?.uppercase(Locale.US)
+    else tagText()
+
 @Composable
-fun Tag(article: NewsArticle, modifier: Modifier = Modifier, color: Color = Brief.colors.accent) {
+fun Tag(article: NewsArticle, modifier: Modifier = Modifier, color: Color = Brief.colors.accent,
+        text: String = article.tagText()) {
     // A sponsored label wraps rather than hide who paid; other labels stay on one line.
-    Text(article.tagText(), style = Brief.type.tag, color = color,
+    Text(text, style = Brief.type.tag, color = color,
         maxLines = if (article.format == StoryFormat.SPONSORED) Int.MAX_VALUE else 1,
         overflow = TextOverflow.Ellipsis, modifier = modifier)
 }

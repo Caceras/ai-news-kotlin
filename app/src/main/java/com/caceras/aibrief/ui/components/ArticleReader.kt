@@ -274,8 +274,10 @@ private fun NewsHeader(article: NewsArticle) {
                     Text(it.label.uppercase(Locale.US), style = Brief.type.tag, color = c.opinionInk)
                     Spacer(Modifier.height(Space.xs))
                 }
-                Tag(article)
-                Spacer(Modifier.height(Space.s))
+                article.readerTagText()?.let {
+                    Tag(article, text = it)
+                    Spacer(Modifier.height(Space.s))
+                }
                 Headline(article, Brief.type.display, maxLines = Int.MAX_VALUE)
                 Spacer(Modifier.height(Space.m))
                 Deck(article.summary, maxLines = Int.MAX_VALUE)
