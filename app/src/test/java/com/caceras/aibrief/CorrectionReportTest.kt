@@ -31,4 +31,18 @@ class CorrectionReportTest {
         assertFalse(email.body.contains("Link:"))
         assertFalse(email.body.contains("Updated:"))
     }
+
+    @Test
+    fun mailtoCarriesSubjectAndBodyEncodedForMailApps() {
+        val uri = mailtoUri("editor@example.com", "Correction: A & B?", "Line one\nStory ID: x=1")
+
+        assertEquals("mailto:editor@example.com?subject=Correction%3A%20A%20%26%20B%3F" +
+            "&body=Line%20one%0AStory%20ID%3A%20x%3D1", uri)
+        assertFalse(uri.contains("+"))
+    }
+
+    @Test
+    fun mailtoWithoutBodyHasOnlyASubject() {
+        assertEquals("mailto:a@b.se?subject=AI%20Brief%20feedback", mailtoUri("a@b.se", "AI Brief feedback"))
+    }
 }
