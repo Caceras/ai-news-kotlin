@@ -87,7 +87,7 @@ fun RankingsModule(rankings: ModelRankings, limit: Int, onOpenSource: () -> Unit
                 }
                 Spacer(Modifier.width(Space.m))
                 Column(Modifier.weight(1f)) {
-                    Text(model.name, style = Brief.type.rowTitle, color = c.ink, maxLines = 2,
+                    Text(model.name, style = Brief.type.rowTitle, color = c.ink, maxLines = scaledLines(2),
                         overflow = TextOverflow.Ellipsis)
                     Text(listOfNotNull(model.maker.takeIf { it.isNotBlank() }, "Open weights".takeIf { model.openWeights })
                         .joinToString(" · "), style = Brief.type.meta, color = c.inkMuted)
@@ -162,7 +162,7 @@ fun SeriesRail(parts: List<NewsArticle>, onOpen: (NewsArticle) -> Unit) {
                     Column(Modifier.padding(Space.gutter)) {
                         Text("PART ${series.part} OF ${series.count}", style = Brief.type.tag, color = c.opinionAccent)
                         Spacer(Modifier.height(Space.s))
-                        Text(article.title, style = Brief.type.headlineSmall, color = c.onMasthead, maxLines = 4,
+                        Text(article.title, style = Brief.type.headlineSmall, color = c.onMasthead, maxLines = scaledLines(4),
                             overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
                     }
                 }
