@@ -79,6 +79,12 @@ class NewsViewModel(
     private val saveLock = Mutex()
     /** Monotonic time of the latest refresh attempt, or null before the first one starts. */
     private var lastRefreshAttempt: Long? = null
+    /**
+     * True when the reader asked for the refresh in flight, including a pull
+     * that arrived while a silent resume refresh was already running: that
+     * reader is waiting on the spinner and must hear if the edition was offline.
+     */
+    private var readerWaiting = false
     /** True once the reader has changed the text size in this session. */
     private var textSizeChosen = false
     /** True once the reader cleared the read list in this session. */
@@ -141,15 +147,16 @@ class NewsViewModel(
             }
             // markRead holds back writes while loading; save any change made in that moment.
             if (historyCleared || _uiState.value.readIds.isNotEmpty()) persistReadHistory()
-            loadLatest(userRequested = false)
+            loadLatest()
         }
     }
 
-    /** [userRequested] refreshes report a failure; the silent launch refresh relies on the edition label. */
+    /** [userRequested] refreshes report a failure, even when they join one already running; the silent launch and resume refreshes rely on the edition label. */
     fun refresh(userRequested: Boolean = false) {
+        if (userRequested) readerWaiting = true
         if (_uiState.value.isRefreshing) return
         _uiState.value = _uiState.value.copy(isRefreshing = true)
-        viewModelScope.launch { loadLatest(userRequested) }
+        viewModelScope.launch { loadLatest() }
     }
 
     /**
@@ -161,7 +168,7 @@ class NewsViewModel(
         if (isEditionStale(lastRefreshAttempt, SystemClock.elapsedRealtime())) refresh(userRequested = false)
     }
 
-    private suspend fun loadLatest(userRequested: Boolean) {
+    private suspend fun loadLatest() {
         lastRefreshAttempt = SystemClock.elapsedRealtime()
         try {
             val load = repository.loadLatest()
@@ -171,11 +178,12 @@ class NewsViewModel(
                 lastUpdated = load.updatedAt,
                 extras = load.extras,
             )
-            if (userRequested && load.freshness != FeedFreshness.LIVE) _notices.trySend(OFFLINE_NOTICE)
+            if (readerWaiting && load.freshness != FeedFreshness.LIVE) _notices.trySend(OFFLINE_NOTICE)
         } catch (error: Exception) {
             if (error is CancellationException) throw error
-            if (userRequested) _notices.trySend(OFFLINE_NOTICE)
+            if (readerWaiting) _notices.trySend(OFFLINE_NOTICE)
         } finally {
+            readerWaiting = false
             _uiState.value = _uiState.value.copy(isRefreshing = false)
         }
     }
