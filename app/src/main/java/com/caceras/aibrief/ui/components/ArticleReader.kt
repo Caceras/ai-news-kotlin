@@ -1,5 +1,6 @@
 package com.caceras.aibrief.ui.components
 
+import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,7 +34,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,17 +69,29 @@ import java.util.Locale
 
 /** Every date in the reader reads the same way: "March 4, 2026". */
 private val READER_DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.US)
-private val READER_TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, HH:mm", Locale.US)
+private val READER_TIME_24: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, HH:mm", Locale.US)
+private val READER_TIME_12: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, h:mm a", Locale.US)
 
 // The zone is resolved per call, so dates stay right if the device changes time zone.
-private fun Instant.readerDate() = READER_DATE.withZone(ZoneId.systemDefault()).format(this)
-private fun Instant.readerTime() = READER_TIME.withZone(ZoneId.systemDefault()).format(this)
+private fun Instant.readerDate(zone: ZoneId) = READER_DATE.withZone(zone).format(this)
 
-/** "By Name · March 4, 2026 · Updated Mar 5, 14:05 · 5 min read" */
-fun NewsArticle.bylineText(): String = listOfNotNull(
+/** "Mar 5, 14:05", or "Mar 5, 2:05 PM" on a phone set to the 12-hour clock. */
+internal fun Instant.readerTime(use24Hour: Boolean, zone: ZoneId = ZoneId.systemDefault()): String =
+    (if (use24Hour) READER_TIME_24 else READER_TIME_12).withZone(zone).format(this)
+
+/** Whether times should read like the phone's clock (Settings › Date & time › Use 24-hour format). */
+@Composable
+@ReadOnlyComposable
+private fun use24HourClock(): Boolean = DateFormat.is24HourFormat(LocalContext.current)
+
+/**
+ * "By Name · March 4, 2026 · Updated Mar 5, 14:05 · 5 min read". An update
+ * stamp that is not later than publication says nothing and is left out.
+ */
+fun NewsArticle.bylineText(use24Hour: Boolean = true, zone: ZoneId = ZoneId.systemDefault()): String = listOfNotNull(
     author?.let { "By $it" } ?: source,
-    publishedAt.readerDate(),
-    updatedAt?.let { "Updated ${it.readerTime()}" },
+    publishedAt.readerDate(zone),
+    updatedAt?.takeIf { it.isAfter(publishedAt) }?.let { "Updated ${it.readerTime(use24Hour, zone)}" },
     "$readingTimeMinutes min read",
 ).joinToString(" · ")
 
@@ -251,7 +266,7 @@ private fun NewsHeader(article: NewsArticle) {
         if (article.format == StoryFormat.BREAKING) {
             Collage(article)
             Row(Modifier.fillMaxWidth().background(c.breaking).padding(horizontal = Space.l, vertical = Space.s)) {
-                Text("BREAKING · ${(article.updatedAt ?: article.publishedAt).readerTime()}",
+                Text("BREAKING · ${(article.updatedAt ?: article.publishedAt).readerTime(use24HourClock())}",
                     style = Brief.type.tag, color = c.onBreaking)
             }
             article.imageCredit?.let {
@@ -282,7 +297,7 @@ private fun NewsHeader(article: NewsArticle) {
                 Spacer(Modifier.height(Space.m))
                 Deck(article.summary, maxLines = Int.MAX_VALUE)
                 Spacer(Modifier.height(Space.gutter))
-                Text(article.bylineText(), style = Brief.type.meta, color = c.inkMuted)
+                Text(article.bylineText(use24HourClock()), style = Brief.type.meta, color = c.inkMuted)
                 if (article.format == StoryFormat.REVIEW) Text("Review: the critic's own assessment.",
                     style = Brief.type.meta, color = c.inkMuted, modifier = Modifier.padding(top = Space.xs))
                 if (article.isOfflineBrief) Text("Offline explainer · background reading",
@@ -315,7 +330,7 @@ private fun OpinionHeader(article: NewsArticle) {
                 Spacer(Modifier.height(Space.m))
                 Text(article.summary, style = Brief.type.quote, color = c.inkMuted)
                 Spacer(Modifier.height(Space.gutter))
-                Text(article.bylineText(), style = Brief.type.meta, color = c.inkMuted)
+                Text(article.bylineText(use24HourClock()), style = Brief.type.meta, color = c.inkMuted)
             }
         }
         Spacer(Modifier.height(Space.m))
@@ -338,7 +353,7 @@ private fun DesignedHeader(article: NewsArticle) {
             }
             Spacer(Modifier.height(Space.m))
         }
-        Text(article.bylineText(), style = Brief.type.meta, color = c.inkMuted)
+        Text(article.bylineText(use24HourClock()), style = Brief.type.meta, color = c.inkMuted)
     }
 }
 
