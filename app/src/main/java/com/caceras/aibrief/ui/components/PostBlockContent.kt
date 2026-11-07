@@ -28,7 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.CollectionInfo
+import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.collectionInfo
+import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
@@ -69,9 +73,14 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier, opinion: B
             }
         }
 
-        is PostBlock.Bullets -> Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.m)) {
-            block.items.forEach { item ->
-                Row {
+        // TalkBack announces "list, N items" and each item's place in it.
+        is PostBlock.Bullets -> Column(modifier.fillMaxWidth()
+            .semantics { collectionInfo = CollectionInfo(rowCount = block.items.size, columnCount = 1) },
+            verticalArrangement = Arrangement.spacedBy(Space.m)) {
+            block.items.forEachIndexed { index, item ->
+                Row(Modifier.semantics(mergeDescendants = true) {
+                    collectionItemInfo = CollectionItemInfo(rowIndex = index, rowSpan = 1, columnIndex = 0, columnSpan = 1)
+                }) {
                     // The dot sits on the middle of the first line, whichever body face is in use.
                     Box(Modifier.padding(top = if (opinion) Space.m else Space.s + Space.xxs).size(Space.s)
                         .background(if (opinion) c.opinionAccent else c.accent, BriefShapes.round))
