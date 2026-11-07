@@ -2068,7 +2068,7 @@
       "title": "On the radar",
       "source": "OpenRouter",
       "sourceUrl": "https://openrouter.ai/models",
-      "checkedAt": "2026-11-05T20:17:09Z",
+      "checkedAt": "2026-11-07T06:27:07Z",
       "entries": [
         {
           "name": "Crouton Alpha",
@@ -2077,6 +2077,14 @@
           "note": "Crouton Alpha is a lightweight model built for scalable coding, agentic, and multimodal workflows.",
           "url": "https://openrouter.ai/stealth/crouton-alpha",
           "stealth": true
+        },
+        {
+          "name": "LFM3-1.7B",
+          "maker": "LiquidAI",
+          "listedAt": "2026-11-06",
+          "note": "A compact 1.7B-parameter text model with a 256K-token context, post-trained for agents, tool calling, and structured outputs.",
+          "url": "https://openrouter.ai/liquid/lfm-3-1.7b",
+          "stealth": false
         },
         {
           "name": "Gemini Omni 1.2 Flash",
@@ -2095,8 +2103,8 @@
           "stealth": false
         },
         {
-          "name": "ricursiveAI/Ripple-65B-Preview",
-          "maker": "ricursiveai",
+          "name": "Ripple 65B Preview",
+          "maker": "Ricursive",
           "listedAt": "2026-11-04",
           "note": "Ripple-65B-Preview by ricursiveAI, a 65B model with native tool calling, served in BF16.",
           "url": "https://openrouter.ai/ricursiveai/ripple-65b-preview",
@@ -2124,14 +2132,6 @@
           "listedAt": "2026-10-28",
           "note": "Particle-1 is a token-efficient agentic coding model from Particle AI, post-trained on DeepSeek V4.1 Flash.",
           "url": "https://openrouter.ai/particle-ai/particle-1",
-          "stealth": false
-        },
-        {
-          "name": "GPT-6.1 Terra Pro",
-          "maker": "OpenAI",
-          "listedAt": "2026-10-26",
-          "note": "GPT-6.1 Terra Pro is the same underlying model as GPT-6.1 Terra, served with reasoning.mode set to pro for higher-quality responses on complex tasks.",
-          "url": "https://openrouter.ai/openai/gpt-6.1-terra-pro",
           "stealth": false
         }
       ]
