@@ -56,4 +56,11 @@ class ArticleImageCacheTest {
         assertEquals(0, ArticleImageCache.trimTarget(40, 4096)) // TRIM_MEMORY_BACKGROUND
         assertEquals(0, ArticleImageCache.trimTarget(80, 4096)) // TRIM_MEMORY_COMPLETE
     }
+
+    @Test
+    fun bundledArtRoundTripsToItsResourceAndLeavesWebAddressesAlone() {
+        assertEquals(0x7f080001, bundledResourceId(bundledArt(0x7f080001)))
+        assertNull(bundledResourceId("https://example.com/bundled:12.webp"))
+        assertNull(bundledResourceId("bundled:not-a-number"))
+    }
 }
