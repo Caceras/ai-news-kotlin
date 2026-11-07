@@ -82,7 +82,7 @@ A cold build of the gates takes about 3 minutes.
 
 ## Code rules learned
 
-- Never read disk (assets, SharedPreferences, cache files) on the main thread at startup. `NewsViewModel` loads the device copy on `Dispatchers.IO` and exposes `isLoading`; keep new startup work there.
+- Never read disk (assets, SharedPreferences, cache files) on the main thread at startup. `NewsViewModel` loads the device copy on `Dispatchers.IO` and exposes `isLoading`; keep new startup work there. `AiBriefApp` calls `ReportDrawnWhen { !edition.isLoading }` (time to full display); if startup gains another wait, add it to that predicate.
 - The same applies to taps: `toggleSaved` updates the shelf in memory and persists on `Dispatchers.IO` under a `Mutex`. Do not call `NewsRepository` disk methods from UI callbacks.
 - Close every `HttpURLConnection` in a `finally`, including early returns.
 - A `git fetch origin main <branch>` aborts entirely if the session branch does not exist on the remote yet, leaving `origin/main` stale. Fetch `main` on its own.
