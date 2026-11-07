@@ -157,7 +157,7 @@ fun SeriesRail(parts: List<NewsArticle>, onOpen: (NewsArticle) -> Unit) {
                 val series = article.series ?: return@forEach
                 Column(Modifier.width(cardWidth).heightIn(min = 260.dp).clip(BriefShapes.card).background(c.masthead)
                     .semantics(mergeDescendants = true) {}
-                    .clickable(role = Role.Button) { onOpen(article) }) {
+                    .clickable(role = Role.Button, onClickLabel = READ_STORY) { onOpen(article) }) {
                     ArticleArtwork(article, ratio = Ratio.HERO)
                     Column(Modifier.padding(Space.gutter)) {
                         Text("PART ${series.part} OF ${series.count}", style = Brief.type.tag, color = c.opinionAccent)
