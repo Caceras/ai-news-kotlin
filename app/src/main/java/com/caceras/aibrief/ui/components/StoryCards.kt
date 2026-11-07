@@ -437,6 +437,10 @@ fun BrandMark(color: Color, modifier: Modifier = Modifier) {
 @Composable
 fun DesignedCard(article: NewsArticle, modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
     val palette = cardPalette(article.cardTheme)
+    // In the feed the card teases the story; as the reader's header (no tap) it is
+    // the story's own headline and standfirst, so nothing is cut short there.
+    val titleLines = if (onClick != null) scaledLines(4) else Int.MAX_VALUE
+    val summaryLines = if (onClick != null) scaledLines(3) else Int.MAX_VALUE
     // The card keeps its designed shape, but grows instead of clipping when large
     // system text needs more room, so the sponsor and title are always readable.
     BoxWithConstraints(modifier.fillMaxWidth()) {
@@ -463,10 +467,10 @@ fun DesignedCard(article: NewsArticle, modifier: Modifier = Modifier, onClick: (
                     SponsorPill(article)
                     Spacer(Modifier.height(Space.s))
                 }
-                Text(article.title, style = Brief.type.designedTitle, color = palette.ink, maxLines = scaledLines(4),
+                Text(article.title, style = Brief.type.designedTitle, color = palette.ink, maxLines = titleLines,
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.7f).semantics { heading() })
                 Spacer(Modifier.height(Space.m))
-                Text(article.summary, style = Brief.type.deck, color = palette.inkMuted, maxLines = scaledLines(3),
+                Text(article.summary, style = Brief.type.deck, color = palette.inkMuted, maxLines = summaryLines,
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.52f))
             }
         }

@@ -92,7 +92,7 @@ class Snaps {
     }
 
     private fun reader(article: NewsArticle) = paparazzi.snapshot {
-        AiBriefTheme { ArticleReader(article, false, {}, {}, {}, {}) }
+        AiBriefTheme { ArticleReader(article, false, {}, {}, {}, {}, onReportError = {}, onCycleTextSize = {}) }
     }
 
     @Test fun saved() = paparazzi.snapshot {

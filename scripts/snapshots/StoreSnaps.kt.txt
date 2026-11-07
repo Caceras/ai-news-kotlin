@@ -110,7 +110,7 @@ class StoreSnaps {
     @Test fun store01Feed() = feed("01-feed")
 
     @Test fun store02Reader() = paparazzi.snapshot("02-reader") {
-        AiBriefTheme { ArticleReader(edition.first { it.imageCredit == "Illustration: AI Brief" && it.format == StoryFormat.EXPLAINER }, true, {}, {}, {}, {}) }
+        AiBriefTheme { ArticleReader(edition.first { it.imageCredit == "Illustration: AI Brief" && it.format == StoryFormat.EXPLAINER }, true, {}, {}, {}, {}, onReportError = {}, onCycleTextSize = {}) }
     }
 
     @Test fun store03MoreStories() = feed("03-more-stories", scrolledTo = 3)
@@ -125,7 +125,7 @@ class StoreSnaps {
     @Test fun store05Dark() {
         paparazzi.unsafeUpdateConfig(phone.copy(nightMode = NightMode.NIGHT))
         paparazzi.snapshot("05-guide-dark") {
-            AiBriefTheme { ArticleReader(edition.first { it.format == StoryFormat.GUIDE }, false, {}, {}, {}, {}) }
+            AiBriefTheme { ArticleReader(edition.first { it.format == StoryFormat.GUIDE }, false, {}, {}, {}, {}, onReportError = {}, onCycleTextSize = {}) }
         }
     }
 }
