@@ -116,7 +116,7 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier, opinion: B
         }
 
         is PostBlock.Link -> {
-            val context = LocalContext.current
+            val openLink = rememberLinkOpener()
             Text(
                 text = "${block.text} ↗",
                 style = Brief.type.body.copy(textDecoration = TextDecoration.Underline),
@@ -124,14 +124,7 @@ fun PostBlockContent(block: PostBlock, modifier: Modifier = Modifier, opinion: B
                 modifier = modifier
                     .minimumInteractiveComponentSize()
                     .spokenAs(block.text)
-                    .clickable(role = Role.Button, onClickLabel = "Open in browser") {
-                        try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, block.url.toUri()))
-                        } catch (_: ActivityNotFoundException) {
-                            // Say why nothing opened; the post itself stays readable.
-                            Toast.makeText(context, "No browser is available to open this link.", Toast.LENGTH_LONG).show()
-                        }
-                    }
+                    .clickable(role = Role.Button, onClickLabel = "Open in browser") { openLink(block.url) }
                     .padding(vertical = Space.s),
             )
         }
