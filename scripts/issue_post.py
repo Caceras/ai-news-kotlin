@@ -9,6 +9,7 @@ same validated publisher the other workflow uses.
 
 Editing the issue later revises the same story; choosing "Unpublish" removes it.
 """
+import hashlib
 import importlib.util
 import io
 import json
@@ -80,10 +81,30 @@ def save_picture(url, name, token, square=False):
         image = ImageOps.fit(image, (side, side)).resize((min(side, 640),) * 2)
     else:
         image.thumbnail((1600, 1600))
+    encoded = io.BytesIO()
+    image.save(encoded, "WEBP", quality=82, method=6)
+    data = encoded.getvalue()
+    # The name carries a hash of the picture. Phones keep downloaded pictures
+    # by address, so a picture replaced by editing the issue must get a new
+    # address, or readers would keep seeing the old one.
     MEDIA.mkdir(parents=True, exist_ok=True)
-    target = MEDIA / f"{name}.webp"
-    image.save(target, "WEBP", quality=82, method=6)
+    target = MEDIA / f"{name}-{hashlib.sha256(data).hexdigest()[:10]}.webp"
+    target.write_bytes(data)
     return RAW_BASE + target.name
+
+
+def issue_media(number):
+    """Pictures in content/media that were saved from issue [number]."""
+    return list(MEDIA.glob(f"issue-{number}-*.webp"))
+
+
+def remove_unused_media(number, draft=None):
+    """Deletes this issue's pictures that the story no longer shows, such as a replaced
+    or withdrawn picture, so a picture we stop using is not kept in the edition."""
+    used = json.dumps(draft) if draft else ""
+    for path in issue_media(number):
+        if RAW_BASE + path.name not in used:
+            path.unlink()
 
 
 def sources(value):
@@ -148,10 +169,12 @@ def main():
         form = sections(body)
         if first_word(form.get("action", "")) == "unpublish":
             identifier = publisher.unpublish(source_issue=number)
+            remove_unused_media(number)
             message = f"Removed `{identifier}`. It disappears from the app on the next refresh."
         else:
             draft = draft_from_issue(body, number, token)
             identifier, outcome = publisher.publish(draft)
+            remove_unused_media(number, draft)
             message = (f"{outcome.capitalize()} `{identifier}`. Readers see it on their next refresh, "
                        "usually within five minutes. Edit this issue to revise the story, or set "
                        "Action to Unpublish to remove it.")

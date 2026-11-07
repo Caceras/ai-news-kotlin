@@ -1,4 +1,5 @@
 import importlib.util
+import io
 import json
 from pathlib import Path
 import tempfile
@@ -120,6 +121,28 @@ class IssueFormTest(unittest.TestCase):
         value = '![image](https://github.com/user-attachments/assets/a)\n<img width="300" src="https://github.com/user-attachments/assets/b" />\nhttps://e.com/c.jpg'
         self.assertEqual(['https://github.com/user-attachments/assets/a', 'https://github.com/user-attachments/assets/b',
                           'https://e.com/c.jpg'], self.issue.picture_urls(value))
+
+    def picture(self, colour):
+        from PIL import Image
+        out = io.BytesIO()
+        Image.new('RGB', (40, 20), colour).save(out, 'PNG')
+        return out.getvalue()
+
+    def test_a_replaced_picture_gets_a_new_address_and_the_old_file_goes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            self.issue.MEDIA = Path(folder)
+            other = Path(folder, 'issue-120-1-keep.webp')
+            other.write_bytes(b'x')
+            self.issue.fetch = lambda url, token: self.picture('red')
+            first = self.issue.save_picture('https://e.com/a', 'issue-12-1', None)
+            self.issue.fetch = lambda url, token: self.picture('blue')
+            second = self.issue.save_picture('https://e.com/b', 'issue-12-1', None)
+            self.assertNotEqual(first, second)
+            self.issue.remove_unused_media(12, {'imageUrl': second})
+            self.assertEqual([second.rsplit('/', 1)[1]], [p.name for p in self.issue.issue_media(12)])
+            self.issue.remove_unused_media(12)
+            self.assertEqual([], self.issue.issue_media(12))
+            self.assertTrue(other.exists())
 
 
 if __name__ == '__main__':
