@@ -236,7 +236,10 @@ fun Meta(article: NewsArticle, modifier: Modifier = Modifier, color: Color = Bri
 }
 
 private fun Modifier.story(onClick: () -> Unit) =
-    semantics(mergeDescendants = true) {}.clickable(role = Role.Button, onClick = onClick)
+    semantics(mergeDescendants = true) {}.clickable(role = Role.Button, onClickLabel = READ_STORY, onClick = onClick)
+
+/** What TalkBack says a story tap does: "Double tap to read story". */
+const val READ_STORY = "Read story"
 
 /** A small red "BREAKING" flag laid over the corner of a collage. */
 @Composable

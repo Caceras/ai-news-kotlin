@@ -162,7 +162,7 @@ fun ArticleReader(
                     Spacer(Modifier.height(Space.l))
                     if (article.url.isNotBlank()) {
                         Row(Modifier.minimumInteractiveComponentSize().border(Space.hairline, c.ink, BriefShapes.button)
-                            .clickable(role = Role.Button, onClick = onOpenSource)
+                            .clickable(role = Role.Button, onClickLabel = "Open in browser", onClick = onOpenSource)
                             .padding(horizontal = Space.gutter, vertical = Space.m),
                             verticalAlignment = Alignment.CenterVertically) {
                             Text(if (article.isOfflineBrief) "Open context" else "Read original source",
@@ -355,7 +355,7 @@ private fun SeriesContents(article: NewsArticle, parts: List<NewsArticle>, onOpe
         parts.forEach { part ->
             val current = part.id == article.id
             Row(Modifier.fillMaxWidth().minimumInteractiveComponentSize()
-                .then(if (current) Modifier else Modifier.clickable(role = Role.Button) { onOpen(part) })
+                .then(if (current) Modifier else Modifier.clickable(role = Role.Button, onClickLabel = READ_STORY) { onOpen(part) })
                 .padding(vertical = Space.s), verticalAlignment = Alignment.CenterVertically) {
                 Text("${part.series?.part}", style = Brief.type.headline,
                     color = if (current) c.opinionAccent else c.onMasthead.copy(alpha = 0.6f),
