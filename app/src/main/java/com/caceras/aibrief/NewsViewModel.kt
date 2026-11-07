@@ -214,13 +214,24 @@ class NewsViewModel(
         persistReadHistory()
     }
 
-    /** Forgets every opened story, so all headlines show as unread again. */
-    fun clearReadHistory() {
+    /**
+     * Forgets every opened story, so all headlines show as unread again.
+     * Returns the forgotten list so the caller can offer Undo.
+     */
+    fun clearReadHistory(): Set<String> {
+        val forgotten = _uiState.value.readIds
         historyCleared = true
         _uiState.update { it.copy(readIds = emptySet()) }
-        _notices.trySend(HISTORY_CLEARED_NOTICE)
-        if (!personalLoaded) return
-        persistReadHistory()
+        if (personalLoaded) persistReadHistory()
+        return forgotten
+    }
+
+    /** Undoes [clearReadHistory]: [forgotten] is read again, and so is every story opened since. */
+    fun restoreReadHistory(forgotten: Set<String>) {
+        // Before the stored list is read, undoing lets it merge back in when it arrives.
+        if (!personalLoaded) historyCleared = false
+        _uiState.update { it.copy(readIds = mergedReadIds(forgotten, it.readIds, cleared = false)) }
+        if (personalLoaded) persistReadHistory()
     }
 
     /** Moves story text to the next size and says which; stored on the IO dispatcher. */
@@ -257,7 +268,6 @@ class NewsViewModel(
             }
         }
         private const val TOPIC_KEY = "topic"
-        private const val HISTORY_CLEARED_NOTICE = "Reading history cleared"
         private const val OFFLINE_NOTICE = "Couldn't reach the latest edition. Showing the copy on this device."
     }
 }

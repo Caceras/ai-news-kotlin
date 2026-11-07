@@ -23,4 +23,10 @@ class MergedReadIdsTest {
     fun `stories opened after clearing stay read`() {
         assertEquals(setOf("c"), mergedReadIds(setOf("a"), setOf("c"), cleared = true))
     }
+
+    @Test
+    fun `undoing a clear brings the list back and keeps stories opened since`() {
+        assertEquals(listOf("a", "b", "c"), mergedReadIds(setOf("a", "b"), setOf("c"), cleared = false).toList())
+        assertEquals(listOf("a", "b"), mergedReadIds(setOf("a", "b"), setOf("b"), cleared = false).toList())
+    }
 }

@@ -319,6 +319,17 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
             }
         }
     }
+    // Clearing the read list is one tap, so it can be undone like removing a saved story.
+    fun clearReadHistory() {
+        val forgotten = viewModel.clearReadHistory()
+        scope.launch {
+            snackbar.currentSnackbarData?.dismiss()
+            if (snackbar.showSnackbar("Reading history cleared", actionLabel = "Undo",
+                    duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) {
+                viewModel.restoreReadHistory(forgotten)
+            }
+        }
+    }
     fun closeReader(fromProgress: Float = 0f) {
         exitProgress = fromProgress
         backProgress = 0f
@@ -463,7 +474,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                         onBrowse = { selectTab(NavTab.HOME) })
                                     NavTab.ABOUT -> AboutScreen(aboutListState,
                                         readCount = state.readIds.size,
-                                        onClearReadHistory = viewModel::clearReadHistory)
+                                        onClearReadHistory = ::clearReadHistory)
                                 }
                             }
                         }
