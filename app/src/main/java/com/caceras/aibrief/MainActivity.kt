@@ -1009,7 +1009,7 @@ private fun Context.shareArticle(article: NewsArticle) {
 
 private fun Context.reportError(article: NewsArticle) {
     val email = correctionEmail(article, "${BuildConfig.VERSION_NAME} (build ${BuildConfig.BUILD_NUMBER})")
-    val intent = Intent(Intent.ACTION_SENDTO, "mailto:$SUPPORT_EMAIL".toUri()).apply {
+    val intent = Intent(Intent.ACTION_SENDTO, mailtoUri(SUPPORT_EMAIL, email.subject, email.body).toUri()).apply {
         putExtra(Intent.EXTRA_SUBJECT, email.subject)
         putExtra(Intent.EXTRA_TEXT, email.body)
     }
@@ -1017,8 +1017,9 @@ private fun Context.reportError(article: NewsArticle) {
 }
 
 private fun Context.sendEmail(address: String) {
-    val intent = Intent(Intent.ACTION_SENDTO, "mailto:$address".toUri()).apply {
-        putExtra(Intent.EXTRA_SUBJECT, "AI Brief feedback")
+    val subject = "AI Brief feedback"
+    val intent = Intent(Intent.ACTION_SENDTO, mailtoUri(address, subject).toUri()).apply {
+        putExtra(Intent.EXTRA_SUBJECT, subject)
     }
     startOrExplain(intent, "No email app is set up. Write to $address.")
 }
