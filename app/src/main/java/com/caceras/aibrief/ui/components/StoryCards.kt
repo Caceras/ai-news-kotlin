@@ -1,7 +1,6 @@
 package com.caceras.aibrief.ui.components
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -37,8 +36,6 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
@@ -97,12 +94,7 @@ fun ArticleArtwork(
     if (!url.isNullOrBlank()) {
         AsyncArticleImage(url, null, modifier, ratio, fallbackResource = fallback)
     } else {
-        Image(
-            painter = painterResource(fallback),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = modifier.then(if (ratio != null) Modifier.fillMaxWidth().aspectRatio(ratio) else Modifier),
-        )
+        AsyncArticleImage(bundledArt(fallback), null, modifier, ratio)
     }
 }
 

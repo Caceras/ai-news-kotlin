@@ -29,7 +29,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Shape
 import com.caceras.aibrief.BuildConfig
 import com.caceras.aibrief.data.SingleFlight
@@ -145,10 +144,16 @@ object ArticleImageCache {
 
     /** Loads [url] decoded for a box of [size]. */
     suspend fun load(context: Context, url: String, size: DecodeSize): DecodedImage? = withContext(Dispatchers.IO) {
-        if (url.isBlank() || !url.startsWith("http")) return@withContext null
+        if (url.isBlank()) return@withContext null
 
         // 1. Check memory cache (instant 0ms return)
         memoryCache.get(memoryKey(url, size))?.let { return@withContext it }
+
+        bundledResourceId(url)?.let { id ->
+            return@withContext runCatching { decodeResourceSafely(context, id, size) }.getOrNull()
+                ?.let { DecodedImage(it, size).also { image -> keep(url, image) } }
+        }
+        if (!url.startsWith("http")) return@withContext null
 
         // 2. Check disk cache
         val diskCacheDir = File(context.cacheDir, "article_images").apply { if (!exists()) mkdirs() }
@@ -250,6 +255,17 @@ object ArticleImageCache {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
     }
 
+    /**
+     * Decodes a bundled illustration at the size it is shown. Read through a
+     * raw stream so Android's density scaling never enlarges it first.
+     */
+    private fun decodeResourceSafely(context: Context, id: Int, size: DecodeSize): Bitmap? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        context.resources.openRawResource(id).use { BitmapFactory.decodeStream(it, null, bounds) }
+        val options = decodeOptions(bounds, size) ?: return null
+        return context.resources.openRawResource(id).use { BitmapFactory.decodeStream(it, null, options) }
+    }
+
     private fun decodeFileSafely(file: File, size: DecodeSize): Bitmap? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(file.absolutePath, bounds)
@@ -301,6 +317,18 @@ object ArticleImageCache {
     }
 }
 
+private const val BUNDLED_PREFIX = "bundled:"
+
+/**
+ * The address [AsyncArticleImage] loads a bundled drawable from. Topic
+ * illustrations are 1200 px pictures; drawn with `painterResource` each card
+ * decoded its own full-size copy on the main thread.
+ */
+fun bundledArt(resourceId: Int): String = "$BUNDLED_PREFIX$resourceId"
+
+internal fun bundledResourceId(url: String): Int? =
+    if (url.startsWith(BUNDLED_PREFIX)) url.removePrefix(BUNDLED_PREFIX).toIntOrNull() else null
+
 @Composable
 fun AsyncArticleImage(
     imageUrl: String?,
@@ -342,12 +370,12 @@ fun AsyncArticleImage(
             .clip(shape)
             .then(if (fit) Modifier else Modifier.background(Brief.colors.placeholder)),
     ) {
-        // The illustration is a full-size bitmap decoded on the main thread, so it
-        // is only composed while the picture is missing or still fading in. A picture
-        // already in memory starts at full opacity and never decodes it.
+        // The topic illustration is only composed while the picture is missing or
+        // still fading in. It loads like any picture: decoded off the main thread at
+        // the box's size, and shared by every card of that topic.
         if (fallbackResource != null && (bitmap == null || alpha < 1f)) {
-            Image(painterResource(fallbackResource), contentDescription,
-                contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            AsyncArticleImage(bundledArt(fallbackResource), contentDescription, Modifier.fillMaxSize(),
+                aspectRatio = null)
         }
         bitmap?.let {
             Image(
