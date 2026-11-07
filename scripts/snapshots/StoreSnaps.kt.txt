@@ -118,7 +118,7 @@ class StoreSnaps {
     @Test fun store04Explore() = paparazzi.snapshot("04-explore") {
         AiBriefTheme { Column(Modifier.fillMaxSize()) {
             Masthead(false, false, NewsCategory.ALL, {}, {}, null, null)
-            Box(Modifier.weight(1f)) { ExploreScreen(NewsUiState(edition, edition.take(2), extras = extras), rememberLazyListState(), {}, {}, {}) }
+            Box(Modifier.weight(1f)) { ExploreScreen(NewsUiState(edition, edition.take(2), extras = extras), rememberLazyListState(), {}, {}, {}, {}) }
             BottomNavigation(NavTab.EXPLORE) {} } }
     }
 

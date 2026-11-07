@@ -25,9 +25,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -62,6 +64,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.ceil
 
 /** Original illustrations used when a story has no picture of its own. Never photographs of real events. */
 @DrawableRes
@@ -154,12 +157,25 @@ fun Headline(article: NewsArticle, style: TextStyle, modifier: Modifier = Modifi
              color: Color? = null) {
     val read = article.id in LocalReadStories.current
     Text(kickerHeadline(article), style = style,
-        color = color ?: if (read) Brief.colors.inkMuted else Brief.colors.ink, maxLines = maxLines,
+        color = color ?: if (read) Brief.colors.inkMuted else Brief.colors.ink, maxLines = scaledLines(maxLines),
         overflow = TextOverflow.Ellipsis, modifier = modifier.semantics {
             heading()
             if (read) stateDescription = "Read"
         })
 }
+
+/**
+ * How many lines a capped headline or deck may use at the reader's font scale.
+ * Caps are drawn for default text; at 200 % system text a four-line headline
+ * needs about eight, so the cap grows with the scale and the card grows with it
+ * instead of cutting the words off.
+ */
+fun linesForScale(lines: Int, fontScale: Float): Int =
+    if (lines == Int.MAX_VALUE || fontScale <= 1f) lines else ceil(lines * fontScale).toInt()
+
+@Composable
+@ReadOnlyComposable
+fun scaledLines(lines: Int): Int = linesForScale(lines, LocalDensity.current.fontScale)
 
 /** The one-line follow-up under a headline. The arrow is decoration and is not read aloud. */
 @Composable
@@ -168,7 +184,7 @@ fun Deck(text: String, modifier: Modifier = Modifier, maxLines: Int = 2, color: 
     Row(modifier) {
         Text("➤", style = Brief.type.deck, color = color, modifier = Modifier.clearAndSetSemantics { })
         Spacer(Modifier.width(Space.s))
-        Text(text, style = Brief.type.deck, color = color, maxLines = maxLines, overflow = TextOverflow.Ellipsis)
+        Text(text, style = Brief.type.deck, color = color, maxLines = scaledLines(maxLines), overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -363,7 +379,7 @@ fun OpinionCard(article: NewsArticle, modifier: Modifier = Modifier, onClick: ()
             Portrait(article, 64.dp)
             Spacer(Modifier.width(Space.m))
             Column(Modifier.weight(1f)) {
-                Text(article.author ?: article.source, style = Brief.type.rowTitle, color = c.ink, maxLines = 1,
+                Text(article.author ?: article.source, style = Brief.type.rowTitle, color = c.ink, maxLines = scaledLines(1),
                     overflow = TextOverflow.Ellipsis)
                 Text((article.authorRole ?: StoryFormat.OPINION.label).uppercase(Locale.US),
                     style = Brief.type.tag, color = c.opinionInk)
@@ -372,10 +388,10 @@ fun OpinionCard(article: NewsArticle, modifier: Modifier = Modifier, onClick: ()
         Spacer(Modifier.height(Space.m))
         Text("“", style = Brief.type.opinionHeadline, color = c.opinionAccent,
             modifier = Modifier.offset(y = Space.xs).clearAndSetSemantics { })
-        Text(article.title, style = Brief.type.opinionHeadline, color = c.ink, maxLines = 4,
+        Text(article.title, style = Brief.type.opinionHeadline, color = c.ink, maxLines = scaledLines(4),
             overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
         Spacer(Modifier.height(Space.s))
-        Text(article.summary, style = Brief.type.quote, color = c.inkMuted, maxLines = 2,
+        Text(article.summary, style = Brief.type.quote, color = c.inkMuted, maxLines = scaledLines(2),
             overflow = TextOverflow.Ellipsis)
     }
 }
@@ -442,10 +458,10 @@ fun DesignedCard(article: NewsArticle, modifier: Modifier = Modifier, onClick: (
                     SponsorPill(article)
                     Spacer(Modifier.height(Space.s))
                 }
-                Text(article.title, style = Brief.type.designedTitle, color = palette.ink, maxLines = 4,
+                Text(article.title, style = Brief.type.designedTitle, color = palette.ink, maxLines = scaledLines(4),
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.7f).semantics { heading() })
                 Spacer(Modifier.height(Space.m))
-                Text(article.summary, style = Brief.type.deck, color = palette.inkMuted, maxLines = 3,
+                Text(article.summary, style = Brief.type.deck, color = palette.inkMuted, maxLines = scaledLines(3),
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.52f))
             }
         }
