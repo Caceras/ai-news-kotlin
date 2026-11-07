@@ -434,8 +434,17 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                 beyondViewportPageCount = 1) { page ->
                                 when (NavTab.entries[page]) {
                                     NavTab.HOME -> FeedScreen(state, updateState, homeListState,
-                                        searchShown, query, onQueryChange = { query = it },
-                                        onCloseSearch = { query = ""; searchShown = false; keyboard?.hide() },
+                                        searchShown, query,
+                                        // New words reorder the results, so the best match is at the top.
+                                        onQueryChange = {
+                                            if (it != query) scope.launch { homeListState.scrollToItem(0) }
+                                            query = it
+                                        },
+                                        // Like the masthead's search button, closing returns to the top of the front page.
+                                        onCloseSearch = {
+                                            query = ""; searchShown = false; keyboard?.hide()
+                                            scope.launch { homeListState.scrollToItem(0) }
+                                        },
                                         onOpenArticle = { keyboard?.hide(); openFromFeed(it) },
                                         onInstallUpdate = updateViewModel::downloadAndInstall,
                                         onGrantInstallPermission = updateViewModel::requestInstallPermission,
