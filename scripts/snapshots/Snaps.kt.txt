@@ -1,6 +1,8 @@
 package com.caceras.aibrief.snap
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
@@ -114,7 +116,9 @@ class Snaps {
     @Test fun largeText() {
         paparazzi.unsafeUpdateConfig(DeviceConfig.PIXEL_6.copy(screenHeight = 2400, softButtons = false, fontScale = 2f))
         paparazzi.snapshot {
-            AiBriefTheme { Column(Modifier.fillMaxSize()) {
+            // Scrolls like the feed, so the second card is measured at its full height
+            // instead of being squeezed into what is left of the screen.
+            AiBriefTheme { Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                 DesignedCard(edition[8].copy(title = "A practical guide to choosing an AI model for a small business"), Modifier.padding(16.dp)) {}
                 DesignedCard(edition[11].copy(title = "Build and ship your first AI agent in one afternoon"), Modifier.padding(16.dp)) {}
             } }
