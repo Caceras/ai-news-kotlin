@@ -125,7 +125,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caceras.aibrief.data.NewsArticle
 import com.caceras.aibrief.data.NewsCategory
-import com.caceras.aibrief.data.PostBlock
 import com.caceras.aibrief.data.StorySearch
 import com.caceras.aibrief.ui.components.ArticleImageCache
 import com.caceras.aibrief.ui.components.ArticleReader
@@ -991,18 +990,7 @@ private fun Context.shareArticle(article: NewsArticle) {
         // The share sheet previews the headline, and mail apps use it as the subject.
         putExtra(Intent.EXTRA_TITLE, article.title)
         putExtra(Intent.EXTRA_SUBJECT, article.title)
-        putExtra(Intent.EXTRA_TEXT, buildString {
-            append(article.title)
-            append("\n\n")
-            append(article.summary)
-            if (article.url.isNotBlank()) { append("\n\n"); append(article.url) }
-            if (article.isOriginalPost) {
-                article.blocks.filterIsInstance<PostBlock.Link>().forEach {
-                    append("\n\n${it.text}: ${it.url}")
-                }
-                append("\n\nFrom AI Brief")
-            }
-        })
+        putExtra(Intent.EXTRA_TEXT, shareText(article))
     }
     startOrExplain(Intent.createChooser(shareIntent, "Share article"), "No app is available for sharing.")
 }
