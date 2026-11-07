@@ -51,6 +51,14 @@ data class NewsUiState(
 internal fun restoredCategory(saved: String?): NewsCategory =
     NewsCategory.entries.firstOrNull { it.name == saved } ?: NewsCategory.ALL
 
+/**
+ * The read list after the stored one ([stored]) arrives: stories opened while it
+ * loaded ([openedWhileLoading]) are added, unless the reader cleared the history in
+ * that moment, in which case the stored list is dropped too.
+ */
+internal fun mergedReadIds(stored: Set<String>, openedWhileLoading: Set<String>, cleared: Boolean): Set<String> =
+    if (cleared) openedWhileLoading else openedWhileLoading.fold(stored) { ids, id -> ReadHistory.marked(ids, id) }
+
 /** How long the edition on screen is trusted before returning to the app checks for a newer one. */
 internal const val STALE_AFTER_MILLIS = 30L * 60L * 1000L
 
@@ -73,6 +81,14 @@ class NewsViewModel(
     private var lastRefreshAttempt: Long? = null
     /** True once the reader has changed the text size in this session. */
     private var textSizeChosen = false
+    /** True once the reader cleared the read list in this session. */
+    private var historyCleared = false
+    /**
+     * True once the shelf and read list stored on this device have been read.
+     * Until then nothing is written over them: a write in that moment would
+     * replace the stored lists with only the stories touched since launch.
+     */
+    private var personalLoaded = false
     // Starts empty and refreshing. The device's copy is read from disk off the
     // main thread so a cold start never blocks the first frame on storage.
     // The chosen topic is restored after the system reclaims the app in the
@@ -89,31 +105,42 @@ class NewsViewModel(
 
     init {
         viewModelScope.launch {
+            // The edition and the reader's own lists are read separately: a stored
+            // edition that cannot be read must not leave the shelf looking empty, or
+            // the next save would overwrite every saved story on disk.
             try {
-                val (initial, saved, read) = withContext(Dispatchers.IO) {
-                    Triple(repository.initialLoad(), repository.savedArticles(), repository.readStoryIds())
-                }
-                val storedSize = withContext(Dispatchers.IO) { repository.readerTextSize() }
-                // A size picked while the device copy was loading wins over the stored one.
-                val textSize = if (textSizeChosen) _uiState.value.readerTextSize else storedSize
+                val initial = withContext(Dispatchers.IO) { repository.initialLoad() }
                 _uiState.value = _uiState.value.copy(
                     articles = initial.articles,
-                    savedArticles = saved,
-                    // A story opened while the device copy was loading stays read.
-                    readIds = _uiState.value.readIds.fold(read) { ids, id -> ReadHistory.marked(ids, id) },
                     freshness = initial.freshness,
                     lastUpdated = initial.updatedAt,
                     extras = initial.extras,
-                    readerTextSize = textSize,
                 )
             } catch (error: Exception) {
                 if (error is CancellationException) throw error
                 _uiState.value = _uiState.value.copy(articles = SeedArticles.create())
+            }
+            try {
+                val (saved, read, storedSize) = withContext(Dispatchers.IO) {
+                    Triple(repository.savedArticles(), repository.readStoryIds(), repository.readerTextSize())
+                }
+                // A size picked while the device copy was loading wins over the stored one.
+                val textSize = if (textSizeChosen) _uiState.value.readerTextSize else storedSize
+                _uiState.value = _uiState.value.copy(
+                    savedArticles = saved,
+                    // A story opened while the device copy was loading stays read,
+                    // and a history cleared in that moment stays cleared.
+                    readIds = mergedReadIds(read, _uiState.value.readIds, historyCleared),
+                    readerTextSize = textSize,
+                )
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
             } finally {
+                personalLoaded = true
                 _uiState.value = _uiState.value.copy(isLoading = false)
             }
-            // markRead holds back writes while loading; save any story opened in that moment.
-            if (_uiState.value.readIds.isNotEmpty()) persistReadHistory()
+            // markRead holds back writes while loading; save any change made in that moment.
+            if (historyCleared || _uiState.value.readIds.isNotEmpty()) persistReadHistory()
             loadLatest(userRequested = false)
         }
     }
@@ -165,12 +192,15 @@ class NewsViewModel(
      * quick repeated taps can never leave an older shelf on disk.
      */
     fun toggleSaved(article: NewsArticle) {
+        // Before the stored shelf is read, saving would replace it with this one story.
+        if (!personalLoaded) return
         _uiState.update { it.copy(savedArticles = toggledSaved(it.savedArticles, article)) }
         persistShelf()
     }
 
     /** Undoes a removal: puts [article] back at [index], the place it had on the shelf. */
     fun restoreSaved(article: NewsArticle, index: Int) {
+        if (!personalLoaded) return
         _uiState.update { it.copy(savedArticles = restoredSaved(it.savedArticles, article, index)) }
         persistShelf()
     }
@@ -180,15 +210,16 @@ class NewsViewModel(
         if (article.id in _uiState.value.readIds) return
         _uiState.update { it.copy(readIds = ReadHistory.marked(it.readIds, article.id)) }
         // Until the stored list is loaded, writing would replace it with this one story.
-        if (_uiState.value.isLoading) return
+        if (!personalLoaded) return
         persistReadHistory()
     }
 
     /** Forgets every opened story, so all headlines show as unread again. */
     fun clearReadHistory() {
+        historyCleared = true
         _uiState.update { it.copy(readIds = emptySet()) }
         _notices.trySend(HISTORY_CLEARED_NOTICE)
-        if (_uiState.value.isLoading) return
+        if (!personalLoaded) return
         persistReadHistory()
     }
 
