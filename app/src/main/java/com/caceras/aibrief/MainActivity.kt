@@ -47,6 +47,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -110,7 +111,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -537,8 +537,7 @@ private fun TopicTabs(selected: NewsCategory, onSelect: (NewsCategory) -> Unit) 
             LaunchedEffect(isSelected) { if (isSelected) inView.bringIntoView() }
             Column(Modifier.width(IntrinsicSize.Max).widthIn(min = 48.dp).heightIn(min = 48.dp)
                 .bringIntoViewRequester(inView)
-                .semantics { this.selected = isSelected }
-                .clickable(role = Role.Tab) {
+                .selectable(selected = isSelected, role = Role.Tab) {
                     if (!isSelected) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onSelect(category)
                 }.padding(horizontal = Space.s), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -562,13 +561,13 @@ private fun BottomNavigation(
     // The bar's colour continues under the system navigation bar; the tabs sit above it.
     Column(Modifier.background(c.card).windowInsetsPadding(bottomInset)) {
         Rule()
-        Row(Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
+        // A selectable group lets TalkBack read "tab 2 of 3".
+        Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).selectableGroup()) {
             NavTab.entries.forEach { tab ->
                 val isSelected = activeTab == tab
                 val color = if (isSelected) c.accent else c.inkMuted
                 Column(Modifier.weight(1f).heightIn(min = 64.dp)
-                    .semantics { selected = isSelected }
-                    .clickable(role = Role.Tab) { onSelect(tab) }
+                    .selectable(selected = isSelected, role = Role.Tab) { onSelect(tab) }
                     .padding(vertical = Space.s),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center) {
