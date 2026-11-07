@@ -126,6 +126,7 @@ import com.caceras.aibrief.data.StorySearch
 import com.caceras.aibrief.ui.components.ArticleImageCache
 import com.caceras.aibrief.ui.components.ArticleReader
 import com.caceras.aibrief.ui.components.BrandMark
+import com.caceras.aibrief.ui.components.rememberLinkOpener
 import com.caceras.aibrief.ui.components.DesignedCard
 import com.caceras.aibrief.ui.components.HeadlineCard
 import com.caceras.aibrief.ui.components.LocalReadStories
@@ -245,6 +246,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
     val keyboard = LocalSoftwareKeyboardController.current
     val keyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     val context = LocalContext.current
+    val openLink = rememberLinkOpener()
 
     fun selectTab(tab: NavTab) {
         keyboard?.hide()
@@ -373,7 +375,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                     ArticleReader(article, state.savedArticles.any { it.id == article.id },
                         onToggleSaved = { toggleSaved(article) },
                         onShare = { context.shareArticle(article) },
-                        onOpenSource = { context.openExternalUrl(article.url) },
+                        onOpenSource = { openLink(article.url) },
                         onReportError = { context.reportError(article) },
                         onBack = { closeReader() },
                         listState = readerListState,
@@ -432,14 +434,14 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                         onDismissUpdate = updateViewModel::dismiss,
                                         onAbout = { selectTab(NavTab.ABOUT) },
                                         onExplore = { selectTab(NavTab.EXPLORE) },
-                                        onOpenUrl = { context.openExternalUrl(it) },
+                                        onOpenUrl = openLink,
                                         onRefresh = {
                                             viewModel.refresh(userRequested = true); updateViewModel.checkForUpdate()
                                         })
                                     NavTab.EXPLORE -> ExploreScreen(state, exploreListState,
                                         onOpenArticle = ::openFromFeed,
                                         onRemoveSaved = ::toggleSaved,
-                                        onOpenUrl = { context.openExternalUrl(it) },
+                                        onOpenUrl = openLink,
                                         onBrowse = { selectTab(NavTab.HOME) })
                                     NavTab.ABOUT -> AboutScreen(aboutListState,
                                         readCount = state.readIds.size,
@@ -876,6 +878,7 @@ private fun AboutSection(title: String, body: String, link: Pair<String, () -> U
 @Composable
 private fun AboutScreen(listState: LazyListState, readCount: Int, onClearReadHistory: () -> Unit) {
     val context = LocalContext.current
+    val openLink = rememberLinkOpener()
     val haptic = LocalHapticFeedback.current
     val c = Brief.colors
     LazyColumn(state = listState,
@@ -903,7 +906,7 @@ private fun AboutScreen(listState: LazyListState, readCount: Int, onClearReadHis
                     "and search queries stay on this device. The app fetches our public edition and article images " +
                     "over HTTPS, so hosting providers receive normal connection data such as your IP address. Clear " +
                     "app storage or uninstall to delete saved articles and caches.",
-                "Read the privacy policy" to { context.openExternalUrl(PRIVACY_URL) })
+                "Read the privacy policy" to { openLink(PRIVACY_URL) })
             if (readCount > 0) {
                 Box(Modifier.padding(horizontal = Space.gutter, vertical = Space.s)) {
                     SecondaryButton("Clear reading history") {
@@ -917,7 +920,7 @@ private fun AboutScreen(listState: LazyListState, readCount: Int, onClearReadHis
             SectionRibbon("Contact")
             AboutSection("Contact and corrections",
                 "Questions, corrections or source suggestions are welcome at $SUPPORT_EMAIL.",
-                "Publisher and contact details" to { context.openExternalUrl(CONTACT_URL) })
+                "Publisher and contact details" to { openLink(CONTACT_URL) })
             Box(Modifier.padding(horizontal = Space.gutter, vertical = Space.s)) {
                 SecondaryButton("Email the editor") {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -941,9 +944,6 @@ private fun Context.startOrExplain(intent: Intent, unavailable: String) {
         Toast.makeText(this, unavailable, Toast.LENGTH_LONG).show()
     }
 }
-
-private fun Context.openExternalUrl(url: String) =
-    startOrExplain(Intent(Intent.ACTION_VIEW, url.toUri()), "No browser is available to open this link.")
 
 private fun Context.shareArticle(article: NewsArticle) {
     val shareIntent = Intent(Intent.ACTION_SEND).apply {
