@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
+import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
@@ -208,6 +209,10 @@ private enum class NavTab(val label: String) { HOME("Latest"), EXPLORE("Explore"
 @Composable
 private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewModel) {
     val edition by viewModel.uiState.collectAsStateWithLifecycle()
+    // Startup is finished when the edition is on screen, not when the first
+    // frame (a loading spinner) is drawn. Reporting it lets Android vitals
+    // measure time to full display and lets the system end launch work early.
+    ReportDrawnWhen { !edition.isLoading }
     // Breaking news loses its flag a day after it broke, on every screen.
     val now = rememberNow()
     val hour = now.epochSecond / 3600
