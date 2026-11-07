@@ -435,6 +435,7 @@ private fun AiBriefApp(viewModel: NewsViewModel, updateViewModel: UpdateViewMode
                                         onAbout = { selectTab(NavTab.ABOUT) },
                                         onExplore = { selectTab(NavTab.EXPLORE) },
                                         onOpenUrl = openLink,
+                                        onShowAllTopics = { viewModel.selectCategory(NewsCategory.ALL) },
                                         onRefresh = {
                                             viewModel.refresh(userRequested = true); updateViewModel.checkForUpdate()
                                         })
@@ -570,6 +571,7 @@ private fun FeedScreen(
     onRefresh: () -> Unit,
     onExplore: () -> Unit,
     onOpenUrl: (String) -> Unit,
+    onShowAllTopics: () -> Unit = {},
 ) {
     val c = Brief.colors
     val focus = remember { FocusRequester() }
@@ -684,11 +686,15 @@ private fun FeedScreen(
                 if (articles.isEmpty()) {
                     if (state.isLoading) item("loading") { LoadingIndicator() }
                     else item("empty") {
+                        val copy = emptyFeedCopy(query, state.selectedCategory)
                         Column(Modifier.fillMaxWidth().padding(horizontal = Space.xl, vertical = Space.section)) {
-                            Text(if (query.isBlank()) "More stories are on their way." else "No stories found.",
-                                style = Brief.type.headline, color = c.ink)
+                            Text(copy.title, style = Brief.type.headline, color = c.ink)
                             Spacer(Modifier.height(Space.m))
-                            Text("Try a different topic or search term.", style = Brief.type.deck, color = c.inkMuted)
+                            Text(copy.hint, style = Brief.type.deck, color = c.inkMuted)
+                            if (copy.showAllTopics) {
+                                Spacer(Modifier.height(Space.l))
+                                PrimaryButton("Show all topics", onShowAllTopics)
+                            }
                         }
                     }
                 }
