@@ -44,6 +44,9 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -500,10 +503,16 @@ private fun Masthead(
 private fun TopicTabs(selected: NewsCategory, onSelect: (NewsCategory) -> Unit) {
     val c = Brief.colors
     val haptic = LocalHapticFeedback.current
-    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = Space.s)) {
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).selectableGroup()
+        .padding(horizontal = Space.s)) {
         NewsCategory.entries.forEach { category ->
             val isSelected = category == selected
+            // The chosen topic scrolls into view, also when it changes without a tap
+            // on the row ("Show all topics", opening search).
+            val inView = remember { BringIntoViewRequester() }
+            LaunchedEffect(isSelected) { if (isSelected) inView.bringIntoView() }
             Column(Modifier.width(IntrinsicSize.Max).widthIn(min = 48.dp).heightIn(min = 48.dp)
+                .bringIntoViewRequester(inView)
                 .semantics { this.selected = isSelected }
                 .clickable(role = Role.Tab) {
                     if (!isSelected) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
