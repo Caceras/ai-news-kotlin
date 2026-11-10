@@ -2068,15 +2068,39 @@
       "title": "On the radar",
       "source": "OpenRouter",
       "sourceUrl": "https://openrouter.ai/models",
-      "checkedAt": "2026-11-07T06:27:07Z",
+      "checkedAt": "2026-11-10T06:29:51Z",
       "entries": [
         {
-          "name": "Crouton Alpha",
-          "maker": "Unannounced",
-          "listedAt": "2026-11-03",
-          "note": "Crouton Alpha is a lightweight model built for scalable coding, agentic, and multimodal workflows.",
-          "url": "https://openrouter.ai/stealth/crouton-alpha",
-          "stealth": true
+          "name": "Nex-N2.6",
+          "maker": "Nex AGI",
+          "listedAt": "2026-11-10",
+          "note": "Nex-N2.6 is an agentic model from Nex AGI, built on GLM-5.3-Flash with about 321B parameters.",
+          "url": "https://openrouter.ai/nex-agi/nex-n2.6",
+          "stealth": false
+        },
+        {
+          "name": "Inkling 2 Small (free)",
+          "maker": "Thinking Machines",
+          "listedAt": "2026-11-09",
+          "note": "Inkling 2 Small is a multimodal mixture-of-experts reasoning model from Thinking Machines Lab, with 17B active parameters out of 594B total.",
+          "url": "https://openrouter.ai/thinkingmachines/inkling-2-small",
+          "stealth": false
+        },
+        {
+          "name": "Claude Fable 5.2",
+          "maker": "Anthropic",
+          "listedAt": "2026-11-09",
+          "note": "Claude Fable 5.2 is Anthropic's most capable model for the most demanding technical work, with gains over Fable 5.1 in coding, reasoning, and vision.",
+          "url": "https://openrouter.ai/anthropic/claude-fable-5.2",
+          "stealth": false
+        },
+        {
+          "name": "Muse Ember",
+          "maker": "Meta",
+          "listedAt": "2026-11-09",
+          "note": "Muse Ember is the smallest and most efficient model from Meta that’s designed for complex reasoning execution and the work agents repeat all day:…",
+          "url": "https://openrouter.ai/meta/muse-ember",
+          "stealth": false
         },
         {
           "name": "LFM3-1.7B",
@@ -2108,30 +2132,6 @@
           "listedAt": "2026-11-04",
           "note": "Ripple-65B-Preview by ricursiveAI, a 65B model with native tool calling, served in BF16.",
           "url": "https://openrouter.ai/ricursiveai/ripple-65b-preview",
-          "stealth": false
-        },
-        {
-          "name": "Hy4",
-          "maker": "Tencent",
-          "listedAt": "2026-11-04",
-          "note": "The official release of Hy4 delivers comprehensive and substantial improvements over Hy4 Preview, with particularly strong gains in agentic…",
-          "url": "https://openrouter.ai/tencent/hy4",
-          "stealth": false
-        },
-        {
-          "name": "GLM 5.3 FlashX Legal",
-          "maker": "Z.ai",
-          "listedAt": "2026-11-02",
-          "note": "GLM-5.3-FlashX-Legal (GLM-Legal) is Z.ai's legal-domain variant of GLM-5.3-FlashX, a native multimodal model that accepts text, image, and video…",
-          "url": "https://openrouter.ai/z-ai/glm-5.3-flashx-legal",
-          "stealth": false
-        },
-        {
-          "name": "Particle-1",
-          "maker": "Particle AI",
-          "listedAt": "2026-10-28",
-          "note": "Particle-1 is a token-efficient agentic coding model from Particle AI, post-trained on DeepSeek V4.1 Flash.",
-          "url": "https://openrouter.ai/particle-ai/particle-1",
           "stealth": false
         }
       ]
