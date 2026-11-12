@@ -2068,10 +2068,10 @@
       "title": "On the radar",
       "source": "OpenRouter",
       "sourceUrl": "https://openrouter.ai/models",
-      "checkedAt": "2026-11-11T06:31:02Z",
+      "checkedAt": "2026-11-12T06:31:26Z",
       "entries": [
         {
-          "name": "ERNIE-5.5-Flash-Preview",
+          "name": "ERNIE-5.5-Flash-Preview (free)",
           "maker": "Baidu",
           "listedAt": "2026-11-10",
           "note": "ERNIE 5.5 Flash Preview is the latest foundation model in the ERNIE family, with comprehensive improvements in coding, agentic capabilities,…",
