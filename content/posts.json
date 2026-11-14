@@ -2068,8 +2068,16 @@
       "title": "On the radar",
       "source": "OpenRouter",
       "sourceUrl": "https://openrouter.ai/models",
-      "checkedAt": "2026-11-13T06:30:42Z",
+      "checkedAt": "2026-11-14T06:28:04Z",
       "entries": [
+        {
+          "name": "Ling 3.2 Flash (free)",
+          "maker": "inclusionAI",
+          "listedAt": "2026-11-13",
+          "note": "Ling 3.2 Flash is a hybrid reasoning model from inclusionAI that accepts text and image input, with a 1M-token context window and up to 200 images…",
+          "url": "https://openrouter.ai/inclusionai/ling-3.2-flash",
+          "stealth": false
+        },
         {
           "name": "Gemini 4 Hydrogen",
           "maker": "Google",
@@ -2124,14 +2132,6 @@
           "listedAt": "2026-11-09",
           "note": "Claude Fable 5.2 is Anthropic's most capable model for the most demanding technical work, with gains over Fable 5.1 in coding, reasoning, and vision.",
           "url": "https://openrouter.ai/anthropic/claude-fable-5.2",
-          "stealth": false
-        },
-        {
-          "name": "Muse Ember",
-          "maker": "Meta",
-          "listedAt": "2026-11-09",
-          "note": "Muse Ember is the smallest and most efficient model from Meta that’s designed for complex reasoning execution and the work agents repeat all day:…",
-          "url": "https://openrouter.ai/meta/muse-ember",
           "stealth": false
         }
       ]
