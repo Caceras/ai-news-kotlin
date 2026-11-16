@@ -2068,8 +2068,16 @@
       "title": "On the radar",
       "source": "OpenRouter",
       "sourceUrl": "https://openrouter.ai/models",
-      "checkedAt": "2026-11-14T06:28:04Z",
+      "checkedAt": "2026-11-16T06:46:37Z",
       "entries": [
+        {
+          "name": "Qwen4 Max",
+          "maker": "Qwen",
+          "listedAt": "2026-11-16",
+          "note": "Qwen4 Max is the flagship model in Alibaba's Qwen4 series.",
+          "url": "https://openrouter.ai/qwen/qwen4-max",
+          "stealth": false
+        },
         {
           "name": "Ling 3.2 Flash (free)",
           "maker": "inclusionAI",
@@ -2124,14 +2132,6 @@
           "listedAt": "2026-11-09",
           "note": "Inkling 2 Small is an open-weight multimodal mixture-of-experts reasoning model from Thinking Machines Lab, with 17B active parameters out of 594B…",
           "url": "https://openrouter.ai/thinkingmachines/inkling-2-small",
-          "stealth": false
-        },
-        {
-          "name": "Claude Fable 5.2",
-          "maker": "Anthropic",
-          "listedAt": "2026-11-09",
-          "note": "Claude Fable 5.2 is Anthropic's most capable model for the most demanding technical work, with gains over Fable 5.1 in coding, reasoning, and vision.",
-          "url": "https://openrouter.ai/anthropic/claude-fable-5.2",
           "stealth": false
         }
       ]
