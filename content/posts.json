@@ -2068,8 +2068,16 @@
       "title": "On the radar",
       "source": "OpenRouter",
       "sourceUrl": "https://openrouter.ai/models",
-      "checkedAt": "2026-11-16T06:46:37Z",
+      "checkedAt": "2026-11-17T06:31:16Z",
       "entries": [
+        {
+          "name": "Hy4 flash",
+          "maker": "Tencent",
+          "listedAt": "2026-11-16",
+          "note": "Hy4 flash is a cost-efficient variant of Hy4 from Tencent, served with roughly a quarter of the flagship's parameter count for lower latency and cost.",
+          "url": "https://openrouter.ai/tencent/hy4-flash",
+          "stealth": false
+        },
         {
           "name": "Qwen4 Max",
           "maker": "Qwen",
@@ -2124,14 +2132,6 @@
           "listedAt": "2026-11-10",
           "note": "Nex-N2.6 is an agentic model from Nex AGI, built on GLM-5.3-Flash with about 321B parameters.",
           "url": "https://openrouter.ai/nex-agi/nex-n2.6",
-          "stealth": false
-        },
-        {
-          "name": "Inkling 2 Small",
-          "maker": "Thinking Machines",
-          "listedAt": "2026-11-09",
-          "note": "Inkling 2 Small is an open-weight multimodal mixture-of-experts reasoning model from Thinking Machines Lab, with 17B active parameters out of 594B…",
-          "url": "https://openrouter.ai/thinkingmachines/inkling-2-small",
           "stealth": false
         }
       ]
