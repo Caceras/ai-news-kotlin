@@ -2068,8 +2068,16 @@
       "title": "On the radar",
       "source": "OpenRouter",
       "sourceUrl": "https://openrouter.ai/models",
-      "checkedAt": "2026-11-19T06:31:54Z",
+      "checkedAt": "2026-11-20T06:30:44Z",
       "entries": [
+        {
+          "name": "Pixtral Large 2502",
+          "maker": "Mistral",
+          "listedAt": "2026-11-20",
+          "note": "Pixtral Large 2502 is the February 2025 version of Mistral AI's large multimodal model, following Pixtral Large 2411.",
+          "url": "https://openrouter.ai/mistralai/pixtral-large-2502",
+          "stealth": false
+        },
         {
           "name": "Gemini 4 Neon",
           "maker": "Google",
@@ -2124,14 +2132,6 @@
           "listedAt": "2026-11-16",
           "note": "Qwen4 Max is the flagship model in Alibaba's Qwen4 series.",
           "url": "https://openrouter.ai/qwen/qwen4-max",
-          "stealth": false
-        },
-        {
-          "name": "Ling 3.2 Flash (free)",
-          "maker": "inclusionAI",
-          "listedAt": "2026-11-13",
-          "note": "Ling 3.2 Flash is a hybrid reasoning model from inclusionAI that accepts text and image input, with a 1M-token context window and up to 200 images…",
-          "url": "https://openrouter.ai/inclusionai/ling-3.2-flash",
           "stealth": false
         }
       ]
