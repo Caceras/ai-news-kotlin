@@ -2068,8 +2068,32 @@
       "title": "On the radar",
       "source": "OpenRouter",
       "sourceUrl": "https://openrouter.ai/models",
-      "checkedAt": "2026-11-21T06:29:15Z",
+      "checkedAt": "2026-11-25T06:32:54Z",
       "entries": [
+        {
+          "name": "Solar Mini 4.5 (Preview)",
+          "maker": "Upstage",
+          "listedAt": "2026-11-24",
+          "note": "Solar Mini 4.5 is Upstage's compact language model, built on a proprietary mixture-of-experts architecture with 35B total and 3B active parameters…",
+          "url": "https://openrouter.ai/upstage/solar-mini-4-5",
+          "stealth": false
+        },
+        {
+          "name": "Solar Pro 4 Contributor",
+          "maker": "Upstage",
+          "listedAt": "2026-11-24",
+          "note": "Solar Pro 4 Contributor is the same Solar Pro 4 model from Upstage, offered at a lower rate in exchange for allowing Upstage to use interaction data…",
+          "url": "https://openrouter.ai/upstage/solar-pro-4-contributor",
+          "stealth": false
+        },
+        {
+          "name": "MiMo-V2.6-Flash-MOPD",
+          "maker": "Xiaomi",
+          "listedAt": "2026-11-23",
+          "note": "MiMo-V2.6-Flash-MOPD is an updated checkpoint of Xiaomi's MiMo-V2.6-Flash, a Mixture-of-Experts model with 309B total and 15B active parameters, a…",
+          "url": "https://openrouter.ai/xiaomi/mimo-v2.6-flash-mopd",
+          "stealth": false
+        },
         {
           "name": "Inkling 2 Mini",
           "maker": "Thinking Machines",
@@ -2108,30 +2132,6 @@
           "listedAt": "2026-11-17",
           "note": "GPT-6.2 Astra Pro is the same underlying model as GPT-6.2 Astra, served with reasoning.mode set to pro for higher-quality responses on complex tasks.",
           "url": "https://openrouter.ai/openai/gpt-6.2-astra-pro",
-          "stealth": false
-        },
-        {
-          "name": "GPT-6.2 Astra",
-          "maker": "OpenAI",
-          "listedAt": "2026-11-17",
-          "note": "GPT-6.2 Astra is the flagship model in the GPT-6.2 series from OpenAI, built for the hardest projects.",
-          "url": "https://openrouter.ai/openai/gpt-6.2-astra",
-          "stealth": false
-        },
-        {
-          "name": "GPT-6.2 Sol Pro",
-          "maker": "OpenAI",
-          "listedAt": "2026-11-17",
-          "note": "GPT-6.2 Sol Pro is the same underlying model as GPT-6.2 Sol, served with reasoning.mode set to pro for higher-quality responses on complex tasks.",
-          "url": "https://openrouter.ai/openai/gpt-6.2-sol-pro",
-          "stealth": false
-        },
-        {
-          "name": "GPT-6.2 Sol",
-          "maker": "OpenAI",
-          "listedAt": "2026-11-17",
-          "note": "GPT-6.2 Sol is an upgrade to GPT-6.1 Sol from OpenAI, positioned below the flagship GPT-6.2 Astra in the GPT-6.2 series.",
-          "url": "https://openrouter.ai/openai/gpt-6.2-sol",
           "stealth": false
         }
       ]
